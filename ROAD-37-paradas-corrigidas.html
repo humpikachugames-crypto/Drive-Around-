@@ -1,0 +1,3913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ROAD-37 // Fuga Infinita 3D (Upgrades, Relevo & Mapas Aquáticos)</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #08080c;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #fff;
+  }
+
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  /* ================= LOBBY UI ================= */
+  #lobbyScreen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(16, 20, 30, 0.88) 0%, rgba(5, 6, 10, 0.97) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 16px 20px 48px;
+    z-index: 20;
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .lobby-topbar {
+    width: 100%;
+    max-width: 1060px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .lobby-title-wrap h1 {
+    font-size: clamp(1.6rem, 4.2vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #f8fafc;
+    text-shadow: 0 0 24px rgba(239, 68, 68, 0.65);
+  }
+
+  .lobby-title-wrap p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+
+  .topbar-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  #openShowcaseBtn {
+    background: linear-gradient(135deg, #0284c7, #1d4ed8);
+    color: #fff;
+    border: 1px solid #38bdf8;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+    transition: transform 0.12s ease;
+  }
+
+  #openShowcaseBtn:active {
+    transform: scale(0.96);
+  }
+
+  .coin-wallet {
+    background: rgba(30, 41, 59, 0.94);
+    border: 2px solid #f59e0b;
+    padding: 8px 16px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 1.05rem;
+    color: #fbbf24;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  /* SELETOR DE MODO (CARROS vs BARCOS) */
+  .mode-tabs {
+    width: 100%;
+    max-width: 1060px;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .mode-tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(148, 163, 184, 0.25);
+    background: rgba(15, 23, 42, 0.85);
+    color: #94a3b8;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mode-tab-btn.active-land {
+    border-color: #ef4444;
+    background: rgba(127, 29, 29, 0.42);
+    color: #f8fafc;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+  }
+
+  .mode-tab-btn.active-water {
+    border-color: #0ea5e9;
+    background: rgba(12, 74, 110, 0.48);
+    color: #f0f9ff;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+  }
+
+  .section-box {
+    width: 100%;
+    max-width: 1060px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 16px;
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+
+  .section-header {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+    gap: 12px;
+  }
+
+  .shop-card {
+    background: rgba(30, 41, 59, 0.78);
+    border: 2px solid rgba(148, 163, 184, 0.25);
+    border-radius: 14px;
+    padding: 13px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+
+  .shop-card.selected {
+    border-color: #ef4444;
+    background: rgba(127, 29, 29, 0.34);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.28);
+  }
+
+  .shop-card.selected-car {
+    border-color: #38bdf8;
+    background: rgba(12, 74, 110, 0.36);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
+  }
+
+  .shop-card.selected-water {
+    border-color: #22d3ee;
+    background: rgba(8, 145, 178, 0.34);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.3);
+  }
+
+  .shop-card.locked-card {
+    opacity: 0.68;
+    cursor: not-allowed;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-top h4 {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .tag-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-owned { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+  .tag-selected-map { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #ef4444; }
+  .tag-selected-car { background: rgba(56, 189, 248, 0.25); color: #7dd3fc; border: 1px solid #38bdf8; }
+  .tag-price { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid #f59e0b; }
+  .tag-lock { background: rgba(100, 116, 139, 0.28); color: #cbd5e1; border: 1px solid #64748b; }
+
+  .car-specs {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .spec-pill {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    font-weight: 700;
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    line-height: 1.35;
+    margin-top: 6px;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 9px;
+    border: none;
+    font-weight: 800;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 0.7px;
+  }
+
+  .btn-select { background: #334155; color: #f8fafc; }
+  .btn-active-car { background: #0284c7; color: #fff; }
+  .btn-active-map { background: #dc2626; color: #fff; }
+  .btn-active-water { background: #0891b2; color: #fff; }
+  .btn-buy { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; }
+  .btn-buy:disabled { background: #1e293b; color: #64748b; cursor: not-allowed; }
+
+  .lobby-footer {
+    text-align: center;
+    flex-shrink: 0;
+    padding-bottom: 16px;
+  }
+
+  #startBtn {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: #fff;
+    border: none;
+    padding: 15px 50px;
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.55);
+    text-transform: uppercase;
+  }
+
+  #startBtn.water-start {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 0 30px rgba(2, 132, 199, 0.6);
+  }
+
+  #startBtn:disabled {
+    background: #1e293b;
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  #startBtn:active:not(:disabled) { transform: scale(0.97); }
+
+  .controls-hint {
+    margin-top: 8px;
+    font-size: 0.76rem;
+    color: #94a3b8;
+  }
+
+  /* ================= 2ª ABA: GARAGEM 3D, UPGRADES & MONSTROS ================= */
+  #showcaseScreen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, #111827 0%, #05070c 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 20px 48px;
+    gap: 16px;
+    z-index: 25;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .showcase-header {
+    width: 100%;
+    max-width: 1060px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .showcase-header h2 {
+    font-size: clamp(1.25rem, 3.5vw, 1.95rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #f8fafc;
+  }
+
+  .showcase-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  #backFromShowcaseBtn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #f8fafc;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .showcase-panel {
+    width: 100%;
+    max-width: 1060px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .showcase-split {
+    display: grid;
+    grid-template-columns: 1.05fr 1.15fr;
+    gap: 16px;
+    align-items: center;
+  }
+
+  @media (max-width: 820px) {
+    .showcase-split {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .turntable-box {
+    position: relative;
+    width: 100%;
+    height: 270px;
+    background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9) 0%, rgba(9, 13, 22, 0.98) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .turntable-box.monster-box {
+    border-color: rgba(239, 68, 68, 0.45);
+    height: 245px;
+  }
+
+  .turntable-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .turntable-label {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .stats-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stats-box h3 {
+    font-size: 1.32rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .stats-box p {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.38;
+  }
+
+  .upgrade-row {
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 10px;
+    padding: 8px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .upgrade-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .upgrade-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .upgrade-name {
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: #f8fafc;
+    letter-spacing: 0.4px;
+  }
+
+  .upgrade-val {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #38bdf8;
+  }
+
+  .upgrade-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0f172a;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .upgrade-btn:disabled {
+    background: #1e293b;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+
+  .upgrade-btn.maxed {
+    background: rgba(16, 185, 129, 0.22);
+    color: #6ee7b7;
+    border: 1px solid #10b981;
+  }
+
+  .level-pips {
+    display: flex;
+    gap: 4px;
+  }
+
+  .pip {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .pip.filled {
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+  }
+
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-row-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.77rem;
+    font-weight: 800;
+    color: #e2e8f0;
+  }
+
+  .stat-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill.danger-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #dc2626, #f87171);
+    border-radius: 999px;
+  }
+
+  .owned-cars-selector {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+  }
+
+  .owned-car-pill {
+    background: rgba(30, 41, 59, 0.9);
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    color: #f8fafc;
+    padding: 8px 13px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .owned-car-pill.active {
+    border-color: #38bdf8;
+    background: rgba(2, 132, 199, 0.35);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+  }
+
+  .owned-car-pill.active-monster {
+    border-color: #ef4444;
+    background: rgba(153, 27, 27, 0.45);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+  }
+
+  /* ================= HUD IN-GAME ================= */
+  #hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    z-index: 10;
+    touch-action: none;
+  }
+
+  .top-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 14px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hud-panel {
+    background: rgba(10, 14, 23, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 7px 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .hud-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #94a3b8;
+  }
+
+  .hud-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #speedValue { color: #38bdf8; }
+  #coinsRunValue { color: #fbbf24; }
+
+  #gearIndicator {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.72rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #1e293b;
+    color: #f8fafc;
+  }
+
+  .durability-bar-bg {
+    width: 110px;
+    height: 7px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  #durabilityBarFill {
+    height: 100%;
+    width: 100%;
+    background: #10b981;
+    transition: width 0.15s ease, background 0.15s ease;
+  }
+
+  #defectsContainer {
+    position: absolute;
+    top: 66px;
+    left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .defect-badge {
+    background: rgba(153, 27, 27, 0.88);
+    border: 1px solid #f87171;
+    color: #fecaca;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #dangerContainer {
+    text-align: center;
+    min-width: 175px;
+  }
+
+  #monsterDistText {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #f87171;
+  }
+
+  .danger-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  #dangerBarFill {
+    height: 100%;
+    width: 15%;
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+  }
+
+  #eventBanner {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid #f59e0b;
+    color: #fde68a;
+    padding: 5px 15px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    white-space: nowrap;
+  }
+
+  #surfaceWarning {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 58, 138, 0.85);
+    border: 1px solid #60a5fa;
+    color: #dbeafe;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: none;
+  }
+
+  #crackedGlassOverlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    opacity: 0.78;
+  }
+
+  #dangerVignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 0px rgba(220, 38, 38, 0);
+    transition: box-shadow 0.15s ease;
+  }
+
+  #exitRunBtn {
+    pointer-events: auto;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  /* ================= CONTROLES TOUCH / TELA ================= */
+  .controls-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .left-pedals {
+    position: absolute;
+    left: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  .right-arrows {
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  .ctrl-btn {
+    background: rgba(15, 23, 42, 0.72);
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    color: #f8fafc;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    touch-action: none;
+  }
+
+  .ctrl-btn:active, .ctrl-btn.active {
+    transform: scale(0.93);
+    background: rgba(239, 68, 68, 0.45);
+    border-color: #ef4444;
+  }
+
+  #btnBrake {
+    width: 102px;
+    height: 64px;
+    border-color: rgba(248, 113, 113, 0.45);
+  }
+
+  #btnBrake span.main-lbl { font-size: 0.92rem; letter-spacing: 1px; }
+  #btnBrake span.sub-lbl { font-size: 0.6rem; color: #fca5a5; margin-top: 2px; }
+
+  #btnGas {
+    width: 102px;
+    height: 84px;
+    border-color: rgba(52, 211, 153, 0.5);
+  }
+
+  #btnGas:active, #btnGas.active {
+    background: rgba(16, 185, 129, 0.45);
+    border-color: #34d399;
+  }
+
+  #btnGas span.main-lbl { font-size: 0.98rem; letter-spacing: 1px; }
+
+  .arrow-btn {
+    width: 78px;
+    height: 78px;
+    font-size: 1.9rem;
+  }
+
+  /* ================= GAME OVER ================= */
+  #gameOverScreen {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 4, 4, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    text-align: center;
+    padding: 24px;
+    backdrop-filter: blur(6px);
+  }
+
+  #gameOverScreen h1 {
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    color: #ef4444;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+  }
+
+  #gameOverScreen p {
+    font-size: 1.05rem;
+    color: #e2e8f0;
+    margin: 10px 0 8px;
+  }
+
+  #earnedCoinsText {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #fbbf24;
+    margin-bottom: 22px;
+  }
+
+  .gameover-btns {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-secondary {
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid #475569;
+    padding: 13px 26px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    padding: 13px 30px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- ================= 1ª ABA: LOBBY PRINCIPAL ================= -->
+<div id="lobbyScreen">
+  <div class="lobby-topbar">
+    <div class="lobby-title-wrap">
+      <h1>ROAD-37</h1>
+      <p>Fuga Infinita 3D • +10 moedas a cada 500m percorridos</p>
+    </div>
+    <div class="topbar-right-actions">
+      <button id="openShowcaseBtn">🚘 GARAGEM 3D, UPGRADES & MONSTROS</button>
+      <button id="openGeneralStoreBtn" style="background:linear-gradient(135deg,#b45309,#f59e0b);color:#111827;border:1px solid #fcd34d;padding:10px 14px;border-radius:999px;font-weight:900;">🛒 LOJA GERAL</button>
+      <div class="coin-wallet">
+        <span>🪙</span>
+        <span id="totalCoinsDisplay">0</span>
+        <span style="font-size:0.76rem;color:#fde68a;">MOEDAS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abas de Modo de Partida: Estradas (Carros) vs Mapas Aquáticos (Barcos) -->
+  <div class="mode-tabs">
+    <button class="mode-tab-btn active-land" id="tabLandBtn">🚗 MODO ESTRADAS (CARROS)</button>
+    <button class="mode-tab-btn" id="tabWaterBtn">🚤 MODO AQUÁTICO (BARCOS & MARES/RIOS)</button>
+  </div>
+
+  <!-- Loja de Veículos -->
+  <div class="section-box">
+    <div class="section-header">
+      <span id="vehiclesSectionTitle">1. Veículos & Garagem</span>
+      <span id="vehiclesSectionSub">Compre ou equipe seu carro para a fuga</span>
+    </div>
+    <div class="shop-grid" id="vehiclesGrid"></div>
+  </div>
+
+  <!-- Loja de Mapas -->
+  <div class="section-box">
+    <div class="section-header">
+      <span id="mapsSectionTitle">2. Mapas & Estradas</span>
+      <span id="mapsSectionSub">Escolha a pista da corrida</span>
+    </div>
+    <div class="shop-grid" id="mapsGrid"></div>
+  </div>
+
+  <div class="lobby-footer">
+    <button id="startBtn">COMEÇAR PARTIDA</button>
+    <div class="controls-hint" id="lobbyHintText">
+      Controles: <b>W / ↑</b> (Acelerar), <b>S / ↓</b> (Frear / Ré em 0 km/h), <b>A / D</b> ou <b>← / →</b> (Virar)
+    </div>
+  </div>
+</div>
+
+<div id="generalStoreScreen" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;gap:16px;padding:18px 20px 48px;background:radial-gradient(circle at top,#1c1917 0%,#05070c 100%);z-index:26;overflow-y:auto;touch-action:pan-y;">
+  <div class="showcase-header"><h2>🛒 Loja Geral de Veículos</h2><div class="showcase-header-right"><div class="coin-wallet">🪙 <span id="storeCoinsDisplay">0</span> MOEDAS</div><button id="backFromStoreBtn" class="btn-secondary">◀ VOLTAR</button></div></div>
+  <div class="showcase-panel"><div class="section-header"><span>ESTOQUE LIMITADO — ATÉ 4 VEÍCULOS</span><span id="generalStoreTimer">Reabastecimento</span></div><p class="card-desc">A loja vende veículos terrestres e aquáticos. O estoque é renovado a cada 2 horas.</p><div class="shop-grid" id="generalStoreGrid"></div></div>
+</div>
+
+<!-- ================= 2ª ABA: GARAGEM 3D, UPGRADES (NV. 5) & MONSTROS ================= -->
+<div id="showcaseScreen">
+  <div class="showcase-header">
+    <h2>🚘 Oficina 3D, Upgrades & Bestiário</h2>
+    <div class="showcase-header-right">
+      <div class="coin-wallet">
+        <span>🪙</span>
+        <span id="showcaseCoinsDisplay">0</span>
+        <span style="font-size:0.76rem;color:#fde68a;">MOEDAS</span>
+      </div>
+      <button id="backFromShowcaseBtn">◀ VOLTAR AO LOBBY</button>
+    </div>
+  </div>
+
+  <!-- Seção 1: Meus Veículos + Melhorias até Nível 5 -->
+  <div class="showcase-panel">
+    <div class="section-header" style="margin-bottom:0;">
+      <span>Seus Veículos Adquiridos (Melhore cada atributo até o Nível 5)</span>
+      <span id="ownedVehiclesCountBadge">1 Veículo</span>
+    </div>
+
+    <div class="owned-cars-selector" id="ownedVehiclesSelector"></div>
+
+    <div class="showcase-split">
+      <div class="turntable-box">
+        <canvas id="carPreviewCanvas" class="turntable-canvas"></canvas>
+        <div class="turntable-label" id="carPreviewLabel">MODELO 3D • GIRANDO</div>
+      </div>
+
+      <div class="stats-box">
+        <h3 id="inspectCarName">Carro Velho</h3>
+        <p id="inspectCarDesc">Descrição do veículo.</p>
+        <div id="upgradesContainer" style="display:flex;flex-direction:column;gap:7px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="showcase-panel">
+    <div class="section-header"><span>MAESTRIAS</span><span>Carros • Barcos • Mapas</span></div>
+    <div id="masteryPanel" class="shop-grid"></div>
+  </div>
+
+  <!-- Seção 2: Monstros (3 Entidades) + Modelo 3D Girando -->
+  <div class="showcase-panel">
+    <div class="section-header" style="margin-bottom:0;">
+      <span>Bestiário de Monstros (3 Entidades Catalogadas)</span>
+      <span style="color:#f87171;">SELECIONE PARA VER EM 3D</span>
+    </div>
+
+    <div class="owned-cars-selector" id="monstersSelector"></div>
+
+    <div class="showcase-split">
+      <div class="turntable-box monster-box">
+        <canvas id="monsterPreviewCanvas" class="turntable-canvas"></canvas>
+        <div class="turntable-label" id="monsterPreviewLabel" style="color:#fca5a5;">ENTIDADE #01 • GIRANDO</div>
+      </div>
+
+      <div class="stats-box">
+        <h3 id="inspectMonsterName" style="color:#f87171;">O Perseguidor da ROAD-37</h3>
+        <p id="inspectMonsterDesc">Descrição do monstro.</p>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>VELOCIDADE INICIAL</span>
+            <span id="statMonBaseSpeedText">84 km/h</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" id="statMonBaseSpeedBar" style="width:45%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>VELOCIDADE MÁXIMA DE CAÇA</span>
+            <span id="statMonMaxSpeedText">185 km/h</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" id="statMonMaxSpeedBar" style="width:82%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>AGRESSIVIDADE & PERSEGUIÇÃO</span>
+            <span id="statMonAggroText">Alta</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" id="statMonAggroBar" style="width:75%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>HABITAT / TERRENO DE CAÇA</span>
+            <span id="statMonHabitatText" style="color:#fbbf24;">Estradas & Asfalto</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HUD DO JOGO ================= -->
+<div id="hud">
+  <svg id="crackedGlassOverlay" viewBox="0 0 1000 600" preserveAspectRatio="none">
+    <g stroke="rgba(226, 232, 240, 0.72)" stroke-width="2.2" fill="none">
+      <polyline points="240,180 180,110 90,60 15,20" />
+      <polyline points="240,180 290,95 340,25" />
+      <polyline points="240,180 350,170 460,145 530,110" />
+      <polyline points="240,180 310,260 390,340 430,450" />
+      <polyline points="240,180 210,290 165,410 120,560" />
+      <polyline points="240,180 135,215 45,260 0,310" />
+      <polygon points="215,155 262,148 282,192 252,222 206,204" stroke-width="1.6" />
+      <polygon points="185,125 288,112 325,205 270,262 175,232" stroke-width="1.3" />
+      <polyline points="780,410 850,330 940,270 1000,230" />
+      <polyline points="780,410 860,460 950,530 1000,580" />
+      <polyline points="780,410 710,490 660,590" />
+      <polyline points="780,410 690,360 610,320" />
+      <polygon points="755,390 805,382 818,430 772,445" stroke-width="1.5" />
+    </g>
+  </svg>
+
+  <div id="dangerVignette"></div>
+
+  <div class="top-hud">
+    <div class="hud-panel">
+      <div class="hud-label" id="hudVehicleLabel">Velocidade & Lataria</div>
+      <div class="hud-value">
+        <span id="speedValue">0</span> <small style="font-size:0.72rem;color:#94a3b8;">KM/H</small>
+        <span id="gearIndicator">N</span>
+      </div>
+      <div class="durability-bar-bg">
+        <div id="durabilityBarFill"></div>
+      </div>
+      <div style="font-size:0.65rem;color:#94a3b8;margin-top:2px;">
+        Durabilidade: <strong id="durabilityText" style="color:#f8fafc;">100/100</strong>
+      </div>
+    </div>
+
+    <div class="hud-panel" id="dangerContainer">
+      <div class="hud-label" id="hudMonsterTitle">Distância do Monstro</div>
+      <div id="monsterDistText">DORMINDO</div>
+      <div class="danger-bar-bg">
+        <div id="dangerBarFill"></div>
+      </div>
+    </div>
+
+    <div class="hud-panel" style="text-align:right;">
+      <div class="hud-label">Distância & Moedas</div>
+      <div class="hud-value">
+        <span id="distanceValue">0 m</span>
+        <span style="margin-left:8px;font-size:0.95rem;" id="coinsRunValue">🪙 +0</span>
+      </div>
+      <button id="exitRunBtn">SAIR P/ LOBBY</button>
+    </div>
+  </div>
+
+  <div id="defectsContainer"></div>
+  <div id="eventBanner">⚠️ ALERTA!</div>
+  <div id="surfaceWarning">🌊 TRECHO ALAGADO — REDUÇÃO DE ADERÊNCIA</div>
+
+  <div id="stopPrompt" style="display:none;position:absolute;left:50%;top:22%;transform:translateX(-50%);pointer-events:auto;text-align:center;background:rgba(8,15,28,.94);border:1px solid #38bdf8;border-radius:14px;padding:12px 16px;min-width:220px;z-index:15;">
+    <b id="stopName">PARADA</b><p style="font-size:.75rem;color:#cbd5e1;margin:5px 0 9px;">Área segura — o monstro está descansando</p>
+    <button id="leaveVehicleBtn" class="action-btn btn-active-water">SAIR DO VEÍCULO</button>
+  </div>
+  <div id="onFootPanel" style="display:none;position:absolute;inset:0;pointer-events:none;z-index:14;">
+    <div style="position:absolute;left:50%;top:18%;transform:translateX(-50%);background:rgba(15,23,42,.9);padding:10px 14px;border-radius:12px;text-align:center;min-width:220px;pointer-events:auto;">
+      <b id="footStopTitle">PARADA</b><div id="lootText" style="font-size:.75rem;color:#cbd5e1;margin:5px 0;">Procure itens na área</div>
+      <button id="collectLootBtn" class="action-btn btn-buy">PROCURAR ITENS</button>
+      <button id="returnVehicleBtn" class="action-btn btn-active-water" style="margin-top:6px;">VOLTAR AO VEÍCULO</button>
+    </div>
+    <div id="footJoystick" style="position:absolute;left:22px;bottom:22px;width:142px;height:142px;border-radius:50%;background:rgba(15,23,42,.62);border:2px solid rgba(255,255,255,.35);pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,.45);">
+      <div id="footStick" style="width:58px;height:58px;border-radius:50%;background:rgba(56,189,248,.72);border:2px solid #bae6fd;box-shadow:0 2px 12px rgba(56,189,248,.35);"></div>
+    </div>
+    <button id="lookModeBtn" class="ctrl-btn" style="position:absolute;right:18px;bottom:20px;padding:12px;pointer-events:auto;">MOVER CÂMERA</button>
+  </div>
+  <div id="itemUsePanel" style="display:none;position:absolute;right:16px;bottom:112px;z-index:13;pointer-events:auto;gap:8px;"></div>
+  <div class="controls-layer">
+    <div class="left-pedals">
+      <button class="ctrl-btn" id="btnBrake">
+        <span class="main-lbl">FREAR</span>
+        <span class="sub-lbl">RÉ EM 0 KM/H</span>
+      </button>
+      <button class="ctrl-btn" id="btnGas">
+        <span class="main-lbl">ACELERAR</span>
+      </button>
+    </div>
+
+    <div class="right-arrows">
+      <button class="ctrl-btn arrow-btn" id="btnLeft">◀</button>
+      <button class="ctrl-btn arrow-btn" id="btnRight">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TELA DE GAME OVER ================= -->
+<div id="gameOverScreen">
+  <h1 id="gameOverTitle">VOCÊ FOI PEGO!</h1>
+  <p id="finalStatsText">O monstro alcançou seu veículo.</p>
+  <div id="earnedCoinsText">🪙 +0 moedas ganhas nesta corrida</div>
+  <div class="gameover-btns">
+    <button class="btn-secondary" id="backLobbyBtn">GARAGEM / LOBBY</button>
+    <button class="btn-primary" id="retryBtn">JOGAR NOVAMENTE</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  // ==========================================
+  // 1. TRILHA SONORA DA PARTIDA
+  // ==========================================
+  class MatchMusicEngine {
+    constructor() {
+      this.ctx = null;
+      this.isPlaying = false;
+      this.timerId = null;
+      this.step = 0;
+      this.masterGain = null;
+    }
+
+    start() {
+      if (this.isPlaying) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      if (!this.ctx) this.ctx = new AudioCtx();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
+
+      this.isPlaying = true;
+      this.step = 0;
+      this.playStep();
+      this.timerId = setInterval(() => this.playStep(), 104);
+    }
+
+    stop() {
+      this.isPlaying = false;
+      if (this.timerId) {
+        clearInterval(this.timerId);
+        this.timerId = null;
+      }
+      if (this.masterGain && this.ctx) {
+        try { this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime); } catch (e) {}
+      }
+    }
+
+    playStep() {
+      if (!this.isPlaying || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const s = this.step % 64;
+
+      const rootSeq = [
+        82.41, 82.41, 164.81, 82.41, 82.41, 82.41, 164.81, 82.41,
+        82.41, 82.41, 164.81, 82.41, 82.41, 82.41, 164.81, 82.41,
+        65.41, 65.41, 130.81, 65.41, 65.41, 65.41, 130.81, 65.41,
+        73.42, 73.42, 146.83, 73.42, 61.74, 61.74, 123.47, 61.74
+      ];
+      this.triggerBass(rootSeq[s % 32], now, 0.09);
+
+      if (s % 4 === 0 || s === 30 || s === 62 || s === 63) this.triggerKick(now);
+      if (s % 8 === 4 || s === 60 || s === 61) this.triggerSnare(now);
+      if (s % 2 === 1) this.triggerHat(now, s % 4 === 2 ? 0.07 : 0.035);
+
+      const leadNotes = {
+        0: 659.25, 2: 659.25, 3: 783.99, 4: 987.77, 6: 880.00, 8: 783.99,
+        10: 659.25, 12: 587.33, 14: 659.25,
+        16: 523.25, 18: 523.25, 19: 659.25, 20: 783.99, 22: 659.25,
+        24: 587.33, 26: 659.25, 28: 739.99, 30: 783.99,
+        32: 987.77, 34: 987.77, 35: 1174.66, 36: 1318.51, 38: 1174.66, 40: 987.77,
+        42: 880.00, 44: 783.99, 46: 880.00,
+        48: 783.99, 50: 880.00, 52: 987.77, 54: 880.00,
+        56: 739.99, 58: 783.99, 60: 659.25
+      };
+
+      if (leadNotes[s]) {
+        this.triggerLead(leadNotes[s], now, 0.21);
+        this.triggerLead(leadNotes[s] * 0.667, now, 0.19, 0.09);
+      }
+      this.step++;
+    }
+
+    triggerBass(freq, time, dur) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(520, time);
+      gain.gain.setValueAtTime(0.45, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + dur);
+      osc.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+      osc.start(time); osc.stop(time + dur);
+    }
+
+    triggerLead(freq, time, dur, vol = 0.20) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2400, time);
+      gain.gain.setValueAtTime(vol, time);
+      gain.gain.exponentialRampToValueAtTime(0.008, time + dur);
+      osc.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+      osc.start(time); osc.stop(time + dur);
+    }
+
+    triggerKick(time) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(145, time);
+      osc.frequency.exponentialRampToValueAtTime(38, time + 0.11);
+      gain.gain.setValueAtTime(0.8, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+      osc.connect(gain); gain.connect(this.masterGain);
+      osc.start(time); osc.stop(time + 0.12);
+    }
+
+    triggerSnare(time) {
+      const bufferSize = this.ctx.sampleRate * 0.11;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(850, time);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.38, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.11);
+      noise.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+      noise.start(time);
+    }
+
+    triggerHat(time, dur) {
+      const bufferSize = Math.floor(this.ctx.sampleRate * dur);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(6000, time);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.15, time);
+      gain.gain.exponentialRampToValueAtTime(0.005, time + dur);
+      noise.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+      noise.start(time);
+    }
+  }
+
+  const musicEngine = new MatchMusicEngine();
+
+  // ==========================================
+  // 2. DADOS DOS CARROS, BARCOS (BALANCEADOS), MAPAS E MONSTROS
+  // ==========================================
+  const CARS_DATA = [
+    {
+      id: 'carro-velho',
+      category: 'car',
+      name: 'Carro Velho',
+      price: 0,
+      maxSpeed: 95,
+      durability: 100,
+      accel: 38,
+      turnRate: 1.35,
+      turnLabel: 'Normal',
+      gripBonus: 0.0,
+      allTerrain: false,
+      defectChance: 0.42,
+      hoodColor: 0x7c2d12,
+      bodyStyle: 'hatch',
+      desc: 'Muito frágil (100 durabilidade) e propenso a defeitos mecânicos durante a fuga.'
+    },
+    {
+      id: 'sedan-velho',
+      category: 'car',
+      name: 'Sedan Velho',
+      price: 20,
+      maxSpeed: 115,
+      durability: 150,
+      accel: 42,
+      turnRate: 1.05,
+      turnLabel: 'Pesada (Difícil)',
+      gripBonus: -0.05,
+      allTerrain: false,
+      defectChance: 0.30,
+      hoodColor: 0x475569,
+      bodyStyle: 'sedan',
+      desc: 'Mais rápido que o carro velho, porém pesado e difícil de fazer curvas fechadas.'
+    },
+    {
+      id: 'picape',
+      category: 'car',
+      name: 'Picape',
+      price: 45,
+      maxSpeed: 135,
+      durability: 200,
+      accel: 48,
+      turnRate: 1.25,
+      turnLabel: 'Boa',
+      gripBonus: 0.05,
+      allTerrain: false,
+      defectChance: 0.22,
+      hoodColor: 0x1e3a8a,
+      bodyStyle: 'pickup',
+      desc: 'Robusta (200 durabilidade). Menos propensa a falhas que os modelos antigos.'
+    },
+    {
+      id: 'sedan-esportivo',
+      category: 'car',
+      name: 'Sedan Esportivo',
+      price: 80,
+      maxSpeed: 200,
+      durability: 250,
+      accel: 62,
+      turnRate: 1.72,
+      turnLabel: 'Excelente (Ágil)',
+      gripBonus: 0.22,
+      allTerrain: false,
+      defectChance: 0.14,
+      hoodColor: 0x0284c7,
+      bodyStyle: 'sport',
+      desc: 'Alta velocidade (200 km/h) e direção precisa: faz curvas com extrema facilidade.'
+    },
+    {
+      id: 'carro-offroad',
+      category: 'car',
+      name: 'Carro Off-Road',
+      price: 110,
+      maxSpeed: 180,
+      durability: 300,
+      accel: 56,
+      turnRate: 1.48,
+      turnLabel: '4x4 Total',
+      gripBonus: 0.40,
+      allTerrain: true,
+      defectChance: 0.12,
+      hoodColor: 0x15803d,
+      bodyStyle: 'offroad',
+      desc: 'Suspensão preparada: mantém total controle na água, terra e terrenos difíceis.'
+    },
+    {
+      id: 'carro-blindado',
+      category: 'car',
+      name: 'Carro Blindado',
+      price: 150,
+      maxSpeed: 155,
+      durability: 450,
+      accel: 46,
+      turnRate: 1.15,
+      turnLabel: 'Blindada',
+      gripBonus: 0.08,
+      allTerrain: false,
+      defectChance: 0.07,
+      hoodColor: 0x18181b,
+      bodyStyle: 'armored',
+      desc: 'Tanque urbano com 450 de durabilidade: suporta várias pancadas e danos pesados.'
+    },
+    {
+      id: 'ferrari',
+      category: 'car',
+      name: 'Ferrari',
+      price: 220,
+      maxSpeed: 260,
+      durability: 200,
+      accel: 96,
+      turnRate: 1.65,
+      turnLabel: 'Superesportiva',
+      gripBonus: 0.20,
+      allTerrain: false,
+      defectChance: 0.15,
+      hoodColor: 0xdc2626,
+      bodyStyle: 'supercar',
+      desc: 'Superesportivo de 260 km/h com aceleração explosiva que atinge o topo rapidamente.'
+      },
+    { id:'cybertruck', category:'car', name:'Cybertruck', price:520, maxSpeed:200, durability:700, accel:72, turnRate:1.12, turnLabel:'Pesado', gripBonus:0.08, allTerrain:true, defectChance:0.04, hoodColor:0x9ca3af, bodyStyle:'cybertruck', electric:true, ability:true, desc:'Picape elétrica angular. Habilidade: atravessa obstáculos por 10s; recarga de 60s. Precisa encontrar energia para recarregar.' },
+    { id:'cavalo', category:'car', name:'Cavalo', price:140, maxSpeed:120, durability:120, accel:55, turnRate:1.8, turnLabel:'Muito ágil', gripBonus:0.25, allTerrain:true, defectChance:0, hoodColor:0x78350f, bodyStyle:'horse', horse:true, desc:'Pula obstáculos usando fôlego. Quando o monstro se aproxima, corre mais rápido por alguns instantes.' },
+    { id:'hatch-popular', category:'car', name:'Hatch Popular', price:90, maxSpeed:110, durability:160, accel:46, turnRate:1.65, turnLabel:'Fácil de controlar', gripBonus:0.15, allTerrain:false, defectChance:0.18, hoodColor:0x2563eb, bodyStyle:'hatch', desc:'Simples, leve e fácil de controlar.' },
+    { id:'van', category:'car', name:'Van', price:210, maxSpeed:140, durability:360, accel:34, turnRate:0.82, turnLabel:'Ruim nas curvas', gripBonus:-0.08, allTerrain:false, defectChance:0.10, hoodColor:0x64748b, bodyStyle:'van', desc:'Muito espaço interno e boa resistência, mas é pesada e ruim nas curvas.' },
+    { id:'carro-rally', category:'car', name:'Carro de Rally', price:330, maxSpeed:195, durability:260, accel:88, turnRate:1.95, turnLabel:'Excelente nas curvas', gripBonus:0.35, allTerrain:true, defectChance:0.10, hoodColor:0xf97316, bodyStyle:'rally', desc:'Excelente nas curvas, aceleração alta e resistência moderada.' },
+    { id:'suv-militar', category:'car', name:'SUV Militar', price:390, maxSpeed:165, durability:620, accel:42, turnRate:0.92, turnLabel:'Pesado', gripBonus:0.12, allTerrain:true, defectChance:0.05, hoodColor:0x365314, bodyStyle:'armored', desc:'Muito resistente, porém bastante pesado.' },
+    { id:'moto', category:'car', name:'Moto', price:180, maxSpeed:130, durability:200, accel:74, turnRate:2.0, turnLabel:'Ágil (risco de queda)', gripBonus:0.18, allTerrain:false, defectChance:0.16, hoodColor:0x991b1b, bodyStyle:'motorcycle', motorcycle:true, desc:'Se inclinar demais nas curvas, você cai e perde a partida.' }
+  ];
+
+  // BARCOS (Aceleração aumentada para permitir arrancada rápida na fuga!)
+  const BOATS_DATA = [
+    {
+      id: 'bote-madeira',
+      category: 'boat',
+      level: 1,
+      name: 'Bote a Motor (Nv. 1)',
+      price: 35,
+      maxSpeed: 105,
+      durability: 120,
+      accel: 54,
+      turnRate: 1.32,
+      turnLabel: 'Leve',
+      gripBonus: 0.05,
+      allTerrain: true,
+      defectChance: 0.32,
+      hoodColor: 0x92400e,
+      bodyStyle: 'boat-dinghy',
+      desc: 'Barco inicial leve com arrancada ágil para escapar do início da perseguição.'
+    },
+    {
+      id: 'barco-pesca',
+      category: 'boat',
+      level: 2,
+      name: 'Barco de Pesca (Nv. 2)',
+      price: 75,
+      maxSpeed: 130,
+      durability: 200,
+      accel: 64,
+      turnRate: 1.28,
+      turnLabel: 'Estável',
+      gripBonus: 0.10,
+      allTerrain: true,
+      defectChance: 0.22,
+      hoodColor: 0x0369a1,
+      bodyStyle: 'boat-fishing',
+      desc: 'Casco reforçado para rios e mares agitados. Aguenta impactos leves nas pedras.'
+    },
+    {
+      id: 'lancha-esportiva',
+      category: 'boat',
+      level: 3,
+      name: 'Lancha Esportiva (Nv. 3)',
+      price: 130,
+      maxSpeed: 175,
+      durability: 240,
+      accel: 82,
+      turnRate: 1.65,
+      turnLabel: 'Ágil',
+      gripBonus: 0.20,
+      allTerrain: true,
+      defectChance: 0.14,
+      hoodColor: 0xe11d48,
+      bodyStyle: 'boat-speedboat',
+      desc: 'Corta as ondas com aceleração forte e faz curvas fechadas com precisão.'
+    },
+    {
+      id: 'lancha-tatica',
+      category: 'boat',
+      level: 4,
+      name: 'Lancha Blindada (Nv. 4)',
+      price: 190,
+      maxSpeed: 205,
+      durability: 420,
+      accel: 86,
+      turnRate: 1.48,
+      turnLabel: 'Pesada / Forte',
+      gripBonus: 0.24,
+      allTerrain: true,
+      defectChance: 0.08,
+      hoodColor: 0x1e293b,
+      bodyStyle: 'boat-armored',
+      desc: 'Embarcação militar com casco blindado de 420 HP, feita para resistir a ataques.'
+    },
+    {
+      id: 'hidro-jato',
+      category: 'boat',
+      level: 5,
+      name: 'Hidro-Jato Turbo (Nv. 5)',
+      price: 260,
+      maxSpeed: 255,
+      durability: 290,
+      accel: 112,
+      turnRate: 1.80,
+      turnLabel: 'Extrema',
+      gripBonus: 0.32,
+      allTerrain: true,
+      defectChance: 0.10,
+      hoodColor: 0x06b6d4,
+      bodyStyle: 'boat-hydro',
+      desc: 'O ápice naval: propulsão a jato capaz de atingir 255 km/h sobre qualquer correnteza.'
+    }
+  ];
+
+  const GENERAL_STORE_ONLY_IDS=['cybertruck','cavalo','hatch-popular','van','carro-rally','suv-militar','moto'];
+
+  // MAPAS TERRESTRES (Agora com subidas e descidas 3D!)
+  const LAND_MAPS_DATA = [
+    {
+      id: 'road-37',
+      type: 'land',
+      name: 'ROAD-37',
+      price: 0,
+      desc: 'Rodovia asfaltada noturna com curvas sinuosas, subidas e descidas.',
+      skyColor: 0x06080f,
+      fogColor: 0x06080f,
+      groundColor: 0x0b120e,
+      grip: 1.0,
+      dragFactor: 1.0,
+      hillAmp: 1.0
+    },
+    {
+      id: 'road-47',
+      type: 'land',
+      name: 'ROAD-47',
+      price: 30,
+      desc: 'Pista serrana íngreme com buracos e barreiras! Desvie para não danificar o carro.',
+      skyColor: 0x0b090c,
+      fogColor: 0x0b090c,
+      groundColor: 0x161210,
+      grip: 0.96,
+      dragFactor: 1.02,
+      hillAmp: 1.35
+    },
+    {
+      id: 'road-99',
+      type: 'land',
+      name: 'ROAD-99',
+      price: 60,
+      desc: 'Estrada de terra com morros e menor aderência (ideal para Off-Road).',
+      skyColor: 0x110c07,
+      fogColor: 0x110c07,
+      groundColor: 0x24170e,
+      grip: 0.60,
+      dragFactor: 1.15,
+      hillAmp: 1.15
+    },
+    {
+      id: 'road-105',
+      type: 'land',
+      name: 'ROAD-105',
+      price: 100,
+      desc: 'Vales alagados! A água acumula nas descidas e freia carros comuns.',
+      skyColor: 0x050d17,
+      fogColor: 0x050d17,
+      groundColor: 0x081726,
+      grip: 0.85,
+      dragFactor: 1.0,
+      hillAmp: 0.9
+    }
+  ];
+
+  // MAPAS AQUÁTICOS (Cada um com sua própria identidade visual e ambiental!)
+  const WATER_MAPS_DATA = [
+    {
+      id: 'river-forest',
+      type: 'water',
+      biome: 'forest-river',
+      name: 'RIO DA FLORESTA NEGRA',
+      price: 0,
+      desc: 'Rio largo atravessando uma floresta densa com árvores gigantes e troncos na água.',
+      skyColor: 0x05140d,
+      fogColor: 0x05140d,
+      groundColor: 0x091c11,
+      waterColor: 0x0f766e,
+      riverWidth: 18,
+      grip: 0.86,
+      dragFactor: 1.02
+    },
+    {
+      id: 'river-canyon',
+      type: 'water',
+      biome: 'canyon-mountains',
+      name: 'DESFILADEIRO DAS MONTANHAS',
+      price: 65,
+      desc: 'Corredeira estreita encaixada entre paredões de montanhas rochosas e picos nevados.',
+      skyColor: 0x071221,
+      fogColor: 0x071221,
+      groundColor: 0x1e293b,
+      waterColor: 0x0284c7,
+      riverWidth: 15.5,
+      grip: 0.78,
+      dragFactor: 1.06
+    },
+    {
+      id: 'open-sea',
+      type: 'water',
+      biome: 'open-ocean',
+      name: 'MAR ABERTO DO LEVIATÃ',
+      price: 130,
+      desc: 'Oceano aberto sem margens de terra! Navegue entre boias iluminadas, recifes e ondas.',
+      skyColor: 0x030917,
+      fogColor: 0x030917,
+      groundColor: 0x020813,
+      waterColor: 0x1d4ed8,
+      riverWidth: 34,
+      grip: 0.80,
+      dragFactor: 1.04
+    }
+  ];
+
+  // 3 MONSTROS DO JOGO
+  const MONSTERS_DATA = [
+    {
+      id: 'perseguidor',
+      number: '#01',
+      name: 'O Perseguidor da ROAD-37',
+      baseSpeed: 84,
+      maxSpeed: 185,
+      aggroLabel: 'Alta (Acelera c/ a distância)',
+      aggroPct: 75,
+      habitat: 'Estradas & Asfalto',
+      desc: 'Criatura sombria de olhos carmesim que permanece adormecida até ouvir o ronco do motor.'
+    },
+    {
+      id: 'espreitador-lama',
+      number: '#02',
+      name: 'Espreitador do Pântano',
+      baseSpeed: 96,
+      maxSpeed: 205,
+      aggroLabel: 'Muito Alta (Arrancada Brutal)',
+      aggroPct: 88,
+      habitat: 'Estradas de Terra & Alagadas (ROAD-99 / 105)',
+      desc: 'Aberração quadrúpede com chifres retorcidos e olhos verde-tóxicos. Domina terrenos lamacentos.'
+    },
+    {
+      id: 'leviata-serra',
+      number: '#03',
+      name: 'Leviatã das Águas',
+      baseSpeed: 88,
+      maxSpeed: 230,
+      aggroLabel: 'Extrema (Predador Aquático)',
+      aggroPct: 96,
+      habitat: 'Todos os Mapas Aquáticos (Rios & Mar Aberto)',
+      desc: 'Serpente marinha colossal de barbatanas brilhantes que caça embarcações em rios e mares.'
+    }
+  ];
+
+  // ==========================================
+  // 3. PERSISTÊNCIA E SISTEMA DE UPGRADES (ATÉ NÍVEL 5)
+  // ==========================================
+  let savedCoins = parseInt(localStorage.getItem('road37_coins') || '0', 10);
+  let unlockedCars = JSON.parse(localStorage.getItem('road37_unlocked_cars') || '["carro-velho"]');
+  let selectedCarId = localStorage.getItem('road37_selected_car') || 'carro-velho';
+  if (!unlockedCars.includes(selectedCarId)) selectedCarId = 'carro-velho';
+
+  let unlockedBoats = JSON.parse(localStorage.getItem('road37_unlocked_boats') || '[]');
+  let selectedBoatId = localStorage.getItem('road37_selected_boat') || '';
+  if (selectedBoatId && !unlockedBoats.includes(selectedBoatId)) {
+    selectedBoatId = unlockedBoats[0] || '';
+  }
+
+  let unlockedMaps = JSON.parse(localStorage.getItem('road37_unlocked_maps') || '["road-37", "river-forest"]');
+  if (!unlockedMaps.includes('river-forest')) unlockedMaps.push('river-forest');
+
+  let selectedLandMapId = localStorage.getItem('road37_selected_land_map') || 'road-37';
+  if (!unlockedMaps.includes(selectedLandMapId)) selectedLandMapId = 'road-37';
+
+  let selectedWaterMapId = localStorage.getItem('road37_selected_water_map') || 'river-forest';
+  if (!unlockedMaps.includes(selectedWaterMapId)) selectedWaterMapId = 'river-forest';
+
+  // Upgrades por veículo: { [vehicleId]: { speed: 1..5, accel: 1..5, durability: 1..5, handling: 1..5, reliability: 1..5 } }
+  let vehicleUpgrades = JSON.parse(localStorage.getItem('road37_upgrades') || '{}');
+  let generalStoreData = JSON.parse(localStorage.getItem('road37_general_store') || 'null');
+  let masteryData = JSON.parse(localStorage.getItem('road37_masteries') || '{"cars":{},"boats":{},"maps":{}}');
+  function allVehicleData(){ return [...CARS_DATA, ...BOATS_DATA]; }
+  function refreshGeneralStore(force=false){
+    const now=Date.now();
+    if(force || !generalStoreData || !Array.isArray(generalStoreData.ids) || now-generalStoreData.updatedAt>=7200000){
+      const pool=allVehicleData().filter(v=>!unlockedCars.includes(v.id) && !unlockedBoats.includes(v.id));
+      const shuffled=pool.slice().sort(()=>Math.random()-0.5);
+      generalStoreData={ids:shuffled.slice(0,4).map(v=>v.id),updatedAt:now};
+      localStorage.setItem('road37_general_store',JSON.stringify(generalStoreData));
+    }
+  }
+  function getMasteryBucket(kind,id){ if(!masteryData[kind][id]) masteryData[kind][id]={distance:0,uses:0,obstacles:0,storms:0}; return masteryData[kind][id]; }
+  function masteryPercent(kind,id){ const m=getMasteryBucket(kind,id); if(kind==='maps')return Math.min(100,Math.round(m.distance/10000*60+m.uses/600*40)); if(kind==='boats')return Math.min(100,Math.round(m.distance/10000*40+m.uses/300*20+m.obstacles/20*20+m.storms/5*20)); return Math.min(100,Math.round(m.distance/10000*50+m.uses/300*30+m.obstacles/20*20)); }
+  refreshGeneralStore();
+
+
+  const UPGRADE_SPECS = [
+    { key: 'speed',       label: 'Velocidade Máxima',   baseCost: 15 },
+    { key: 'accel',       label: 'Aceleração / Motor',  baseCost: 15 },
+    { key: 'durability',  label: 'Durabilidade / Casco',baseCost: 15 },
+    { key: 'handling',    label: 'Direção & Aderência', baseCost: 12 },
+    { key: 'reliability', label: 'Resistência a Falhas',baseCost: 12 }
+  ];
+
+  function getVehicleUpgradeLevels(vehId) {
+    if (!vehicleUpgrades[vehId]) {
+      vehicleUpgrades[vehId] = { speed: 1, accel: 1, durability: 1, handling: 1, reliability: 1 };
+    }
+    return vehicleUpgrades[vehId];
+  }
+
+  // Retorna os atributos efetivos já somando os níveis de melhoria (Nv 1 a Nv 5)
+  function getEffectiveVehicleStats(vehCfg) {
+    const up = getVehicleUpgradeLevels(vehCfg.id);
+    const sBonus = up.speed - 1;       // 0 a 4
+    const aBonus = up.accel - 1;       // 0 a 4
+    const dBonus = up.durability - 1;  // 0 a 4
+    const hBonus = up.handling - 1;    // 0 a 4
+    const rBonus = up.reliability - 1; // 0 a 4
+
+    return {
+      ...vehCfg,
+      maxSpeed: Math.round(vehCfg.maxSpeed + sBonus * 14),
+      accel: Math.round(vehCfg.accel + aBonus * 11),
+      durability: Math.round(vehCfg.durability + dBonus * 45),
+      turnRate: Number((vehCfg.turnRate + hBonus * 0.12).toFixed(2)),
+      gripBonus: Number((vehCfg.gripBonus + hBonus * 0.06).toFixed(2)),
+      defectChance: Math.max(0.02, Number((vehCfg.defectChance - rBonus * 0.06).toFixed(2))),
+      upgrades: up
+    };
+  }
+
+  let lobbyMode = 'land';
+
+  function saveProgress() {
+    localStorage.setItem('road37_coins', String(savedCoins));
+    localStorage.setItem('road37_unlocked_cars', JSON.stringify(unlockedCars));
+    localStorage.setItem('road37_selected_car', selectedCarId);
+    localStorage.setItem('road37_unlocked_boats', JSON.stringify(unlockedBoats));
+    localStorage.setItem('road37_selected_boat', selectedBoatId);
+    localStorage.setItem('road37_unlocked_maps', JSON.stringify(unlockedMaps));
+    localStorage.setItem('road37_selected_land_map', selectedLandMapId);
+    localStorage.setItem('road37_selected_water_map', selectedWaterMapId);
+    localStorage.setItem('road37_upgrades', JSON.stringify(vehicleUpgrades));
+    localStorage.setItem('road37_masteries', JSON.stringify(masteryData));
+    localStorage.setItem('road37_general_store', JSON.stringify(generalStoreData));
+  }
+
+  function hasAnyBoat() {
+    return unlockedBoats.length > 0;
+  }
+
+  function getActiveVehicle() {
+    const base = lobbyMode === 'water'
+      ? (BOATS_DATA.find(b => b.id === selectedBoatId) || BOATS_DATA.find(b => unlockedBoats.includes(b.id)) || BOATS_DATA[0])
+      : (CARS_DATA.find(c => c.id === selectedCarId) || CARS_DATA[0]);
+    return getEffectiveVehicleStats(base);
+  }
+
+  function getActiveMap() {
+    if (lobbyMode === 'water') {
+      return WATER_MAPS_DATA.find(m => m.id === selectedWaterMapId) || WATER_MAPS_DATA[0];
+    }
+    return LAND_MAPS_DATA.find(m => m.id === selectedLandMapId) || LAND_MAPS_DATA[0];
+  }
+
+  function getActiveMonsterForMap(mapCfg) {
+    if (mapCfg.type === 'water') return MONSTERS_DATA[2];
+    if (mapCfg.id === 'road-99' || mapCfg.id === 'road-105') return MONSTERS_DATA[1];
+    return MONSTERS_DATA[0];
+  }
+
+  // ==========================================
+  // 4. ESTADO DA PARTIDA
+  // ==========================================
+  let gameState = 'LOBBY';
+
+  const DEFAULT_ROAD_WIDTH = 16;
+  const SEGMENT_LENGTH = 5;
+  const AHEAD_SEGMENTS = 85;
+  const BEHIND_SEGMENTS = 18;
+  const MAX_REVERSE_KMH = 45;
+
+  let carZ = 0;
+  let carX = 0;
+  let carY = 0;
+  let carSpeedKmh = 0;
+  let carYaw = 0;
+  let steeringInput = 0;
+  let carAngularVel = 0;
+  let bumpShakeTimer = 0;
+
+  let currentDurability = 100;
+  let maxDurability = 100;
+  let lastDefectTime = 0;
+  const defects = {
+    tireDamaged: false,
+    engineDamaged: false,
+    glassBroken: false,
+    lightsBroken: false
+  };
+
+  let runCoinsEarned = 0;
+  let nextCoinMilestone = 500;
+
+  let monsterAwake = false;
+  let monsterZ = 38;
+  let monsterSpeedKmh = 0;
+  let monsterBobPhase = 0;
+  let activeRunMonster = MONSTERS_DATA[0];
+
+  const input = { gas: false, brake: false, left: false, right: false };
+  let nextStopDistance=5000, currentStop=null, onFoot=false, stopItems=[], carriedItems={gasoline:0,battery:0}, lastProgressSave=0;
+  let footAvatar=null, parkedVehicleMesh=null;
+  function makeFootAvatar(){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,1.05,10),new THREE.MeshStandardMaterial({color:0x334155}));body.position.y=.9;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.25,12,10),new THREE.MeshStandardMaterial({color:0xd6a77a}));head.position.y=1.55;g.add(head);return g;}
+  let lastWaveAt=0, nextWaveAt=0, activeWave=null, waveMesh=null;
+  let cyberEnergy=100, cyberAbilityUntil=0, cyberAbilityReadyAt=0, horseStamina=100, horseJumpUntil=0, motorcycleLean=0, gasBoostUntil=0;
+  const footInput={forward:false,back:false,left:false,right:false}; let lookDrag=false,lastLookX=0,lastLookY=0,footYaw=0,footPitch=0;
+
+
+  // ==========================================
+  // 5. CENA 3D PRINCIPAL & GEOMETRIA DE SUBIDAS/DESCIDAS
+  // ==========================================
+  const canvas = document.getElementById('gameCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x06080f);
+  scene.fog = new THREE.FogExp2(0x06080f, 0.0085);
+
+  const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 460);
+  const waveMaterial=new THREE.MeshStandardMaterial({color:0x7dd3fc,emissive:0x075985,transparent:true,opacity:.78,roughness:.22,metalness:.25,side:THREE.DoubleSide});
+  function createWaveVisual(size){const g=new THREE.Group();const crest=new THREE.Mesh(new THREE.TorusGeometry(size,Math.max(.5,size*.13),8,32,Math.PI),waveMaterial.clone());crest.rotation.x=Math.PI/2;crest.position.y=size*.34;g.add(crest);const face=new THREE.Mesh(new THREE.PlaneGeometry(size*2.2,size*.9,12,5),waveMaterial.clone());face.position.y=size*.12;g.add(face);return g;}
+
+
+  const ambientLight = new THREE.AmbientLight(0x334155, 0.95);
+  scene.add(ambientLight);
+
+  const moonLight = new THREE.DirectionalLight(0x94a3b8, 0.65);
+  moonLight.position.set(30, 80, -40);
+  scene.add(moonLight);
+
+  function getActiveRoadWidth() {
+    const mapCfg = getActiveMap();
+    return mapCfg.riverWidth || DEFAULT_ROAD_WIDTH;
+  }
+
+  function getRoadCenterX(z) {
+    const s = -z;
+    if (s <= 40) return 0;
+    const d = s - 40;
+    const c1 = Math.sin(d * 0.0055) * 34;
+    const c2 = Math.sin(d * 0.0135 + 1.2) * 16;
+    const c3 = Math.cos(d * 0.0023) * 28;
+    const ramp = Math.min(1, d / 90);
+    return (c1 + c2 + (c3 - 28)) * ramp;
+  }
+
+  // Elevação do terreno (Subidas e Descidas nas estradas!)
+  function getRoadElevationY(z) {
+    const mapCfg = getActiveMap();
+    if (mapCfg.type === 'water') return 0; // Água permanece nivelada
+    const s = -z;
+    if (s <= 50) return 0;
+    const d = s - 50;
+    const amp = mapCfg.hillAmp || 1.0;
+    const ramp = Math.min(1, d / 110);
+    const h1 = Math.sin(d * 0.009) * 9.5;
+    const h2 = Math.sin(d * 0.021 + 0.8) * 3.8;
+    return (h1 + h2) * amp * ramp;
+  }
+
+  function getRoadYaw(z) {
+    const delta = 0.5;
+    const x1 = getRoadCenterX(z);
+    const x2 = getRoadCenterX(z - delta);
+    return Math.atan2(-(x2 - x1), delta);
+  }
+
+  function getRoadPitch(z) {
+    const delta = 0.6;
+    const y1 = getRoadElevationY(z);
+    const y2 = getRoadElevationY(z - delta);
+    return Math.atan2(y2 - y1, delta);
+  }
+
+  function createSurfaceTexture(type) {
+    const c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 512;
+    const ctx = c.getContext('2d');
+
+    if (type === 'water') {
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 6500; i++) {
+        const shade = Math.random();
+        ctx.fillStyle = shade > 0.65 ? 'rgba(125, 211, 252, 0.25)' : 'rgba(7, 89, 133, 0.35)';
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 18, 3);
+      }
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.35)';
+      ctx.fillRect(0, 0, 12, 512);
+      ctx.fillRect(512 - 12, 0, 12, 512);
+    } else if (type === 'dirt') {
+      ctx.fillStyle = '#4a321f';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 11000; i++) {
+        const r = 55 + Math.floor(Math.random() * 45);
+        const g = 36 + Math.floor(Math.random() * 30);
+        const b = 20 + Math.floor(Math.random() * 18);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 3, 3);
+      }
+      ctx.fillStyle = 'rgba(32, 20, 11, 0.45)';
+      ctx.fillRect(115, 0, 55, 512);
+      ctx.fillRect(342, 0, 55, 512);
+    } else {
+      ctx.fillStyle = '#1b1e26';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 9000; i++) {
+        const v = 20 + Math.floor(Math.random() * 26);
+        ctx.fillStyle = `rgb(${v},${v+2},${v+6})`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+      }
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(18, 0, 10, 512);
+      ctx.fillRect(512 - 28, 0, 10, 512);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(251, 30, 10, 190);
+      ctx.fillRect(251, 290, 10, 190);
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  const asphaltMat = new THREE.MeshStandardMaterial({ map: createSurfaceTexture('asphalt'), roughness: 0.88, metalness: 0.05 });
+  const dirtMat = new THREE.MeshStandardMaterial({ map: createSurfaceTexture('dirt'), roughness: 0.98, metalness: 0.0 });
+  const riverMat = new THREE.MeshStandardMaterial({ map: createSurfaceTexture('water'), roughness: 0.2, metalness: 0.55 });
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x0b120e, roughness: 1 });
+
+  const postMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+  const reflectorMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x291d18 });
+  const foliageMat = new THREE.MeshStandardMaterial({ color: 0x0f2419 });
+  const denseForestMat = new THREE.MeshStandardMaterial({ color: 0x064e3b });
+
+  const mountainMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.95, flatShading: true });
+  const mountainSnowMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7, flatShading: true });
+  const rockHazardMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9, flatShading: true });
+  const logHazardMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
+  const buoyMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 });
+  const buoyLightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+
+  const potholeMat = new THREE.MeshStandardMaterial({ color: 0x07080a, roughness: 1 });
+  const barrierMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+  const barrierStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const waterPuddleMat = new THREE.MeshStandardMaterial({
+    color: 0x0284c7, roughness: 0.15, metalness: 0.7, transparent: true, opacity: 0.78
+  });
+
+  const groundGeo = new THREE.PlaneGeometry(320, SEGMENT_LENGTH + 0.35);
+  groundGeo.rotateX(-Math.PI / 2);
+  const postGeo = new THREE.BoxGeometry(0.18, 1.1, 0.18);
+  const refGeo = new THREE.BoxGeometry(0.22, 0.18, 0.22);
+  const trunkGeo = new THREE.CylinderGeometry(0.35, 0.5, 3.2, 6);
+  const coneGeo = new THREE.ConeGeometry(2.4, 6.5, 7);
+  const bigTreeTrunkGeo = new THREE.CylinderGeometry(0.55, 0.85, 5.0, 7);
+  const bigTreeCrownGeo = new THREE.DodecahedronGeometry(3.6, 1);
+
+  const potholeGeo = new THREE.CircleGeometry(1.45, 14);
+  potholeGeo.rotateX(-Math.PI / 2);
+  const barrierGeo = new THREE.BoxGeometry(2.8, 0.95, 0.55);
+
+  const mountainGeo = new THREE.ConeGeometry(11, 26, 6);
+  const mountainCapGeo = new THREE.ConeGeometry(3.8, 9, 6);
+  const rockGeo = new THREE.DodecahedronGeometry(1.25, 0);
+  const logGeo = new THREE.CylinderGeometry(0.38, 0.42, 3.4, 8);
+  logGeo.rotateZ(Math.PI / 2);
+  const buoyBaseGeo = new THREE.CylinderGeometry(0.45, 0.55, 1.4, 10);
+  const buoyTopGeo = new THREE.SphereGeometry(0.28, 8, 8);
+
+  const activeSegments = new Map();
+
+  function clearAllSegments() {
+    for (const [, data] of activeSegments.entries()) {
+      scene.remove(data.group);
+    }
+    activeSegments.clear();
+  }
+
+  function seededRandom(seed) {
+    const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  function spawnSegment(segIdx) {
+    if (activeSegments.has(segIdx)) return;
+
+    const mapCfg = getActiveMap();
+    const isWaterMap = mapCfg.type === 'water';
+    const roadW = getActiveRoadWidth();
+
+    const zPos = -segIdx * SEGMENT_LENGTH;
+    const centerX = getRoadCenterX(zPos);
+    const centerY = getRoadElevationY(zPos);
+    const segYaw = getRoadYaw(zPos);
+    const segPitch = getRoadPitch(zPos);
+
+    const group = new THREE.Group();
+    group.position.set(centerX, centerY, zPos);
+    group.rotation.order = 'YXZ';
+    group.rotation.y = segYaw;
+    group.rotation.x = segPitch;
+
+    let surfaceMat = asphaltMat;
+    if (isWaterMap) surfaceMat = riverMat;
+    else if (mapCfg.id === 'road-99') surfaceMat = dirtMat;
+
+    const segGeo = new THREE.PlaneGeometry(roadW, SEGMENT_LENGTH + 0.32);
+    segGeo.rotateX(-Math.PI / 2);
+    group.add(new THREE.Mesh(segGeo, surfaceMat));
+
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.position.y = -0.06;
+    group.add(groundMesh);
+
+    const hazards = [];
+    let isFlooded = isWaterMap;
+
+    if (isWaterMap) {
+      // ================= IDENTIDADE PRÓPRIA DE CADA MAPA AQUÁTICO =================
+      if (mapCfg.biome === 'forest-river') {
+        // 1. RIO DA FLORESTA NEGRA: Margens de terra + floresta fechada nas duas bordas
+        const rL = seededRandom(segIdx * 7 + 1);
+        const rR = seededRandom(segIdx * 7 + 2);
+
+        const treeL = new THREE.Group();
+        const tL = new THREE.Mesh(bigTreeTrunkGeo, trunkMat);
+        tL.position.y = 2.5;
+        const cL = new THREE.Mesh(bigTreeCrownGeo, denseForestMat);
+        cL.position.y = 6.8;
+        treeL.add(tL, cL);
+        treeL.position.set(-(roadW / 2 + 2.4 + rL * 4.5), 0, 0);
+        group.add(treeL);
+
+        const treeR = new THREE.Group();
+        const tR = new THREE.Mesh(bigTreeTrunkGeo, trunkMat);
+        tR.position.y = 2.5;
+        const cR = new THREE.Mesh(bigTreeCrownGeo, denseForestMat);
+        cR.position.y = 6.8;
+        treeR.add(tR, cR);
+        treeR.position.set(roadW / 2 + 2.4 + rR * 4.5, 0, 0);
+        group.add(treeR);
+
+        if (segIdx > 14) {
+          const chance = seededRandom(segIdx * 19);
+          const laneOffset = (seededRandom(segIdx * 37) - 0.5) * (roadW - 4.8);
+          if (chance < 0.13) {
+            const log = new THREE.Mesh(logGeo, logHazardMat);
+            log.position.set(laneOffset, 0.2, 0);
+            group.add(log);
+            hazards.push({ type: 'log', localX: laneOffset, radius: 1.75 });
+          }
+        }
+      } else if (mapCfg.biome === 'canyon-mountains') {
+        // 2. DESFILADEIRO DAS MONTANHAS: Paredões rochosos e picos nevados nas duas margens
+        const rL = seededRandom(segIdx * 5 + 1);
+        const rR = seededRandom(segIdx * 5 + 2);
+
+        const mtnL = new THREE.Group();
+        const scaleYL = 0.85 + rL * 0.75;
+        const bodyL = new THREE.Mesh(mountainGeo, mountainMat);
+        bodyL.position.y = 12.5 * scaleYL;
+        bodyL.scale.set(1.15, scaleYL, 1.1);
+        const capL = new THREE.Mesh(mountainCapGeo, mountainSnowMat);
+        capL.position.y = 21.5 * scaleYL;
+        capL.scale.set(1.15, scaleYL, 1.1);
+        mtnL.add(bodyL, capL);
+        mtnL.position.set(-(roadW / 2 + 8.2), 0, 0);
+        group.add(mtnL);
+
+        const mtnR = new THREE.Group();
+        const scaleYR = 0.85 + rR * 0.75;
+        const bodyR = new THREE.Mesh(mountainGeo, mountainMat);
+        bodyR.position.y = 12.5 * scaleYR;
+        bodyR.scale.set(1.15, scaleYR, 1.1);
+        const capR = new THREE.Mesh(mountainCapGeo, mountainSnowMat);
+        capR.position.y = 21.5 * scaleYR;
+        capR.scale.set(1.15, scaleYR, 1.1);
+        mtnR.add(bodyR, capR);
+        mtnR.position.set(roadW / 2 + 8.2, 0, 0);
+        group.add(mtnR);
+
+        if (segIdx > 14) {
+          const chance = seededRandom(segIdx * 23);
+          const laneOffset = (seededRandom(segIdx * 41) - 0.5) * (roadW - 4.8);
+          if (chance < 0.16) {
+            const rock = new THREE.Mesh(rockGeo, rockHazardMat);
+            rock.position.set(laneOffset, 0.35, 0);
+            group.add(rock);
+            hazards.push({ type: 'rock', localX: laneOffset, radius: 1.45 });
+          }
+        }
+      } else {
+        // 3. MAR ABERTO DO LEVIATÃ: Oceano vasto sem paredes de montanha, balizado por boias luminosas
+        if (Math.abs(segIdx) % 5 === 0) {
+          const buoyL = new THREE.Group();
+          const bBaseL = new THREE.Mesh(buoyBaseGeo, buoyMat);
+          bBaseL.position.y = 0.6;
+          const bTopL = new THREE.Mesh(buoyTopGeo, buoyLightMat);
+          bTopL.position.y = 1.45;
+          buoyL.add(bBaseL, bTopL);
+          buoyL.position.set(-(roadW / 2 + 0.5), 0, 0);
+
+          const buoyR = buoyL.clone();
+          buoyR.position.set(roadW / 2 + 0.5, 0, 0);
+          group.add(buoyL, buoyR);
+        }
+
+        if (segIdx > 14) {
+          const chance = seededRandom(segIdx * 29);
+          const laneOffset = (seededRandom(segIdx * 43) - 0.5) * (roadW - 6.0);
+          if (chance < 0.12) {
+            const rock = new THREE.Mesh(rockGeo, rockHazardMat);
+            rock.scale.set(1.3, 0.85, 1.3);
+            rock.position.set(laneOffset, 0.3, 0);
+            group.add(rock);
+            hazards.push({ type: 'rock', localX: laneOffset, radius: 1.65 });
+          }
+        }
+      }
+    } else {
+      // ================= MAPAS TERRESTRES (COM SUBIDAS E DESCIDAS) =================
+      if (mapCfg.id !== 'road-99' && Math.abs(segIdx) % 4 === 0) {
+        const leftPost = new THREE.Mesh(postGeo, postMat);
+        leftPost.position.set(-roadW / 2 - 0.6, 0.55, 0);
+        const leftRef = new THREE.Mesh(refGeo, reflectorMat);
+        leftRef.position.set(-roadW / 2 - 0.6, 0.95, 0);
+
+        const rightPost = new THREE.Mesh(postGeo, postMat);
+        rightPost.position.set(roadW / 2 + 0.6, 0.55, 0);
+        const rightRef = new THREE.Mesh(refGeo, reflectorMat);
+        rightRef.position.set(roadW / 2 + 0.6, 0.95, 0);
+
+        group.add(leftPost, leftRef, rightPost, rightRef);
+      }
+
+      if (Math.abs(segIdx) % 3 === 0) {
+        const r1 = seededRandom(segIdx * 3 + 1);
+        const r2 = seededRandom(segIdx * 3 + 2);
+
+        const treeL = new THREE.Group();
+        const trunkL = new THREE.Mesh(trunkGeo, trunkMat);
+        trunkL.position.y = 1.6;
+        const leavesL = new THREE.Mesh(coneGeo, foliageMat);
+        leavesL.position.y = 5.4;
+        treeL.add(trunkL, leavesL);
+        treeL.position.set(-(roadW / 2 + 5 + r1 * 18), 0, 0);
+        group.add(treeL);
+
+        const treeR = new THREE.Group();
+        const trunkR = new THREE.Mesh(trunkGeo, trunkMat);
+        trunkR.position.y = 1.6;
+        const leavesR = new THREE.Mesh(coneGeo, foliageMat);
+        leavesR.position.y = 5.4;
+        treeR.add(trunkR, leavesR);
+        treeR.position.set(roadW / 2 + 5 + r2 * 18, 0, 0);
+        group.add(treeR);
+      }
+
+      if (segIdx > 14) {
+        const chance = seededRandom(segIdx * 17);
+        const laneOffset = (seededRandom(segIdx * 31) - 0.5) * (roadW - 4.5);
+
+        if (mapCfg.id === 'road-47') {
+          if (chance < 0.16) {
+            const hole = new THREE.Mesh(potholeGeo, potholeMat);
+            hole.position.set(laneOffset, 0.02, 0);
+            group.add(hole);
+            hazards.push({ type: 'pothole', localX: laneOffset, radius: 1.5 });
+          } else if (chance >= 0.16 && chance < 0.27) {
+            const barrier = new THREE.Mesh(barrierGeo, barrierMat);
+            barrier.position.set(laneOffset, 0.48, 0);
+            const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.84, 0.22, 0.58), barrierStripeMat);
+            stripe.position.set(laneOffset, 0.55, 0);
+            group.add(barrier, stripe);
+            hazards.push({ type: 'barrier', localX: laneOffset, radius: 1.7 });
+          }
+        } else {
+          if (chance < 0.045) {
+            const hole = new THREE.Mesh(potholeGeo, potholeMat);
+            hole.position.set(laneOffset, 0.02, 0);
+            group.add(hole);
+            hazards.push({ type: 'pothole', localX: laneOffset, radius: 1.45 });
+          }
+        }
+
+        if (mapCfg.id === 'road-105') {
+          const cycle = segIdx % 38;
+          if (cycle >= 18 && cycle <= 31) {
+            isFlooded = true;
+            const waterGeo = new THREE.PlaneGeometry(roadW - 0.8, SEGMENT_LENGTH + 0.25);
+            waterGeo.rotateX(-Math.PI / 2);
+            const waterMesh = new THREE.Mesh(waterGeo, waterPuddleMat);
+            waterMesh.position.y = 0.04;
+            group.add(waterMesh);
+          }
+        }
+      }
+    }
+
+    scene.add(group);
+    activeSegments.set(segIdx, { group, hazards, isFlooded });
+  }
+
+  function updateDynamicRoadGeneration() {
+    const currentCarIdx = Math.floor(-carZ / SEGMENT_LENGTH);
+    const lowestNeededIdx = Math.min(currentCarIdx, Math.floor(-monsterZ / SEGMENT_LENGTH)) - BEHIND_SEGMENTS;
+    const highestNeededIdx = currentCarIdx + AHEAD_SEGMENTS;
+
+    for (let idx = lowestNeededIdx; idx <= highestNeededIdx; idx++) {
+      spawnSegment(idx);
+    }
+
+    for (const [idx, data] of activeSegments.entries()) {
+      if (idx < lowestNeededIdx || idx > highestNeededIdx + 5) {
+        scene.remove(data.group);
+        activeSegments.delete(idx);
+      }
+    }
+  }
+
+  // Interior do veículo (1ª pessoa)
+  const carCockpit = new THREE.Group();
+  carCockpit.rotation.order = 'YXZ';
+  scene.add(carCockpit);
+  const cockpitVisuals = new THREE.Group();
+  carCockpit.add(cockpitVisuals);
+  const specialCockpitVisuals = new THREE.Group();
+  carCockpit.add(specialCockpitVisuals);
+
+  const hoodMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, metalness: 0.6, roughness: 0.3 });
+  const hoodMesh = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.14, 1.5), hoodMat);
+  hoodMesh.position.set(0, 0.72, -1.35);
+  hoodMesh.rotation.x = 0.06;
+  cockpitVisuals.add(hoodMesh);
+
+  const dashMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.9, 0.38, 0.65),
+    new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 })
+  );
+  dashMesh.position.set(0, 0.76, -0.58);
+  cockpitVisuals.add(dashMesh);
+
+  const pillarGeo = new THREE.BoxGeometry(0.08, 0.95, 0.08);
+  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+  const leftPillar = new THREE.Mesh(pillarGeo, pillarMat);
+  leftPillar.position.set(-0.88, 1.25, -0.52);
+  leftPillar.rotation.z = -0.22;
+  leftPillar.rotation.x = -0.35;
+
+  const rightPillar = new THREE.Mesh(pillarGeo, pillarMat);
+  rightPillar.position.set(0.88, 1.25, -0.52);
+  rightPillar.rotation.z = 0.22;
+  rightPillar.rotation.x = -0.35;
+  cockpitVisuals.add(leftPillar, rightPillar);
+
+  const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.06, 1.2), pillarMat);
+  roofMesh.position.set(0, 1.66, -0.05);
+  cockpitVisuals.add(roofMesh);
+
+  const mirrorFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.1, 0.04),
+    new THREE.MeshStandardMaterial({ color: 0x090d16 })
+  );
+  mirrorFrame.position.set(0, 1.48, -0.45);
+  const mirrorGlassMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+  const mirrorGlass = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.075), mirrorGlassMat);
+  mirrorGlass.position.set(0, 1.48, -0.428);
+  cockpitVisuals.add(mirrorFrame, mirrorGlass);
+
+  const steeringWheelGroup = new THREE.Group();
+  steeringWheelGroup.position.set(-0.36, 0.93, -0.36);
+  steeringWheelGroup.rotation.x = -0.32;
+
+  const wheelRim = new THREE.Mesh(
+    new THREE.TorusGeometry(0.18, 0.024, 10, 24),
+    new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 })
+  );
+  const wheelSpoke = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.035, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0x374151 })
+  );
+  const wheelCenter = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.055, 0.03, 16),
+    new THREE.MeshStandardMaterial({ color: 0xdc2626 })
+  );
+  wheelCenter.rotation.x = Math.PI / 2;
+
+  steeringWheelGroup.add(wheelRim, wheelSpoke, wheelCenter);
+  cockpitVisuals.add(steeringWheelGroup);
+
+  const headlightLeft = new THREE.SpotLight(0xfffbeb, 3.4, 135, Math.PI / 4.2, 0.45, 1);
+  headlightLeft.position.set(-0.65, 0.72, -1.8);
+  headlightLeft.target.position.set(-0.65, 0.2, -25);
+  carCockpit.add(headlightLeft);
+  carCockpit.add(headlightLeft.target);
+
+  const headlightRight = new THREE.SpotLight(0xfffbeb, 3.4, 135, Math.PI / 4.2, 0.45, 1);
+  headlightRight.position.set(0.65, 0.72, -1.8);
+  headlightRight.target.position.set(0.65, 0.2, -25);
+  carCockpit.add(headlightRight);
+  carCockpit.add(headlightRight.target);
+
+  camera.position.set(-0.36, 1.24, -0.05);
+  camera.rotation.set(0, 0, 0);
+  carCockpit.add(camera);
+
+  // ==========================================
+  // 6. CONSTRUTORES DE MODELOS 3D (MONSTROS, CARROS & BARCOS)
+  // ==========================================
+  function buildMonster3DModel(monsterId = 'perseguidor') {
+    const group = new THREE.Group();
+
+    if (monsterId === 'espreitador-lama') {
+      const swampMat = new THREE.MeshStandardMaterial({ color: 0x14261c, roughness: 0.92, metalness: 0.1 });
+      const hornMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.5 });
+
+      const torso = new THREE.Mesh(new THREE.DodecahedronGeometry(1.55, 1), swampMat);
+      torso.position.set(0, 2.0, 0);
+      torso.scale.set(1.15, 1.35, 1.25);
+      group.add(torso);
+
+      const hornGeo = new THREE.ConeGeometry(0.24, 1.8, 6);
+      const hornL = new THREE.Mesh(hornGeo, hornMat);
+      hornL.position.set(-0.95, 3.6, -0.3);
+      hornL.rotation.z = 0.45;
+      const hornR = new THREE.Mesh(hornGeo, hornMat);
+      hornR.position.set(0.95, 3.6, -0.3);
+      hornR.rotation.z = -0.45;
+      group.add(hornL, hornR);
+
+      const clawGeo = new THREE.BoxGeometry(0.32, 3.2, 0.32);
+      const clawL = new THREE.Mesh(clawGeo, swampMat);
+      clawL.position.set(-1.75, 1.7, -0.8);
+      clawL.rotation.x = -0.65;
+      clawL.rotation.z = 0.25;
+      const clawR = new THREE.Mesh(clawGeo, swampMat);
+      clawR.position.set(1.75, 1.7, -0.8);
+      clawR.rotation.x = -0.65;
+      clawR.rotation.z = -0.25;
+      group.add(clawL, clawR);
+
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+      const eyeGeo = new THREE.SphereGeometry(0.18, 8, 8);
+      [[-0.45, 2.75, -1.45], [0.45, 2.75, -1.45], [-0.25, 2.45, -1.55], [0.25, 2.45, -1.55]].forEach(([ex, ey, ez]) => {
+        const e = new THREE.Mesh(eyeGeo, eyeMat);
+        e.position.set(ex, ey, ez);
+        group.add(e);
+      });
+
+      const glow = new THREE.PointLight(0x22c55e, 4.5, 35);
+      glow.position.set(0, 2.6, -1.5);
+      group.add(glow);
+
+    } else if (monsterId === 'leviata-serra') {
+      const scaleMat = new THREE.MeshStandardMaterial({ color: 0x091a28, roughness: 0.35, metalness: 0.65 });
+      const finMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.5 });
+
+      const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.65, 3.4, 10), scaleMat);
+      seg1.position.set(0, 1.7, -0.4);
+      seg1.rotation.x = 0.22;
+
+      const head = new THREE.Mesh(new THREE.ConeGeometry(1.35, 2.6, 8), scaleMat);
+      head.position.set(0, 3.6, -1.15);
+      head.rotation.x = -1.25;
+
+      const archBody = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.65, 8, 16, Math.PI), scaleMat);
+      archBody.position.set(0, 0.8, 1.4);
+      archBody.rotation.y = Math.PI / 2;
+
+      const finGeo = new THREE.ConeGeometry(0.25, 1.6, 4);
+      const fin1 = new THREE.Mesh(finGeo, finMat);
+      fin1.position.set(0, 4.3, -0.2);
+      fin1.rotation.x = -0.35;
+      const fin2 = new THREE.Mesh(finGeo, finMat);
+      fin2.position.set(0, 2.7, 1.4);
+
+      group.add(seg1, head, archBody, fin1, fin2);
+
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+      const eyeGeo = new THREE.SphereGeometry(0.24, 8, 8);
+      const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeL.position.set(-0.62, 3.6, -1.85);
+      const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeR.position.set(0.62, 3.6, -1.85);
+      group.add(eyeL, eyeR);
+
+      const glow = new THREE.PointLight(0x06b6d4, 5.0, 38);
+      glow.position.set(0, 3.2, -1.6);
+      group.add(glow);
+
+    } else {
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0b0b0e, roughness: 0.85, metalness: 0.15 });
+      const body = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.4, 8), bodyMat);
+      body.position.y = 2.2;
+      group.add(body);
+
+      const armGeo = new THREE.BoxGeometry(0.35, 2.8, 0.35);
+      const leftArm = new THREE.Mesh(armGeo, bodyMat);
+      leftArm.position.set(-1.55, 2.1, -0.5);
+      leftArm.rotation.z = 0.28;
+      leftArm.rotation.x = -0.4;
+
+      const rightArm = new THREE.Mesh(armGeo, bodyMat);
+      rightArm.position.set(1.55, 2.1, -0.5);
+      rightArm.rotation.z = -0.28;
+      rightArm.rotation.x = -0.4;
+      group.add(leftArm, rightArm);
+
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff1e1e });
+      const eyeGeo = new THREE.SphereGeometry(0.22, 8, 8);
+      const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeL.position.set(-0.48, 3.2, -0.85);
+      const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeR.position.set(0.48, 3.2, -0.85);
+      group.add(eyeL, eyeR);
+
+      const glow = new THREE.PointLight(0xdc2626, 4.5, 35);
+      glow.position.set(0, 2.8, -1.2);
+      group.add(glow);
+    }
+
+    return group;
+  }
+
+  let monsterGroup = buildMonster3DModel('perseguidor');
+  scene.add(monsterGroup);
+
+  function setRunMonsterMesh(monsterId) {
+    scene.remove(monsterGroup);
+    monsterGroup = buildMonster3DModel(monsterId);
+    scene.add(monsterGroup);
+  }
+
+  function buildExteriorVehicle3D(vehCfg) {
+    const group = new THREE.Group();
+    const paintMat = new THREE.MeshStandardMaterial({
+      color: vehCfg.hoodColor,
+      metalness: vehCfg.bodyStyle.includes('supercar') || vehCfg.bodyStyle.includes('hydro') ? 0.78 : 0.45,
+      roughness: 0.28
+    });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.7 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1, opacity: 0.78, transparent: true });
+
+    if (vehCfg.category === 'boat') {
+      const hullLength = vehCfg.level >= 4 ? 4.5 : (vehCfg.level >= 2 ? 4.1 : 3.5);
+      const hullWidth = vehCfg.level === 4 ? 1.95 : 1.65;
+
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(hullWidth, 0.55, hullLength * 0.72), paintMat);
+      hull.position.set(0, 0.35, 0.35);
+      group.add(hull);
+
+      const bow = new THREE.Mesh(new THREE.ConeGeometry(hullWidth * 0.68, hullLength * 0.45, 4), paintMat);
+      bow.rotation.x = -Math.PI / 2;
+      bow.rotation.y = Math.PI / 4;
+      bow.position.set(0, 0.38, -hullLength * 0.46);
+      group.add(bow);
+
+      if (vehCfg.level === 1) {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(hullWidth - 0.25, 0.12, 0.45), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+        bench.position.set(0, 0.64, 0.1);
+        group.add(bench);
+      } else if (vehCfg.level === 2) {
+        const consoleBox = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.72, 0.75), darkMat);
+        consoleBox.position.set(0, 0.85, 0.1);
+        group.add(consoleBox);
+      } else {
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(hullWidth - 0.3, 0.48, 1.5), glassMat);
+        cabin.position.set(0, 0.78, -0.05);
+        group.add(cabin);
+      }
+
+      const motor = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.65, 0.5), darkMat);
+      motor.position.set(0, 0.55, hullLength * 0.42);
+      group.add(motor);
+
+      const bowLight = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.14, 0.1), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+      bowLight.position.set(0, 0.52, -hullLength * 0.64);
+      group.add(bowLight);
+
+      return group;
+    }
+
+    if (vehCfg.bodyStyle === 'cybertruck') {
+      const metal=new THREE.MeshStandardMaterial({color:0xa1a1aa,metalness:.94,roughness:.24});
+      const darkWheel=new THREE.MeshStandardMaterial({color:0x09090b,roughness:.86});
+      const lower=new THREE.Mesh(new THREE.BoxGeometry(2.05,.62,4.45),metal);lower.position.y=.68;group.add(lower);
+      const angularCab=new THREE.Mesh(new THREE.CylinderGeometry(1.18,1.18,2.35,4,1,false),metal);angularCab.rotation.x=Math.PI/2;angularCab.rotation.z=Math.PI/4;angularCab.scale.set(1,.62,1);angularCab.position.set(0,1.25,.05);group.add(angularCab);
+      const hood=new THREE.Mesh(new THREE.BoxGeometry(2.02,.18,1.05),metal);hood.position.set(0,1.02,-1.62);hood.rotation.x=-.16;group.add(hood);
+      const led=new THREE.Mesh(new THREE.BoxGeometry(1.95,.09,.08),new THREE.MeshBasicMaterial({color:0xe0f2fe}));led.position.set(0,.88,-2.25);group.add(led);
+      for(const x of [-1.08,1.08])for(const z of [-1.35,1.35]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.43,.43,.28,18),darkWheel);w.rotation.z=Math.PI/2;w.position.set(x,.43,z);group.add(w);}
+      return group;
+    }
+    if (vehCfg.bodyStyle === 'horse') {
+      const brown=new THREE.MeshStandardMaterial({color:0x78350f}); const dark=new THREE.MeshStandardMaterial({color:0x1c1917});
+      const torso=new THREE.Mesh(new THREE.BoxGeometry(.85,.9,1.8),brown);torso.position.y=1.25;group.add(torso);
+      const neck=new THREE.Mesh(new THREE.BoxGeometry(.48,1.05,.5),brown);neck.position.set(0,1.85,-.72);neck.rotation.x=-.35;group.add(neck);
+      const head=new THREE.Mesh(new THREE.BoxGeometry(.48,.5,.65),brown);head.position.set(0,2.35,-.98);group.add(head);
+      for(const x of [-.3,.3])for(const z of [-.62,.62]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.18,.95,.2),dark);leg.position.set(x,.48,z);group.add(leg);}
+    }
+    if (vehCfg.bodyStyle === 'motorcycle') {
+      const red=new THREE.MeshStandardMaterial({color:vehCfg.hoodColor,metalness:.45}); const black=new THREE.MeshStandardMaterial({color:0x09090b});
+      const frame=new THREE.Mesh(new THREE.BoxGeometry(.48,.42,1.5),red);frame.position.y=.85;group.add(frame);
+      for(const z of [-.85,.85]){const wheel=new THREE.Mesh(new THREE.TorusGeometry(.38,.12,8,18),black);wheel.rotation.y=Math.PI/2;wheel.position.set(0,.4,z);group.add(wheel);}
+      const seat=new THREE.Mesh(new THREE.BoxGeometry(.5,.15,.72),black);seat.position.set(0,1.2,.1);group.add(seat);
+    }
+    if (vehCfg.bodyStyle === 'horse' || vehCfg.bodyStyle === 'motorcycle') return group;
+
+    if (vehCfg.bodyStyle === 'van') {
+      const vanBody=new THREE.Mesh(new THREE.BoxGeometry(2.05,1.55,4.3),paintMat);vanBody.position.y=1.08;group.add(vanBody);
+      const vanGlass=new THREE.Mesh(new THREE.BoxGeometry(1.82,.48,.08),glassMat);vanGlass.position.set(0,1.45,-2.17);group.add(vanGlass);
+      for(const x of [-1.08,1.08])for(const z of [-1.35,1.35]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.28,18),new THREE.MeshStandardMaterial({color:0x09090b}));w.rotation.z=Math.PI/2;w.position.set(x,.4,z);group.add(w);}
+      return group;
+    }
+    if (vehCfg.bodyStyle === 'rally') {
+      const spoiler=new THREE.Mesh(new THREE.BoxGeometry(2,.12,.35),darkMat);spoiler.position.set(0,1.12,1.9);group.add(spoiler);
+    }
+
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.9 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.8, roughness: 0.2 });
+
+    const chassisHeight = vehCfg.bodyStyle === 'supercar' ? 0.45 : (vehCfg.bodyStyle === 'offroad' ? 0.65 : 0.55);
+    const chassisY = vehCfg.bodyStyle === 'offroad' ? 0.62 : 0.46;
+    const bodyWidth = vehCfg.bodyStyle === 'armored' ? 2.05 : 1.85;
+    const bodyLength = vehCfg.bodyStyle === 'pickup' ? 4.3 : 4.0;
+
+    const chassis = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth, chassisHeight, bodyLength), paintMat);
+    chassis.position.y = chassisY;
+    group.add(chassis);
+
+    if (vehCfg.bodyStyle === 'pickup') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth - 0.1, 0.62, 1.55), paintMat);
+      cab.position.set(0, chassisY + 0.55, -0.35);
+      const bedWall = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth - 0.12, 0.35, 1.65), darkMat);
+      bedWall.position.set(0, chassisY + 0.32, 1.15);
+      group.add(cab, bedWall);
+    } else if (vehCfg.bodyStyle === 'supercar') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.46, 1.8), glassMat);
+      cab.position.set(0, chassisY + 0.42, -0.1);
+      const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.08, 0.32), darkMat);
+      spoiler.position.set(0, chassisY + 0.55, 1.82);
+      group.add(cab, spoiler);
+    } else if (vehCfg.bodyStyle === 'armored') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.96, 0.68, 2.6), paintMat);
+      cab.position.set(0, chassisY + 0.58, 0.15);
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.22, 2.64), glassMat);
+      visor.position.set(0, chassisY + 0.65, 0.15);
+      group.add(cab, visor);
+    } else {
+      const cabLen = vehCfg.bodyStyle === 'hatch' ? 2.2 : 1.95;
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.55, cabLen), paintMat);
+      cab.position.set(0, chassisY + 0.52, 0.1);
+      const win = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.36, cabLen - 0.18), glassMat);
+      win.position.set(0, chassisY + 0.54, 0.1);
+      group.add(cab, win);
+    }
+
+    const headL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.16, 0.08), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+    headL.position.set(-0.62, chassisY + 0.05, -bodyLength / 2 - 0.01);
+    const headR = headL.clone();
+    headR.position.x = 0.62;
+
+    const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.16, 0.08), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+    tailL.position.set(-0.62, chassisY + 0.05, bodyLength / 2 + 0.01);
+    const tailR = tailL.clone();
+    tailR.position.x = 0.62;
+    group.add(headL, headR, tailL, tailR);
+
+    const wheelRadius = vehCfg.bodyStyle === 'offroad' ? 0.46 : 0.36;
+    const wheelGeo = new THREE.CylinderGeometry(wheelRadius, wheelRadius, 0.28, 20);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const rimGeo = new THREE.CylinderGeometry(wheelRadius * 0.55, wheelRadius * 0.55, 0.30, 12);
+    rimGeo.rotateZ(Math.PI / 2);
+
+    [
+      [-bodyWidth / 2 - 0.04, wheelRadius, -1.25],
+      [ bodyWidth / 2 + 0.04, wheelRadius, -1.25],
+      [-bodyWidth / 2 - 0.04, wheelRadius,  1.25],
+      [ bodyWidth / 2 + 0.04, wheelRadius,  1.25]
+    ].forEach(([wx, wy, wz]) => {
+      const tire = new THREE.Mesh(wheelGeo, wheelMat);
+      tire.position.set(wx, wy, wz);
+      const rim = new THREE.Mesh(rimGeo, rimMat);
+      rim.position.set(wx, wy, wz);
+      group.add(tire, rim);
+    });
+
+    return group;
+  }
+
+  // ==========================================
+  // 7. 2ª ABA: GARAGEM 3D, UPGRADES (ATÉ NÍVEL 5) & BESTIÁRIO
+  // ==========================================
+  const showcaseScreen = document.getElementById('showcaseScreen');
+  const carPreviewCanvas = document.getElementById('carPreviewCanvas');
+  const monsterPreviewCanvas = document.getElementById('monsterPreviewCanvas');
+
+  let showcaseActive = false;
+  let inspectedVehicleId = selectedCarId;
+  let inspectedMonsterId = MONSTERS_DATA[0].id;
+
+  const carPreviewRenderer = new THREE.WebGLRenderer({ canvas: carPreviewCanvas, antialias: true, alpha: true });
+  const carPreviewScene = new THREE.Scene();
+  const carPreviewCamera = new THREE.PerspectiveCamera(45, 1.8, 0.1, 100);
+  carPreviewCamera.position.set(3.8, 2.1, 4.4);
+  carPreviewCamera.lookAt(0, 0.7, 0);
+
+  carPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const carKeyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  carKeyLight.position.set(5, 8, 5);
+  carPreviewScene.add(carKeyLight);
+
+  const platformMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.5, 2.7, 0.15, 32),
+    new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.3 })
+  );
+  platformMesh.position.y = -0.08;
+  carPreviewScene.add(platformMesh);
+
+  let currentPreviewVehicleMesh = null;
+
+  const monsterPreviewRenderer = new THREE.WebGLRenderer({ canvas: monsterPreviewCanvas, antialias: true, alpha: true });
+  const monsterPreviewScene = new THREE.Scene();
+  const monsterPreviewCamera = new THREE.PerspectiveCamera(45, 1.8, 0.1, 100);
+  monsterPreviewCamera.position.set(0, 2.7, 6.2);
+  monsterPreviewCamera.lookAt(0, 2.2, 0);
+
+  monsterPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const monsterKeyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  monsterKeyLight.position.set(4, 7, 5);
+  monsterPreviewScene.add(monsterKeyLight);
+
+  const monsterPlatform = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.3, 2.5, 0.15, 32),
+    new THREE.MeshStandardMaterial({ color: 0x271010, metalness: 0.5, roughness: 0.4 })
+  );
+  monsterPlatform.position.y = -0.08;
+  monsterPreviewScene.add(monsterPlatform);
+
+  let currentPreviewMonsterMesh = null;
+
+  function resizeShowcaseRenderers() {
+    const carRect = carPreviewCanvas.parentElement.getBoundingClientRect();
+    if (carRect.width > 0 && carRect.height > 0) {
+      carPreviewRenderer.setSize(carRect.width, carRect.height, false);
+      carPreviewCamera.aspect = carRect.width / carRect.height;
+      carPreviewCamera.updateProjectionMatrix();
+    }
+
+    const monRect = monsterPreviewCanvas.parentElement.getBoundingClientRect();
+    if (monRect.width > 0 && monRect.height > 0) {
+      monsterPreviewRenderer.setSize(monRect.width, monRect.height, false);
+      monsterPreviewCamera.aspect = monRect.width / monRect.height;
+      monsterPreviewCamera.updateProjectionMatrix();
+    }
+  }
+
+  function renderShowcaseTab() {
+    document.getElementById('showcaseCoinsDisplay').textContent = savedCoins;
+    renderMasteries();
+    document.getElementById('totalCoinsDisplay').textContent = savedCoins;
+
+    const ownedCars = CARS_DATA.filter(c => unlockedCars.includes(c.id));
+    const ownedBoats = BOATS_DATA.filter(b => unlockedBoats.includes(b.id));
+    const allOwnedVehicles = [...ownedCars, ...ownedBoats];
+
+    if (!allOwnedVehicles.some(v => v.id === inspectedVehicleId)) {
+      inspectedVehicleId = allOwnedVehicles[0].id;
+    }
+
+    document.getElementById('ownedVehiclesCountBadge').textContent =
+      `${ownedCars.length} Carro(s) • ${ownedBoats.length} Barco(s)`;
+
+    const selectorEl = document.getElementById('ownedVehiclesSelector');
+    selectorEl.innerHTML = '';
+
+    allOwnedVehicles.forEach(veh => {
+      const btn = document.createElement('button');
+      btn.className = `owned-car-pill ${veh.id === inspectedVehicleId ? 'active' : ''}`;
+      btn.textContent = `${veh.category === 'boat' ? '🚤' : '🚗'} ${veh.name}`;
+      btn.addEventListener('click', () => {
+        inspectedVehicleId = veh.id;
+        renderShowcaseTab();
+      });
+      selectorEl.appendChild(btn);
+    });
+
+    const baseVehCfg = allOwnedVehicles.find(v => v.id === inspectedVehicleId) || allOwnedVehicles[0];
+    const effVeh = getEffectiveVehicleStats(baseVehCfg);
+
+    if (currentPreviewVehicleMesh) {
+      carPreviewScene.remove(currentPreviewVehicleMesh);
+    }
+    currentPreviewVehicleMesh = buildExteriorVehicle3D(baseVehCfg);
+    carPreviewScene.add(currentPreviewVehicleMesh);
+
+    document.getElementById('carPreviewLabel').textContent = `${baseVehCfg.name.toUpperCase()} • MODELO 3D`;
+    document.getElementById('inspectCarName').textContent = baseVehCfg.name;
+    document.getElementById('inspectCarDesc').textContent = baseVehCfg.desc;
+
+    // Renderizar os 5 upgrades (Nível 1 a Nível 5)
+    const upgradesContainer = document.getElementById('upgradesContainer');
+    upgradesContainer.innerHTML = '';
+
+    const statDisplays = {
+      speed: `${effVeh.maxSpeed} km/h`,
+      accel: `${effVeh.accel} pts`,
+      durability: `${effVeh.durability} HP`,
+      handling: `${effVeh.turnRate}x (${baseVehCfg.turnLabel})`,
+      reliability: `${Math.round((1 - effVeh.defectChance) * 100)}%`
+    };
+
+    UPGRADE_SPECS.forEach(spec => {
+      const curLv = effVeh.upgrades[spec.key]; // 1..5
+      const isMax = curLv >= 5;
+      const cost = spec.baseCost * curLv;
+      const canAfford = savedCoins >= cost;
+
+      const row = document.createElement('div');
+      row.className = 'upgrade-row';
+
+      let pipsHtml = '';
+      for (let lv = 1; lv <= 5; lv++) {
+        pipsHtml += `<div class="pip ${lv <= curLv ? 'filled' : ''}"></div>`;
+      }
+
+      row.innerHTML = `
+        <div class="upgrade-row-header">
+          <div class="upgrade-title-group">
+            <span class="upgrade-name">${spec.label} — Nível ${curLv}/5</span>
+            <span class="upgrade-val">Atual: ${statDisplays[spec.key]}</span>
+          </div>
+          <button class="upgrade-btn ${isMax ? 'maxed' : ''}" ${isMax || !canAfford ? 'disabled' : ''}>
+            ${isMax ? 'NÍVEL MÁXIMO (5)' : `MELHORAR (🪙 ${cost})`}
+          </button>
+        </div>
+        <div class="level-pips">${pipsHtml}</div>
+      `;
+
+      const btn = row.querySelector('button');
+      if (!isMax) {
+        btn.addEventListener('click', () => {
+          if (savedCoins >= cost && effVeh.upgrades[spec.key] < 5) {
+            savedCoins -= cost;
+            vehicleUpgrades[baseVehCfg.id][spec.key] += 1;
+            saveProgress();
+            renderShowcaseTab();
+            renderLobbyShop();
+          }
+        });
+      }
+
+      upgradesContainer.appendChild(row);
+    });
+
+    // Seletor dos 3 Monstros
+    const monSelectorEl = document.getElementById('monstersSelector');
+    monSelectorEl.innerHTML = '';
+    MONSTERS_DATA.forEach(mon => {
+      const btn = document.createElement('button');
+      btn.className = `owned-car-pill ${mon.id === inspectedMonsterId ? 'active-monster' : ''}`;
+      btn.textContent = `${mon.number} ${mon.name}`;
+      btn.addEventListener('click', () => {
+        inspectedMonsterId = mon.id;
+        renderShowcaseTab();
+      });
+      monSelectorEl.appendChild(btn);
+    });
+
+    const monCfg = MONSTERS_DATA.find(m => m.id === inspectedMonsterId) || MONSTERS_DATA[0];
+
+    if (currentPreviewMonsterMesh) {
+      monsterPreviewScene.remove(currentPreviewMonsterMesh);
+    }
+    currentPreviewMonsterMesh = buildMonster3DModel(monCfg.id);
+    currentPreviewMonsterMesh.rotation.y = Math.PI;
+    monsterPreviewScene.add(currentPreviewMonsterMesh);
+
+    document.getElementById('monsterPreviewLabel').textContent = `ENTIDADE ${monCfg.number} • GIRANDO`;
+    document.getElementById('inspectMonsterName').textContent = monCfg.name;
+    document.getElementById('inspectMonsterDesc').textContent = monCfg.desc;
+
+    document.getElementById('statMonBaseSpeedText').textContent = `${monCfg.baseSpeed} km/h`;
+    document.getElementById('statMonBaseSpeedBar').style.width = `${Math.min(100, Math.round((monCfg.baseSpeed / 130) * 100))}%`;
+
+    document.getElementById('statMonMaxSpeedText').textContent = `${monCfg.maxSpeed} km/h`;
+    document.getElementById('statMonMaxSpeedBar').style.width = `${Math.min(100, Math.round((monCfg.maxSpeed / 250) * 100))}%`;
+
+    document.getElementById('statMonAggroText').textContent = monCfg.aggroLabel;
+    document.getElementById('statMonAggroBar').style.width = `${monCfg.aggroPct}%`;
+    document.getElementById('statMonHabitatText').textContent = monCfg.habitat;
+
+    requestAnimationFrame(resizeShowcaseRenderers);
+  }
+
+  document.getElementById('openShowcaseBtn').addEventListener('click', () => {
+    inspectedVehicleId = lobbyMode === 'water' && hasAnyBoat() ? selectedBoatId : selectedCarId;
+    lobbyScreen.style.display = 'none';
+    showcaseScreen.style.display = 'flex';
+    showcaseActive = true;
+    renderShowcaseTab();
+  });
+
+  document.getElementById('backFromShowcaseBtn').addEventListener('click', () => {
+    showcaseActive = false;
+    showcaseScreen.style.display = 'none';
+    lobbyScreen.style.display = 'flex';
+    renderLobbyShop();
+  });
+  document.getElementById('openGeneralStoreBtn').addEventListener('click',()=>{lobbyScreen.style.display='none';showcaseScreen.style.display='none';document.getElementById('generalStoreScreen').style.display='flex';renderGeneralStore();});
+  document.getElementById('backFromStoreBtn').addEventListener('click',()=>{document.getElementById('generalStoreScreen').style.display='none';lobbyScreen.style.display='flex';renderLobbyShop();});
+
+
+  // ==========================================
+  // 8. RENDERIZAÇÃO DO LOBBY (ESTRADAS & MAPAS AQUÁTICOS)
+  // ==========================================
+  const totalCoinsDisplayEl = document.getElementById('totalCoinsDisplay');
+  const vehiclesGridEl = document.getElementById('vehiclesGrid');
+  const mapsGridEl = document.getElementById('mapsGrid');
+  const tabLandBtn = document.getElementById('tabLandBtn');
+  const tabWaterBtn = document.getElementById('tabWaterBtn');
+  const startBtn = document.getElementById('startBtn');
+
+  tabLandBtn.addEventListener('click', () => {
+    lobbyMode = 'land';
+    applyVehicleVisuals();
+    applyMapEnvironment();
+    renderLobbyShop();
+  });
+
+  tabWaterBtn.addEventListener('click', () => {
+    lobbyMode = 'water';
+    applyVehicleVisuals();
+    applyMapEnvironment();
+    renderLobbyShop();
+  });
+
+  function renderLobbyShop() {
+    totalCoinsDisplayEl.textContent = savedCoins;
+
+    if (lobbyMode === 'land') {
+      tabLandBtn.className = 'mode-tab-btn active-land';
+      tabWaterBtn.className = 'mode-tab-btn';
+      document.getElementById('vehiclesSectionTitle').textContent = '1. Carros & Garagem';
+      document.getElementById('vehiclesSectionSub').textContent = 'Compre ou equipe seu carro (melhore-o na Garagem 3D)';
+      document.getElementById('mapsSectionTitle').textContent = '2. Mapas Terrestres (Estradas com Subidas e Descidas)';
+      document.getElementById('mapsSectionSub').textContent = 'Escolha a estrada da corrida';
+
+      startBtn.disabled = false;
+      startBtn.className = '';
+      startBtn.textContent = 'COMEÇAR PARTIDA (ESTRADA)';
+    } else {
+      tabLandBtn.className = 'mode-tab-btn';
+      tabWaterBtn.className = 'mode-tab-btn active-water';
+      document.getElementById('vehiclesSectionTitle').textContent = '1. Barcos & Estaleiro (Nível 1 ao 5)';
+      document.getElementById('vehiclesSectionSub').textContent = 'Compre um barco para desbloquear rios e mares';
+      document.getElementById('mapsSectionTitle').textContent = '2. Mapas Aquáticos (Floresta, Montanhas & Mar Aberto)';
+      document.getElementById('mapsSectionSub').textContent = hasAnyBoat()
+        ? 'Cada mapa aquático possui cenário e obstáculos próprios!'
+        : '⚠️ Compre pelo menos 1 barco acima para navegar nos mapas aquáticos';
+
+      if (hasAnyBoat()) {
+        startBtn.disabled = false;
+        startBtn.className = 'water-start';
+        startBtn.textContent = 'NAVEGAR AGORA (PARTIDA)';
+      } else {
+        startBtn.disabled = true;
+        startBtn.className = '';
+        startBtn.textContent = 'COMPRE UM BARCO P/ JOGAR';
+      }
+    }
+
+    vehiclesGridEl.innerHTML = '';
+    const unlockedList = lobbyMode === 'water' ? unlockedBoats : unlockedCars;
+    const listToRender = (lobbyMode === 'water' ? BOATS_DATA : CARS_DATA).filter(v=>!GENERAL_STORE_ONLY_IDS.includes(v.id)||unlockedList.includes(v.id));
+    const currentSelectedId = lobbyMode === 'water' ? selectedBoatId : selectedCarId;
+
+    listToRender.forEach(baseItem => {
+      const item = getEffectiveVehicleStats(baseItem);
+      const isUnlocked = unlockedList.includes(item.id);
+      const isSelected = isUnlocked && currentSelectedId === item.id;
+
+      const card = document.createElement('div');
+      card.className = `shop-card ${isSelected ? (lobbyMode === 'water' ? 'selected-water' : 'selected-car') : ''}`;
+
+      let badgeHtml = '';
+      if (isSelected) badgeHtml = `<span class="tag-badge tag-selected-car">Equipado</span>`;
+      else if (isUnlocked) badgeHtml = `<span class="tag-badge tag-owned">${lobbyMode === 'water' ? 'No Estaleiro' : 'Na Garagem'}</span>`;
+      else badgeHtml = `<span class="tag-badge tag-price">🪙 ${item.price}</span>`;
+
+      let btnHtml = '';
+      if (isSelected) {
+        btnHtml = `<button class="action-btn ${lobbyMode === 'water' ? 'btn-active-water' : 'btn-active-car'}">EQUIPADO</button>`;
+      } else if (isUnlocked) {
+        btnHtml = `<button class="action-btn btn-select">SELECIONAR</button>`;
+      } else {
+        const canAfford = savedCoins >= item.price;
+        btnHtml = `<button class="action-btn btn-buy" ${canAfford ? '' : 'disabled'}>
+          ${canAfford ? `COMPRAR (${item.price} MOEDAS)` : `FALTA ${item.price - savedCoins} MOEDAS`}
+        </button>`;
+      }
+
+      card.innerHTML = `
+        <div>
+          <div class="card-top">
+            <h4>${item.name}</h4>
+            ${badgeHtml}
+          </div>
+          <div class="car-specs">
+            <span class="spec-pill">⚡ ${item.maxSpeed} km/h</span>
+            <span class="spec-pill">🚀 Acel ${item.accel}</span>
+            <span class="spec-pill">🛡️ ${item.durability} HP</span>
+          </div>
+          <p class="card-desc">${item.desc}</p>
+        </div>
+        ${btnHtml}
+      `;
+
+      card.addEventListener('click', () => {
+        if (lobbyMode === 'water') {
+          if (isUnlocked) {
+            selectedBoatId = item.id;
+            saveProgress();
+            applyVehicleVisuals();
+            renderLobbyShop();
+          } else if (savedCoins >= item.price) {
+            savedCoins -= item.price;
+            unlockedBoats.push(item.id);
+            selectedBoatId = item.id;
+            saveProgress();
+            applyVehicleVisuals();
+            renderLobbyShop();
+          }
+        } else {
+          if (isUnlocked) {
+            selectedCarId = item.id;
+            saveProgress();
+            applyVehicleVisuals();
+            renderLobbyShop();
+          } else if (savedCoins >= item.price) {
+            savedCoins -= item.price;
+            unlockedCars.push(item.id);
+            selectedCarId = item.id;
+            saveProgress();
+            applyVehicleVisuals();
+            renderLobbyShop();
+          }
+        }
+      });
+
+      vehiclesGridEl.appendChild(card);
+    });
+
+    renderGeneralStore();
+    mapsGridEl.innerHTML = '';
+    const mapsList = lobbyMode === 'water' ? WATER_MAPS_DATA : LAND_MAPS_DATA;
+    const activeMapId = lobbyMode === 'water' ? selectedWaterMapId : selectedLandMapId;
+    const boatRequirementMet = lobbyMode === 'land' || hasAnyBoat();
+
+    mapsList.forEach(map => {
+      const isUnlocked = unlockedMaps.includes(map.id) && boatRequirementMet;
+      const isSelected = isUnlocked && activeMapId === map.id;
+
+      const card = document.createElement('div');
+      card.className = `shop-card ${isSelected ? (lobbyMode === 'water' ? 'selected-water' : 'selected') : ''} ${!boatRequirementMet ? 'locked-card' : ''}`;
+
+      let badgeHtml = '';
+      if (!boatRequirementMet) {
+        badgeHtml = `<span class="tag-badge tag-lock">🔒 Requer Barco</span>`;
+      } else if (isSelected) {
+        badgeHtml = `<span class="tag-badge ${lobbyMode === 'water' ? 'tag-selected-car' : 'tag-selected-map'}">Selecionado</span>`;
+      } else if (isUnlocked) {
+        badgeHtml = `<span class="tag-badge tag-owned">Liberado</span>`;
+      } else {
+        badgeHtml = `<span class="tag-badge tag-price">🪙 ${map.price}</span>`;
+      }
+
+      let btnHtml = '';
+      if (!boatRequirementMet) {
+        btnHtml = `<button class="action-btn btn-buy" disabled>COMPRE UM BARCO ACIMA</button>`;
+      } else if (isSelected) {
+        btnHtml = `<button class="action-btn ${lobbyMode === 'water' ? 'btn-active-water' : 'btn-active-map'}">MAPA ATIVO</button>`;
+      } else if (isUnlocked) {
+        btnHtml = `<button class="action-btn btn-select">SELECIONAR</button>`;
+      } else {
+        const canAfford = savedCoins >= map.price;
+        btnHtml = `<button class="action-btn btn-buy" ${canAfford ? '' : 'disabled'}>
+          ${canAfford ? `COMPRAR (${map.price} MOEDAS)` : `FALTA ${map.price - savedCoins} MOEDAS`}
+        </button>`;
+      }
+
+      card.innerHTML = `
+        <div>
+          <div class="card-top">
+            <h4>${map.name}</h4>
+            ${badgeHtml}
+          </div>
+          <p class="card-desc">${map.desc}</p>
+        </div>
+        ${btnHtml}
+      `;
+
+      card.addEventListener('click', () => {
+        if (!boatRequirementMet) return;
+
+        if (unlockedMaps.includes(map.id)) {
+          if (lobbyMode === 'water') selectedWaterMapId = map.id;
+          else selectedLandMapId = map.id;
+          saveProgress();
+          applyMapEnvironment();
+          renderLobbyShop();
+        } else if (savedCoins >= map.price) {
+          savedCoins -= map.price;
+          unlockedMaps.push(map.id);
+          if (lobbyMode === 'water') selectedWaterMapId = map.id;
+          else selectedLandMapId = map.id;
+          saveProgress();
+          applyMapEnvironment();
+          renderLobbyShop();
+        }
+      });
+
+      mapsGridEl.appendChild(card);
+    });
+  }
+
+  function renderGeneralStore(){
+    refreshGeneralStore();
+    const grid=document.getElementById('generalStoreGrid'); if(!grid) return;
+    const wallet=document.getElementById('storeCoinsDisplay');if(wallet)wallet.textContent=savedCoins;
+    grid.innerHTML='';
+    const remaining=Math.max(0,7200000-(Date.now()-generalStoreData.updatedAt));
+    const hh=Math.floor(remaining/3600000), mm=Math.floor((remaining%3600000)/60000);
+    document.getElementById('generalStoreTimer').textContent=`Novo estoque em ${hh}h ${mm}min`;
+    generalStoreData.ids.forEach(id=>{
+      const v=allVehicleData().find(x=>x.id===id); if(!v) return;
+      const owned=v.category==='boat'?unlockedBoats.includes(id):unlockedCars.includes(id);
+      const card=document.createElement('div'); card.className='shop-card';
+      card.innerHTML=`<div><div class="card-top"><h4>${v.category==='boat'?'🚤':'🚗'} ${v.name}</h4><span class="tag-badge tag-price">🪙 ${v.price}</span></div><div class="car-specs"><span class="spec-pill">⚡ ${v.maxSpeed} km/h</span><span class="spec-pill">🛡️ ${v.durability} HP</span></div><p class="card-desc">${v.desc}</p></div><button class="action-btn btn-buy" ${owned||savedCoins<v.price?'disabled':''}>${owned?'ADQUIRIDO':savedCoins>=v.price?'COMPRAR':'MOEDAS INSUFICIENTES'}</button>`;
+      card.querySelector('button').addEventListener('click',()=>{
+        if(owned||savedCoins<v.price)return; savedCoins-=v.price;
+        if(v.category==='boat'){unlockedBoats.push(v.id);selectedBoatId=v.id;}else{unlockedCars.push(v.id);selectedCarId=v.id;}
+        generalStoreData.ids=generalStoreData.ids.filter(x=>x!==v.id); saveProgress(); renderLobbyShop();
+      }); grid.appendChild(card);
+    });
+    if(!generalStoreData.ids.length) grid.innerHTML='<p class="card-desc">Estoque esgotado. O próximo reabastecimento acontece no horário indicado.</p>';
+  }
+
+  function renderMasteries(){
+    const el=document.getElementById('masteryPanel'); if(!el)return; el.innerHTML='';
+    const groups=[['cars','🚗 Maestria de carros',CARS_DATA],['boats','🚤 Maestria de barcos',BOATS_DATA],['maps','🗺️ Maestria de mapas',[...LAND_MAPS_DATA,...WATER_MAPS_DATA]]];
+    groups.forEach(([kind,label,items])=>{
+      const card=document.createElement('div'); card.className='shop-card';
+      const rows=items.map(v=>{const m=getMasteryBucket(kind,v.id);const pct=masteryPercent(kind,v.id);return `<div style="margin:7px 0"><div style="display:flex;justify-content:space-between;font-size:.76rem"><b>${v.name}</b><b>${pct}%</b></div><div class="stat-bar-bg"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#0284c7,#38bdf8)"></div></div><small style="color:#94a3b8">Distância: ${Math.floor(m.distance)}m • Tempo: ${Math.floor(m.uses)}s • Obstáculos/ondas: ${m.obstacles+m.storms}</small></div>`}).join('');
+      card.innerHTML=`<b>${label}</b>${rows}`; el.appendChild(card);
+    });
+  }
+
+  let cockpitCameraBaseY = 1.24;
+  function applyVehicleVisuals() {
+    const vehCfg = getActiveVehicle();
+    hoodMat.color.setHex(vehCfg.hoodColor);
+    // Limpa a cabine especial anterior para nunca reaproveitar o modelo de outro veículo.
+    while (specialCockpitVisuals.children.length) {
+      const child = specialCockpitVisuals.children[0];
+      specialCockpitVisuals.remove(child);
+    }
+    const style = vehCfg.bodyStyle;
+    const special = vehCfg.category === 'boat' || ['horse','motorcycle','van','cybertruck'].includes(style);
+    cockpitVisuals.visible = !special;
+    specialCockpitVisuals.visible = special;
+    roofMesh.visible = !special && vehCfg.category !== 'boat';
+    mirrorFrame.visible = !special && vehCfg.category !== 'boat';
+    mirrorGlass.visible = !special && vehCfg.category !== 'boat';
+    steeringWheelGroup.visible = !special;
+    headlightLeft.visible = vehCfg.category !== 'boat' && style !== 'horse';
+    headlightRight.visible = vehCfg.category !== 'boat' && style !== 'horse';
+
+    const mat = (color, metalness=0.25, roughness=0.65) => new THREE.MeshStandardMaterial({color,metalness,roughness});
+    const dark = mat(0x111827,0.15,0.8);
+    const rubber = mat(0x08090b,0.05,0.95);
+    const glass = new THREE.MeshStandardMaterial({color:0x38bdf8,metalness:0.65,roughness:0.18,transparent:true,opacity:0.5});
+    const addBox = (w,h,d,material,x,y,z,rx=0,ry=0,rz=0) => {
+      const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);specialCockpitVisuals.add(m);return m;
+    };
+
+    if (style === 'motorcycle') {
+      const red=mat(vehCfg.hoodColor,0.55,0.28);
+      // Visão do piloto: tanque e painel ficam baixos, próximos à borda inferior.
+      // O centro do horizonte permanece livre para não bloquear a estrada.
+      addBox(0.48,0.12,0.62,red,0,0.43,-0.62,-0.08);
+      addBox(0.30,0.07,0.25,dark,0,0.55,-0.42);
+      // Guidão baixo e aberto, com as manoplas apenas nas laterais.
+      addBox(0.82,0.045,0.055,rubber,0,0.82,-0.28,0,0,0);
+      addBox(0.055,0.10,0.055,dark,-0.40,0.78,-0.28,0,0,-0.12);
+      addBox(0.055,0.10,0.055,dark,0.40,0.78,-0.28,0,0,0.12);
+      const gauge=new THREE.Mesh(new THREE.CircleGeometry(0.075,16),new THREE.MeshBasicMaterial({color:0x22d3ee}));
+      gauge.position.set(0,0.64,-0.48);specialCockpitVisuals.add(gauge);
+      cockpitCameraBaseY=1.48; camera.position.set(0,cockpitCameraBaseY,0.12);
+    } else if (style === 'horse') {
+      const brown=mat(0x78350f), mane=mat(0x292018), leather=mat(0x713f12);
+      // Pescoço, crina e orelhas enquadram a visão montada no cavalo.
+      const neck=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.9,1.15),brown);neck.position.set(0,0.65,-0.92);neck.rotation.x=-0.32;specialCockpitVisuals.add(neck);
+      const head=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.55,0.52),brown);head.position.set(0,1.05,-1.48);specialCockpitVisuals.add(head);
+      const maneMesh=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.95),mane);maneMesh.position.set(0,1.08,-1.02);maneMesh.rotation.x=-0.25;specialCockpitVisuals.add(maneMesh);
+      for(const x of [-0.2,0.2]){const ear=new THREE.Mesh(new THREE.ConeGeometry(0.11,0.38,5),brown);ear.position.set(x,1.42,-1.43);ear.rotation.z=x<0?0.18:-0.18;specialCockpitVisuals.add(ear);}
+      addBox(0.95,0.12,0.2,leather,0,0.38,-0.45);
+      cockpitCameraBaseY=1.62; camera.position.set(0,cockpitCameraBaseY,0.12);
+    } else if (vehCfg.category === 'boat') {
+      const hull=mat(vehCfg.hoodColor,0.55,0.32);
+      addBox(1.55,0.18,1.9,hull,0,0.42,-1.15);
+      addBox(1.35,0.12,0.35,dark,0,0.68,-0.72);
+      addBox(0.08,0.5,0.08,dark,-0.78,0.68,-1.05,0.15);
+      addBox(0.08,0.5,0.08,dark,0.78,0.68,-1.05,0.15);
+      addBox(0.08,0.5,0.08,dark,-0.78,0.68,-1.9,-0.15);
+      addBox(0.08,0.5,0.08,dark,0.78,0.68,-1.9,-0.15);
+      if(vehCfg.level>=2){addBox(0.62,0.48,0.48,dark,0,0.84,-0.55);addBox(0.52,0.25,0.05,glass,0,1.12,-0.78);}
+      cockpitCameraBaseY=1.22; camera.position.set(0,cockpitCameraBaseY,0);
+    } else if (style === 'van') {
+      const paint=mat(vehCfg.hoodColor,0.35,0.42);
+      addBox(1.9,0.22,1.1,paint,0,0.63,-1.05);
+      addBox(1.9,0.72,0.08,glass,0,1.28,-0.66);
+      addBox(0.08,0.8,0.08,dark,-0.96,1.05,-0.66);
+      addBox(0.08,0.8,0.08,dark,0.96,1.05,-0.66);
+      addBox(1.85,0.16,0.52,dark,0,0.78,-0.35);
+      addBox(0.58,0.08,0.28,dark,0.55,0.93,-0.35);
+      cockpitCameraBaseY=1.35; camera.position.set(0,cockpitCameraBaseY,0);
+    } else if (style === 'cybertruck') {
+      const metal=mat(0xa1a1aa,0.94,0.24);
+      addBox(2.0,0.2,1.45,metal,0,0.72,-1.12);
+      addBox(1.95,0.1,0.28,metal,0,1.03,-0.76,0.16);
+      addBox(1.8,0.52,0.07,glass,0,1.35,-0.65);
+      addBox(1.9,0.12,0.08,dark,0,0.95,-0.58);
+      addBox(0.68,0.09,0.32,dark,0,0.98,-0.34);
+      cockpitCameraBaseY=1.3; camera.position.set(0,cockpitCameraBaseY,0);
+    } else {
+      cockpitCameraBaseY=1.24; camera.position.set(-0.36,cockpitCameraBaseY,-0.05);
+    }
+    camera.rotation.set(0,0,0);
+  }
+
+  function applyMapEnvironment() {
+    const mapCfg = getActiveMap();
+    scene.background.setHex(mapCfg.skyColor);
+    scene.fog.color.setHex(mapCfg.fogColor);
+    groundMat.color.setHex(mapCfg.groundColor);
+
+    if (mapCfg.waterColor) {
+      riverMat.color.setHex(mapCfg.waterColor);
+    }
+
+    activeRunMonster = getActiveMonsterForMap(mapCfg);
+    setRunMonsterMesh(activeRunMonster.id);
+
+    clearAllSegments();
+    updateDynamicRoadGeneration();
+  }
+
+  // ==========================================
+  // 9. SISTEMA DE DURABILIDADE E DEFEITOS
+  // ==========================================
+  const durabilityBarFillEl = document.getElementById('durabilityBarFill');
+  const durabilityTextEl = document.getElementById('durabilityText');
+  const defectsContainerEl = document.getElementById('defectsContainer');
+  const crackedGlassOverlayEl = document.getElementById('crackedGlassOverlay');
+  const eventBannerEl = document.getElementById('eventBanner');
+
+  let bannerTimeout = null;
+  function showEventBanner(text, borderColor = '#f59e0b') {
+    eventBannerEl.textContent = text;
+    eventBannerEl.style.borderColor = borderColor;
+    eventBannerEl.style.opacity = '1';
+    if (bannerTimeout) clearTimeout(bannerTimeout);
+    bannerTimeout = setTimeout(() => {
+      eventBannerEl.style.opacity = '0';
+    }, 2800);
+  }
+
+  function updateDurabilityHUD() {
+    const pct = Math.max(0, Math.min(100, (currentDurability / maxDurability) * 100));
+    durabilityBarFillEl.style.width = `${pct}%`;
+    durabilityTextEl.textContent = `${Math.max(0, Math.round(currentDurability))}/${maxDurability}`;
+
+    if (pct > 55) durabilityBarFillEl.style.background = '#10b981';
+    else if (pct > 25) durabilityBarFillEl.style.background = '#f59e0b';
+    else durabilityBarFillEl.style.background = '#ef4444';
+  }
+
+  function updateDefectsHUD() {
+    const isBoat = getActiveVehicle().category === 'boat';
+    defectsContainerEl.innerHTML = '';
+    if (defects.tireDamaged) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">${isBoat ? '🧭 LEME DANIFICADO (Puxando)' : '🛞 PNEU DANIFICADO (Puxando/Lento)'}</div>`;
+    }
+    if (defects.engineDamaged) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">⚙️ MOTOR DANIFICADO (Menos potência)</div>`;
+    }
+    if (defects.glassBroken) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">${isBoat ? '🌊 CASCO RACHADO' : '🪟 VIDRO QUEBRADO'}</div>`;
+      crackedGlassOverlayEl.style.display = isBoat ? 'none' : 'block';
+    } else {
+      crackedGlassOverlayEl.style.display = 'none';
+    }
+    if (defects.lightsBroken) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">💡 LUZES QUEBRADAS (Faróis falhando)</div>`;
+    }
+  }
+
+  function tryTriggerRandomDefect(forceBonusChance = 0) {
+    const now = performance.now();
+    if (now - lastDefectTime < 12000) return;
+
+    const vehCfg = getActiveVehicle();
+    const isBoat = vehCfg.category === 'boat';
+    const chance = Math.min(0.85, vehCfg.defectChance + forceBonusChance);
+
+    if (Math.random() > chance) return;
+
+    const available = [];
+    if (!defects.tireDamaged) available.push('tireDamaged');
+    if (!defects.engineDamaged) available.push('engineDamaged');
+    if (!defects.glassBroken) available.push('glassBroken');
+    if (!defects.lightsBroken) available.push('lightsBroken');
+
+    if (available.length === 0) return;
+
+    const chosen = available[Math.floor(Math.random() * available.length)];
+    defects[chosen] = true;
+    lastDefectTime = now;
+    updateDefectsHUD();
+
+    const labels = {
+      tireDamaged: isBoat ? '⚠️ DEFEITO: LEME EMPERRADO!' : '⚠️ DEFEITO: PNEU DANIFICADO!',
+      engineDamaged: '⚠️ DEFEITO: MOTOR DANIFICADO!',
+      glassBroken: isBoat ? '⚠️ DEFEITO: CASCO RACHADO!' : '⚠️ DEFEITO: VIDRO QUEBRADO!',
+      lightsBroken: '⚠️ DEFEITO: LUZES QUEBRADAS!'
+    };
+    showEventBanner(labels[chosen], '#ef4444');
+  }
+
+  function applyVehicleDamage(amount, defectBonus = 0.15) {
+    currentDurability -= amount;
+    bumpShakeTimer = 0.4;
+    updateDurabilityHUD();
+
+    if (currentDurability <= 0) {
+      currentDurability = 0;
+      triggerGameOver('DESTRUIDO');
+      return true;
+    }
+
+    tryTriggerRandomDefect(defectBonus);
+    return false;
+  }
+
+  // ==========================================
+  // 10. CONTROLES E FLUXO DO JOGO
+  // ==========================================
+  const lobbyScreen = document.getElementById('lobbyScreen');
+  const hud = document.getElementById('hud');
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const gameOverTitleEl = document.getElementById('gameOverTitle');
+  const speedValueEl = document.getElementById('speedValue');
+  const gearIndicatorEl = document.getElementById('gearIndicator');
+  const distanceValueEl = document.getElementById('distanceValue');
+  const coinsRunValueEl = document.getElementById('coinsRunValue');
+  const monsterDistTextEl = document.getElementById('monsterDistText');
+  const dangerBarFillEl = document.getElementById('dangerBarFill');
+  const surfaceWarningEl = document.getElementById('surfaceWarning');
+  const dangerVignetteEl = document.getElementById('dangerVignette');
+  const finalStatsTextEl = document.getElementById('finalStatsText');
+  const earnedCoinsTextEl = document.getElementById('earnedCoinsText');
+
+  function resetGame() {
+    const vehCfg = getActiveVehicle();
+    const mapCfg = getActiveMap();
+
+    carZ = 0;
+    carX = 0;
+    carY = 0;
+    carSpeedKmh = 0;
+    carYaw = 0;
+    steeringInput = 0;
+    carAngularVel = 0;
+    bumpShakeTimer = 0;
+
+    maxDurability = vehCfg.durability;
+    currentDurability = maxDurability;
+    lastDefectTime = performance.now();
+
+    defects.tireDamaged = false;
+    defects.engineDamaged = false;
+    defects.glassBroken = false;
+    defects.lightsBroken = false;
+    updateDurabilityHUD();
+    updateDefectsHUD();
+
+    runCoinsEarned = 0;
+    nextCoinMilestone = 500;
+    nextStopDistance=5000; currentStop=null; onFoot=false; carriedItems={gasoline:0,battery:0}; cyberEnergy=100; cyberAbilityUntil=0; cyberAbilityReadyAt=0; horseStamina=100; horseJumpUntil=0; gasBoostUntil=0; activeWave=null; lastWaveAt=0; nextWaveAt=performance.now()+18000+Math.random()*14000;
+
+    monsterAwake = false;
+    monsterZ = 44; // Distância inicial justa para embalar o barco/carro
+    monsterSpeedKmh = 0;
+
+    input.gas = false;
+    input.brake = false;
+    input.left = false;
+    input.right = false;
+    document.getElementById('stopPrompt').style.display='none';document.getElementById('onFootPanel').style.display='none';document.getElementById('itemUsePanel').style.display='none';document.querySelector('.controls-layer').style.display='block';document.getElementById('collectLootBtn').disabled=false;
+
+    document.getElementById('hudVehicleLabel').textContent =
+      vehCfg.category === 'boat' ? 'Velocidade & Casco' : 'Velocidade & Lataria';
+    document.getElementById('hudMonsterTitle').textContent =
+      `Distância: ${activeRunMonster.name}`;
+
+    eventBannerEl.style.opacity = '0';
+    surfaceWarningEl.style.display = 'none';
+    monsterDistTextEl.textContent = 'DORMINDO (ACELERE P/ INICIAR)';
+    monsterDistTextEl.style.color = '#94a3b8';
+    dangerBarFillEl.style.width = '10%';
+    dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
+    mirrorGlassMat.color.setHex(0x1e293b);
+    coinsRunValueEl.textContent = '🪙 +0';
+
+    headlightLeft.intensity = 3.4;
+    headlightRight.intensity = 3.4;
+
+    applyVehicleVisuals();
+    applyMapEnvironment();
+    updateTransforms(0);
+  }
+
+  function startGame() {
+    if (lobbyMode === 'water' && !hasAnyBoat()) return;
+    resetGame();
+    gameState = 'PLAYING';
+    showcaseActive = false;
+    lobbyScreen.style.display = 'none';
+    showcaseScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    hud.style.display = 'block';
+    musicEngine.start();
+  }
+
+  function exitToLobby() {
+    if(onFoot){onFoot=false;if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);}
+    musicEngine.stop();
+    resetGame();
+    gameState = 'LOBBY';
+    showcaseActive = false;
+    gameOverScreen.style.display = 'none';
+    showcaseScreen.style.display = 'none';
+    document.getElementById('generalStoreScreen').style.display='none';
+    hud.style.display = 'none';
+    lobbyScreen.style.display = 'flex';
+    renderLobbyShop();
+  }
+
+  function triggerGameOver(reason = 'MONSTRO') {
+    if(onFoot){onFoot=false;if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);}
+    musicEngine.stop();
+    gameState = 'GAMEOVER';
+    hud.style.display = 'none';
+    gameOverScreen.style.display = 'flex';
+
+    const vehCfg = getActiveVehicle();
+    const mapCfg = getActiveMap();
+    const meters = Math.max(0, Math.floor(-carZ));
+
+    if (reason === 'QUEDA') { gameOverTitleEl.textContent='VOCÊ CAIU DA MOTO!'; finalStatsTextEl.textContent=`A moto perdeu o equilíbrio após ${meters} metros.`; }
+    else if (reason === 'DESTRUIDO') {
+      gameOverTitleEl.textContent = vehCfg.category === 'boat' ? 'BARCO AFUNDOU!' : 'CARRO DESTRUÍDO!';
+      finalStatsTextEl.textContent = `A durabilidade do seu ${vehCfg.name} chegou a 0 após ${meters} metros!`;
+    } else {
+      gameOverTitleEl.textContent = 'VOCÊ FOI PEGO!';
+      finalStatsTextEl.textContent = `${activeRunMonster.name} alcançou seu ${vehCfg.name} após ${meters} metros em ${mapCfg.name}!`;
+    }
+    earnedCoinsTextEl.textContent = `🪙 +${runCoinsEarned} moedas ganhas nesta corrida`;
+    renderLobbyShop();
+  }
+
+  startBtn.addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  document.getElementById('backLobbyBtn').addEventListener('click', exitToLobby);
+  document.getElementById('exitRunBtn').addEventListener('click', exitToLobby);
+
+  function bindControlButton(elementId, keyName) {
+    const el = document.getElementById(elementId);
+    const press = (e) => { e.preventDefault(); input[keyName] = true; el.classList.add('active'); };
+    const release = (e) => { e.preventDefault(); input[keyName] = false; el.classList.remove('active'); };
+    el.addEventListener('pointerdown', press);
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointerleave', release);
+    el.addEventListener('pointercancel', release);
+  }
+
+  bindControlButton('btnGas', 'gas');
+  bindControlButton('btnBrake', 'brake');
+  bindControlButton('btnLeft', 'left');
+  bindControlButton('btnRight', 'right');
+  const abilityBtn=document.createElement('button');abilityBtn.id='specialAbilityBtn';abilityBtn.className='ctrl-btn';abilityBtn.textContent='HABILIDADE';abilityBtn.style.cssText='position:absolute;right:112px;bottom:112px;pointer-events:auto;padding:10px;display:none;';document.querySelector('.controls-layer').appendChild(abilityBtn);
+  abilityBtn.addEventListener('click',()=>{const v=getActiveVehicle();const now=performance.now();if(v.id!=='cybertruck'||now<cyberAbilityReadyAt||cyberEnergy<=0)return;cyberAbilityUntil=now+10000;cyberAbilityReadyAt=now+60000;showEventBanner('⚡ HABILIDADE ATIVA: 10 SEGUNDOS!','#38bdf8');});
+  const horseJumpBtn=document.createElement('button');horseJumpBtn.id='horseJumpBtn';horseJumpBtn.className='ctrl-btn';horseJumpBtn.textContent='PULAR';horseJumpBtn.style.cssText='position:absolute;right:112px;bottom:112px;pointer-events:auto;padding:10px;display:none;';document.querySelector('.controls-layer').appendChild(horseJumpBtn);
+  function horseJump(){if(getActiveVehicle().horse&&horseStamina>=22&&performance.now()>=horseJumpUntil){horseStamina-=22;horseJumpUntil=performance.now()+950;showEventBanner('🐎 SALTO!','#fbbf24');}}
+  horseJumpBtn.addEventListener('click',horseJump);
+
+
+  window.addEventListener('keydown', (e) => {
+    if(e.code==='Space'){e.preventDefault();horseJump();}
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { input.gas = true; document.getElementById('btnGas').classList.add('active'); }
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') { input.brake = true; document.getElementById('btnBrake').classList.add('active'); }
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') { input.left = true; document.getElementById('btnLeft').classList.add('active'); }
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') { input.right = true; document.getElementById('btnRight').classList.add('active'); }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { input.gas = false; document.getElementById('btnGas').classList.remove('active'); }
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') { input.brake = false; document.getElementById('btnBrake').classList.remove('active'); }
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') { input.left = false; document.getElementById('btnLeft').classList.remove('active'); }
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') { input.right = false; document.getElementById('btnRight').classList.remove('active'); }
+  });
+
+  // ==========================================
+  // 11. FÍSICA DO VEÍCULO (SUBIDAS/DESCIDAS, BARCOS & MONSTROS)
+  // ==========================================
+  function spawnRoadsideStop(distance){
+    const places=['POSTO DE SERVIÇO','LOJA DE VIDEOGAME','CAR PARADISE'];
+    currentStop={distance,name:places[Math.floor(Math.random()*places.length)],x:getRoadCenterX(carZ),z:carZ};
+    monsterAwake=false; monsterSpeedKmh=0; monsterZ=carZ+42;
+    document.getElementById('stopName').textContent=currentStop.name;
+    document.getElementById('footStopTitle').textContent=currentStop.name;
+    document.getElementById('stopPrompt').style.display='block';
+    showEventBanner(`🅿️ PARADA: ${currentStop.name}`,'#38bdf8');
+  }
+  function enterOnFoot(){
+    if(!currentStop||onFoot||Math.abs(carSpeedKmh)>2)return;
+    onFoot=true; document.getElementById('stopPrompt').style.display='none';document.getElementById('onFootPanel').style.display='block';
+    document.querySelector('.controls-layer').style.display='none';
+    scene.attach(camera);carCockpit.visible=false;footAvatar=makeFootAvatar();scene.add(footAvatar);footAvatar.position.set(carX,carY,carZ+2.4);footYaw=carYaw;footPitch=0;
+    parkedVehicleMesh=buildExteriorVehicle3D(getActiveVehicle());parkedVehicleMesh.position.set(carX,carY,carZ-2.6);parkedVehicleMesh.rotation.y=getRoadYaw(carZ)+carYaw;scene.add(parkedVehicleMesh);
+    const n=Math.floor(Math.random()*3); stopItems=[];
+    for(let i=0;i<n;i++) stopItems.push(Math.random()<.55?'gasoline':'battery');
+    carSpeedKmh=0;
+  }
+  function leaveOnFoot(){
+    if(!onFoot)return; onFoot=false;footInput.forward=footInput.back=footInput.left=footInput.right=false;footStick.style.transform='translate(0,0)';document.getElementById('onFootPanel').style.display='none';document.querySelector('.controls-layer').style.display='block';
+    if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);
+    document.getElementById('itemUsePanel').style.display='flex'; renderItemButtons();
+    monsterAwake=true;monsterZ=carZ+40;monsterSpeedKmh=activeRunMonster.baseSpeed*.55;
+    showEventBanner('⚠️ O MONSTRO ACORDOU! VOLTE A ACELERAR!','#ef4444');
+    currentStop=null;
+  }
+  function renderItemButtons(){
+    const el=document.getElementById('itemUsePanel');el.innerHTML='';
+    [['gasoline','⛽ Gasolina'],['battery','🔋 Bateria']].forEach(([k,label])=>{if(carriedItems[k]>0){const b=document.createElement('button');b.className='ctrl-btn';b.style.padding='9px';b.textContent=`${label} x${carriedItems[k]}`;b.onclick=()=>{const v=getActiveVehicle();if(k==='gasoline'&&v.category!=='boat'&&!v.electric){gasBoostUntil=performance.now()+15000;carSpeedKmh=Math.min(v.maxSpeed+45,carSpeedKmh+45);carriedItems[k]--;showEventBanner('⛽ TURBO DE GASOLINA: +45 KM/H POR 15s!','#fbbf24');}else if(k==='battery'&&v.electric){cyberEnergy=Math.min(100,cyberEnergy+45);carriedItems[k]--;}else{showEventBanner(k==='battery'?'BATERIA SÓ FUNCIONA EM VEÍCULO ELÉTRICO':'GASOLINA SÓ FUNCIONA EM CARROS A COMBUSTÃO','#f59e0b');return;}renderItemButtons();};el.appendChild(b);}});
+    if(!carriedItems.gasoline&&!carriedItems.battery)el.style.display='none';
+  }
+  document.getElementById('leaveVehicleBtn').addEventListener('click',enterOnFoot);
+  document.getElementById('returnVehicleBtn').addEventListener('click',leaveOnFoot);
+  document.getElementById('collectLootBtn').addEventListener('click',()=>{if(!onFoot)return;if(!stopItems.length){document.getElementById('lootText').textContent='Você não encontrou itens nesta parada.';return;}stopItems.forEach(k=>carriedItems[k]++);document.getElementById('lootText').textContent=`Encontrado(s): ${stopItems.map(x=>x==='gasoline'?'Gasolina':'Bateria').join(', ')}`;stopItems=[];document.getElementById('collectLootBtn').disabled=true;});
+  const footJoystick=document.getElementById('footJoystick'),footStick=document.getElementById('footStick');let footJoyPointer=null;
+  function updateFootJoystick(e){const r=footJoystick.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const max=43,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max;}footStick.style.transform=`translate(${dx}px,${dy}px)`;footInput.left=dx<-10;footInput.right=dx>10;footInput.forward=dy<-10;footInput.back=dy>10;}
+  footJoystick.addEventListener('pointerdown',e=>{e.preventDefault();footJoyPointer=e.pointerId;footJoystick.setPointerCapture(e.pointerId);updateFootJoystick(e);});
+  footJoystick.addEventListener('pointermove',e=>{if(e.pointerId===footJoyPointer)updateFootJoystick(e);});
+  function releaseFootJoystick(e){if(e.pointerId!==footJoyPointer)return;footJoyPointer=null;footInput.forward=footInput.back=footInput.left=footInput.right=false;footStick.style.transform='translate(0,0)';}
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>footJoystick.addEventListener(ev,releaseFootJoystick));
+  document.getElementById('lookModeBtn').addEventListener('click',()=>{lookDrag=!lookDrag;document.getElementById('lookModeBtn').textContent=lookDrag?'CÂMERA ATIVA':'MOVER CÂMERA';});
+  canvas.addEventListener('pointerdown',e=>{if(onFoot&&lookDrag){lastLookX=e.clientX;lastLookY=e.clientY;canvas.setPointerCapture(e.pointerId);}});
+  canvas.addEventListener('pointermove',e=>{if(onFoot&&lookDrag&&e.buttons){footYaw-=(e.clientX-lastLookX)*.006;footPitch=Math.max(-.65,Math.min(.65,footPitch+(e.clientY-lastLookY)*.004));lastLookX=e.clientX;lastLookY=e.clientY;}});
+
+  function updateSeaWaves(dt,now,vehCfg,mapCfg){
+    if(mapCfg.biome!=='open-ocean')return;
+    if(!nextWaveAt)nextWaveAt=now+18000+Math.random()*16000;
+    if(!activeWave&&now>=nextWaveAt){
+      const r=Math.random();const level=r<.48?'pequena':r<.79?'media':r<.95?'grande':'tsunami';
+      const size={pequena:3,media:6,grande:11,tsunami:19}[level];
+      activeWave={level,size,z:carZ-75,hit:false,created:now};waveMesh=createWaveVisual(size);scene.add(waveMesh);waveMesh.position.set(carX,carY,activeWave.z);
+      showEventBanner(level==='tsunami'?'🌊 ALERTA: ONDA GIGANTE!':`🌊 Onda ${level}!`,'#38bdf8');
+      nextWaveAt=now+22000+Math.random()*26000;
+    }
+    if(activeWave&&waveMesh){
+      activeWave.z+=Math.max(12,Math.abs(carSpeedKmh)/3.6+8)*dt;waveMesh.position.z=activeWave.z;waveMesh.position.x=carX;waveMesh.rotation.z=Math.sin(now*.001)*.04;
+      if(!activeWave.hit&&activeWave.z>=carZ-5){
+        activeWave.hit=true;const level=activeWave.level;const speed=Math.abs(carSpeedKmh);const resistance=vehCfg.durability;
+        const ignore=level==='pequena'?speed>105:level==='media'?speed>155:level==='grande'?speed>210:false;
+        if(!ignore){const push={pequena:7,media:18,grande:34,tsunami:58}[level];carSpeedKmh=Math.max(-25,carSpeedKmh-push);carZ+=level==='tsunami'?5:level==='grande'?2.5:0.7;
+          if(level!=='pequena'&&Math.random()<(level==='tsunami'?.9:level==='grande'?.55:.22)){const damage=Math.max(5,Math.round(({media:18,grande:48,tsunami:105}[level]||0)*(resistance<250?1.25:resistance>500?.55:1)));if(applyVehicleDamage(damage,.2))return;}
+          if(level==='tsunami'&&Math.random()<.38){tryTriggerRandomDefect(.2);}
+        }else showEventBanner('🚤 Você atravessou a onda em alta velocidade!','#38bdf8');
+        if(level!=='pequena')getMasteryBucket('boats',vehCfg.id).storms++;
+      }
+      if(activeWave.z>carZ+30){scene.remove(waveMesh);waveMesh.geometry?.dispose?.();waveMesh=null;activeWave=null;}
+    }
+  }
+
+  function updatePhysics(dt, now) {
+    if (gameState !== 'PLAYING') return;
+
+    const vehCfg = getActiveVehicle();
+    const mapCfg = getActiveMap();
+    const isWaterMap = mapCfg.type === 'water';
+    const roadW = getActiveRoadWidth();
+    if(onFoot){
+      const move=(footInput.forward?1:0)-(footInput.back?1:0);const side=(footInput.right?1:0)-(footInput.left?1:0);
+      const speed=4.2;const dir=footYaw;
+      carX+=(-Math.sin(dir)*move+Math.cos(dir)*side)*speed*dt;carZ+=(-Math.cos(dir)*move-Math.sin(dir)*side)*speed*dt;
+      monsterAwake=false;monsterZ=carZ+42;return;
+    }
+    if(currentStop){carSpeedKmh=0;monsterAwake=false;monsterSpeedKmh=0;monsterZ=carZ+42;document.getElementById('stopPrompt').style.display='block';return;}
+    const currentSegIdx = Math.floor(-carZ / SEGMENT_LENGTH);
+    const currentSegData = activeSegments.get(currentSegIdx);
+
+    const inWater = isWaterMap || (currentSegData ? currentSegData.isFlooded : false);
+    surfaceWarningEl.style.display = (!isWaterMap && inWater) ? 'block' : 'none';
+
+    const isOffRoadOrBoat = vehCfg.allTerrain;
+    const baseTerrainGrip = isOffRoadOrBoat ? 0.95 : (inWater ? 0.58 : mapCfg.grip);
+    const effectiveGrip = Math.min(1.25, Math.max(0.45, baseTerrainGrip + vehCfg.gripBonus));
+
+    // Inclinação da pista (Subida reduz um pouco a força, descida embala!)
+    const roadPitch = getRoadPitch(carZ);
+    const slopeGravityEffect = Math.sin(roadPitch) * 38; // positivo na subida, negativo na descida
+
+    // As paradas não devem reduzir a velocidade antes de chegar ao marco.
+    // Em pistas aquáticas, não existem paradas.
+    const metersUntilStop=nextStopDistance+carZ;
+    const approachingStop=false;
+    let effectiveMaxSpeed = vehCfg.maxSpeed - slopeGravityEffect * 0.35;
+    if(performance.now()<gasBoostUntil)effectiveMaxSpeed+=45;
+    if (!isOffRoadOrBoat && inWater) effectiveMaxSpeed = Math.min(effectiveMaxSpeed, 125);
+    if (!isOffRoadOrBoat && mapCfg.id === 'road-99') effectiveMaxSpeed *= 0.90;
+    if (defects.engineDamaged) effectiveMaxSpeed *= 0.72;
+    if (defects.tireDamaged) effectiveMaxSpeed *= 0.80;
+
+    const surfaceDrag = (!isOffRoadOrBoat && inWater) ? 28 : 14 * (isOffRoadOrBoat ? 1.0 : mapCfg.dragFactor);
+    const baseAccel = (defects.engineDamaged ? vehCfg.accel * 0.62 : vehCfg.accel) * ((!isOffRoadOrBoat && inWater) ? 0.75 : 1);
+    const accelRate = Math.max(16, baseAccel - slopeGravityEffect * 0.55);
+    const brakeRate = isWaterMap ? 56 : ((!isOffRoadOrBoat && inWater) ? 58 : 88);
+    const reverseAccel = 28;
+
+    if(vehCfg.electric){
+      if(cyberEnergy>0&&(input.gas||now<cyberAbilityUntil)) cyberEnergy=Math.max(0,cyberEnergy-(0.10*dt+Math.abs(carSpeedKmh)*.0009*dt+(now<cyberAbilityUntil?.24*dt:0)));
+      if(cyberEnergy<=0){carSpeedKmh=0;input.gas=false;showEventBanner('🔋 ENERGIA ESGOTADA! Encontre uma bateria numa parada.','#f59e0b');}
+    }
+    if(vehCfg.horse){horseStamina=Math.min(100,horseStamina+10*dt);if(monsterAwake&&monsterZ-carZ<35)effectiveMaxSpeed+=22;}
+    if(vehCfg.motorcycle){
+      // A moto só perde o equilíbrio em curva muito brusca e em alta velocidade.
+      const speedFactor=Math.max(0,(Math.abs(carSpeedKmh)-75)/Math.max(1,vehCfg.maxSpeed-75));
+      motorcycleLean=Math.abs(steeringInput)*speedFactor;
+      if(motorcycleLean>1.18){triggerGameOver('QUEDA');return;}
+    }
+    if (input.gas) {
+      if (carSpeedKmh < 0) {
+        carSpeedKmh += brakeRate * dt;
+        if (carSpeedKmh > 0) carSpeedKmh = 0;
+      } else {
+        carSpeedKmh = Math.min(effectiveMaxSpeed, carSpeedKmh + accelRate * dt);
+      }
+    } else if (input.brake) {
+      if (carSpeedKmh > 0.5) {
+        carSpeedKmh = Math.max(0, carSpeedKmh - brakeRate * dt);
+      } else {
+        carSpeedKmh = Math.max(-MAX_REVERSE_KMH, carSpeedKmh - reverseAccel * dt);
+      }
+    } else {
+      if (carSpeedKmh > 0) {
+        carSpeedKmh = Math.max(0, carSpeedKmh - surfaceDrag * dt);
+      } else if (carSpeedKmh < 0) {
+        carSpeedKmh = Math.min(0, carSpeedKmh + surfaceDrag * dt);
+      }
+    }
+
+    if (carSpeedKmh > effectiveMaxSpeed) {
+      const capDeceleration=36;
+      carSpeedKmh = Math.max(effectiveMaxSpeed, carSpeedKmh - capDeceleration * dt);
+    }
+
+    // Despertar do monstro (começa gradualmente para não matar o jogador nos primeiros segundos)
+    if (!monsterAwake && Math.abs(carSpeedKmh) > 3.5) {
+      monsterAwake = true;
+      monsterZ = carZ + 44;
+      monsterSpeedKmh = activeRunMonster.baseSpeed * 0.55;
+      showEventBanner(`⚠️ ${activeRunMonster.name.toUpperCase()} ESTÁ CAÇANDO VOCÊ!`, '#ef4444');
+    }
+
+    if (Math.abs(carSpeedKmh) > 35 && now - lastDefectTime > 18000) {
+      if (Math.random() < vehCfg.defectChance * 0.18 * dt) {
+        tryTriggerRandomDefect(0);
+      }
+    }
+
+    const tirePull = defects.tireDamaged ? -0.14 : 0;
+    const targetSteer = (input.left ? 1 : 0) + (input.right ? -1 : 0) + tirePull;
+    const steerResponsiveness = 4.5 + effectiveGrip * 7.5;
+    steeringInput += (targetSteer - steeringInput) * Math.min(1, dt * steerResponsiveness);
+
+    const speedFactor = Math.min(1, Math.abs(carSpeedKmh) / 25);
+    const reverseSign = carSpeedKmh >= 0 ? 1 : -1;
+    const turnMultiplier = defects.tireDamaged ? vehCfg.turnRate * 0.78 : vehCfg.turnRate;
+    const desiredAngularVel = steeringInput * turnMultiplier * speedFactor * reverseSign;
+
+    const angularInertia = 3.5 + effectiveGrip * 9.5;
+    carAngularVel += (desiredAngularVel - carAngularVel) * Math.min(1, dt * angularInertia);
+    carYaw += carAngularVel * dt;
+
+    const metersPerSec = carSpeedKmh / 3.6;
+    const roadYaw = getRoadYaw(carZ);
+    const totalYaw = roadYaw + carYaw;
+
+    carX += -Math.sin(totalYaw) * metersPerSec * dt;
+    carZ += -Math.cos(totalYaw) * metersPerSec * dt;
+    carY = getRoadElevationY(carZ);
+
+    // Colisão com obstáculos
+    const roadCenter = getRoadCenterX(carZ);
+    const relX = carX - roadCenter;
+
+    if (currentSegData && currentSegData.hazards.length > 0) {
+      for (let i = currentSegData.hazards.length - 1; i >= 0; i--) {
+        const h = currentSegData.hazards[i];
+        if (Math.abs(relX - h.localX) < h.radius) {
+          if(vehCfg.id==='cybertruck'&&now<cyberAbilityUntil){currentSegData.hazards.splice(i,1);continue;}
+          if(vehCfg.horse&&now<horseJumpUntil){currentSegData.hazards.splice(i,1);continue;}
+          currentSegData.hazards.splice(i, 1);
+          getMasteryBucket(vehCfg.category==='boat'?'boats':'cars',vehCfg.id).obstacles++;
+          if (h.type === 'pothole') {
+            carSpeedKmh *= 0.76;
+            showEventBanner('💥 PASSOU NO BURACO! (-22 DURABILIDADE)', '#f59e0b');
+            if (applyVehicleDamage(22, 0.25)) return;
+          } else if (h.type === 'barrier') {
+            carSpeedKmh *= 0.48;
+            showEventBanner('🚧 BATEU NO OBSTÁCULO! (-45 DURABILIDADE)', '#ef4444');
+            if (applyVehicleDamage(45, 0.40)) return;
+          } else if (h.type === 'rock') {
+            carSpeedKmh *= 0.58;
+            showEventBanner('🪨 BATEU NA PEDRA! (-32 CASCO)', '#ef4444');
+            if (applyVehicleDamage(32, 0.35)) return;
+          } else if (h.type === 'log') {
+            carSpeedKmh *= 0.76;
+            showEventBanner('🪵 ATINGIU UM TRONCO! (-18 CASCO)', '#f59e0b');
+            if (applyVehicleDamage(18, 0.25)) return;
+          }
+        }
+      }
+    }
+
+    if (bumpShakeTimer > 0) bumpShakeTimer -= dt;
+
+    // Barreira lateral (Em mar aberto o limite é apenas a área de navegação sem dano de rocha)
+    const maxOffset = roadW / 2 - 1.15;
+    if (relX > maxOffset || relX < -maxOffset) {
+      carX = roadCenter + (relX > maxOffset ? maxOffset : -maxOffset);
+      if (mapCfg.biome !== 'open-ocean' && Math.abs(carSpeedKmh) > 40 && bumpShakeTimer <= 0 && !(vehCfg.id==='cybertruck'&&now<cyberAbilityUntil)) {
+        const wallDamage = Math.round(Math.abs(carSpeedKmh) * (isWaterMap ? 0.25 : 0.22));
+        let hitMsg = `💥 BATEU NA LATERAL! (-${wallDamage} DURABILIDADE)`;
+        if (mapCfg.biome === 'canyon-mountains') hitMsg = `⛰️ BATEU NA MONTANHA! (-${wallDamage} CASCO)`;
+        else if (mapCfg.biome === 'forest-river') hitMsg = `🌲 BATEU NA MARGEM DA FLORESTA! (-${wallDamage} CASCO)`;
+
+        showEventBanner(hitMsg, '#f59e0b');
+        if (applyVehicleDamage(wallDamage, 0.25)) return;
+      }
+      carYaw *= 0.80;
+      carSpeedKmh *= 0.88;
+    }
+
+    const distanceTraveled = Math.max(0, Math.floor(-carZ));
+    if(!isWaterMap && distanceTraveled>=nextStopDistance && !currentStop){carZ=-nextStopDistance;carX=getRoadCenterX(carZ);carSpeedKmh=0;spawnRoadsideStop(nextStopDistance);nextStopDistance+=5000;}
+    if(isWaterMap) updateSeaWaves(dt,now,vehCfg,mapCfg);
+    const masteryKind=vehCfg.category==='boat'?'boats':'cars';const mastery=getMasteryBucket(masteryKind,vehCfg.id);mastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mastery.uses+=dt;
+    const mapMastery=getMasteryBucket('maps',mapCfg.id);mapMastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mapMastery.uses+=dt;
+    if (distanceTraveled >= nextCoinMilestone) {
+      saveProgress();
+      runCoinsEarned += 10;
+      savedCoins += 10;
+      saveProgress();
+      nextCoinMilestone += 500;
+      coinsRunValueEl.textContent = `🪙 +${runCoinsEarned}`;
+      showEventBanner(`🪙 +10 MOEDAS! (${distanceTraveled}m PERCORRIDOS)`, '#fbbf24');
+    }
+
+    // Perseguição do Monstro (rampa progressiva mais suave nos primeiros 150m)
+    if (monsterAwake && !currentStop && !onFoot) {
+      const earlyScale = Math.min(1, 0.65 + (distanceTraveled / 180) * 0.35);
+      const rampFactor = activeRunMonster.id === 'leviata-serra' ? 0.020 : (activeRunMonster.id === 'espreitador-lama' ? 0.019 : 0.016);
+      const baseMonsterSpeed = Math.min(
+        activeRunMonster.maxSpeed,
+        (activeRunMonster.baseSpeed * earlyScale) + distanceTraveled * rampFactor
+      );
+      const gap = monsterZ - carZ;
+      const rubberBand = gap > 65 ? (gap - 65) * 0.65 : 0;
+      const targetMonsterSpeed = baseMonsterSpeed + rubberBand;
+
+      monsterSpeedKmh += (targetMonsterSpeed - monsterSpeedKmh) * Math.min(1, dt * 1.65);
+      monsterZ -= (monsterSpeedKmh / 3.6) * dt;
+      monsterBobPhase += dt * 14;
+
+      if (monsterZ <= carZ + 2.4) {
+        triggerGameOver('MONSTRO');
+        return;
+      }
+    }
+
+    updateDynamicRoadGeneration();
+
+    speedValueEl.textContent = Math.round(Math.abs(carSpeedKmh));
+    abilityBtn.style.display=vehCfg.id==='cybertruck'?'block':'none';
+    horseJumpBtn.style.display=vehCfg.horse?'block':'none';
+    abilityBtn.textContent=now<cyberAbilityReadyAt?`RECARGA ${Math.ceil((cyberAbilityReadyAt-now)/1000)}s`:now<cyberAbilityUntil?'ATIVA!':'HABILIDADE';
+    if(vehCfg.electric)document.getElementById('hudVehicleLabel').textContent=`Energia ${Math.round(cyberEnergy)}% • Durabilidade`;
+    else if(vehCfg.horse)document.getElementById('hudVehicleLabel').textContent=`Fôlego ${Math.round(horseStamina)}% • Resistência`;
+    if(vehCfg.id==='moto'&&motorcycleLean>.88)showEventBanner('⚠️ CUIDADO: MOTO INCLINADA!','#f59e0b');
+    if(now-lastProgressSave>5000){saveProgress();lastProgressSave=now;}
+
+    if (carSpeedKmh < -0.5) {
+      gearIndicatorEl.textContent = 'R';
+      gearIndicatorEl.style.background = '#dc2626';
+    } else if (carSpeedKmh > 0.5) {
+      gearIndicatorEl.textContent = 'D';
+      gearIndicatorEl.style.background = '#059669';
+    } else {
+      gearIndicatorEl.textContent = 'N';
+      gearIndicatorEl.style.background = '#1e293b';
+    }
+
+    distanceValueEl.textContent = `${distanceTraveled} m`;
+
+    if (monsterAwake) {
+      const gapMeters = Math.max(0, Math.round(monsterZ - carZ));
+      monsterDistTextEl.textContent = `${gapMeters} m ATRÁS`;
+      monsterDistTextEl.style.color = gapMeters < 18 ? '#ef4444' : '#fbbf24';
+
+      const dangerPct = Math.max(5, Math.min(100, ((45 - gapMeters) / 42) * 100));
+      dangerBarFillEl.style.width = `${dangerPct}%`;
+
+      if (gapMeters < 22) {
+        const intensity = (22 - gapMeters) / 22;
+        dangerVignetteEl.style.boxShadow = `inset 0 0 ${Math.round(intensity * 95)}px rgba(220, 38, 38, ${0.65 * intensity})`;
+        mirrorGlassMat.color.setRGB(0.2 + intensity * 0.8, 0.05, 0.05);
+      } else {
+        dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
+        mirrorGlassMat.color.setHex(0x1e293b);
+      }
+    }
+  }
+
+  function updateTransforms(time) {
+    if(onFoot){camera.position.set(carX+Math.sin(footYaw)*3,carY+2.3,carZ+Math.cos(footYaw)*3);camera.lookAt(carX,carY+1.1,carZ-2);if(footAvatar){footAvatar.position.set(carX,carY,carZ);footAvatar.rotation.y=footYaw;}return;}
+    const roadYaw = getRoadYaw(carZ);
+    const roadPitch = getRoadPitch(carZ);
+    const isBoat = getActiveVehicle().category === 'boat';
+
+    const waveY = isBoat ? Math.sin(time * 0.0045) * 0.09 : 0;
+    const waveRoll = isBoat ? Math.sin(time * 0.0038) * 0.035 + steeringInput * 0.06 : 0;
+
+    const horseJumpY=getActiveVehicle().horse&&performance.now()<horseJumpUntil?Math.sin((1-(horseJumpUntil-performance.now())/950)*Math.PI)*1.15:0;
+    carCockpit.position.set(carX, carY + waveY + horseJumpY, carZ);
+    carCockpit.rotation.y = roadYaw + carYaw;
+    carCockpit.rotation.x = roadPitch;
+    carCockpit.rotation.z = waveRoll + (getActiveVehicle().motorcycle ? -steeringInput*.075 : 0);
+
+    if (defects.lightsBroken) {
+      headlightRight.intensity = 0;
+      headlightLeft.intensity = Math.sin(time * 0.035) > 0.1 ? 1.1 : 0.15;
+    } else {
+      headlightLeft.intensity = 3.4;
+      headlightRight.intensity = 3.4;
+    }
+
+    const mapCfg = getActiveMap();
+    const baseShake = (Math.abs(carSpeedKmh) / 180) * (mapCfg.id === 'road-99' ? 0.025 : 0.011);
+    const tireShake = defects.tireDamaged ? 0.018 : 0;
+    const impactShake = bumpShakeTimer > 0 ? 0.065 : 0;
+    camera.position.y = cockpitCameraBaseY + Math.sin(time * 0.06) * (baseShake + tireShake + impactShake);
+
+    steeringWheelGroup.rotation.z = steeringInput * 0.65;
+
+    const monsterRoadX = getRoadCenterX(monsterZ);
+    const monsterRoadY = getRoadElevationY(monsterZ);
+    const monsterYaw = getRoadYaw(monsterZ);
+    monsterGroup.position.set(
+      monsterRoadX + Math.sin(monsterBobPhase * 0.5) * 1.4,
+      monsterRoadY + Math.abs(Math.sin(monsterBobPhase)) * 0.45,
+      monsterZ
+    );
+    monsterGroup.rotation.y = monsterYaw;
+    monsterGroup.rotation.x = currentStop ? Math.PI * 0.42 : 0;
+  }
+
+  // ==========================================
+  // 12. LOOP PRINCIPAL
+  // ==========================================
+  let lastTime = performance.now();
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+
+    if (showcaseActive) {
+      if (currentPreviewVehicleMesh) currentPreviewVehicleMesh.rotation.y += dt * 1.15;
+      if (currentPreviewMonsterMesh) currentPreviewMonsterMesh.rotation.y += dt * 1.15;
+      carPreviewRenderer.render(carPreviewScene, carPreviewCamera);
+      monsterPreviewRenderer.render(monsterPreviewScene, monsterPreviewCamera);
+    } else if (gameState === 'LOBBY') {
+      if(Date.now()-generalStoreData.updatedAt>=7200000)renderLobbyShop();
+      carZ -= 14 * dt;
+      carX = getRoadCenterX(carZ);
+      carY = getRoadElevationY(carZ);
+      carYaw = 0;
+      monsterZ = carZ + 34;
+      updateDynamicRoadGeneration();
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    } else if (gameState === 'PLAYING') {
+      updatePhysics(dt, now);
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    } else {
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (showcaseActive) resizeShowcaseRenderers();
+  });
+
+  renderLobbyShop();
+  applyVehicleVisuals();
+  applyMapEnvironment();
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
