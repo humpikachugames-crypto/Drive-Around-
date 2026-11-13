@@ -1,0 +1,2704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ROAD-37 // Fuga Infinita 3D</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #08080c;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #fff;
+  }
+
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  /* ================= LOBBY UI ================= */
+  #lobbyScreen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(16, 20, 30, 0.88) 0%, rgba(5, 6, 10, 0.97) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 16px 20px 48px;
+    z-index: 20;
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .lobby-topbar {
+    width: 100%;
+    max-width: 1040px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .lobby-title-wrap h1 {
+    font-size: clamp(1.6rem, 4.2vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #f8fafc;
+    text-shadow: 0 0 24px rgba(239, 68, 68, 0.65);
+  }
+
+  .lobby-title-wrap p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+
+  .topbar-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  #openShowcaseBtn {
+    background: linear-gradient(135deg, #0284c7, #1d4ed8);
+    color: #fff;
+    border: 1px solid #38bdf8;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 0.82rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+    transition: transform 0.12s ease;
+  }
+
+  #openShowcaseBtn:active {
+    transform: scale(0.96);
+  }
+
+  .coin-wallet {
+    background: rgba(30, 41, 59, 0.94);
+    border: 2px solid #f59e0b;
+    padding: 8px 16px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 1.05rem;
+    color: #fbbf24;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  }
+
+  .section-box {
+    width: 100%;
+    max-width: 1040px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 16px;
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+
+  .section-header {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+    gap: 12px;
+  }
+
+  .shop-card {
+    background: rgba(30, 41, 59, 0.78);
+    border: 2px solid rgba(148, 163, 184, 0.25);
+    border-radius: 14px;
+    padding: 13px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+
+  .shop-card.selected {
+    border-color: #ef4444;
+    background: rgba(127, 29, 29, 0.34);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.28);
+  }
+
+  .shop-card.selected-car {
+    border-color: #38bdf8;
+    background: rgba(12, 74, 110, 0.36);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.28);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-top h4 {
+    font-size: 1.06rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .tag-badge {
+    font-size: 0.66rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-owned { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+  .tag-selected-map { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #ef4444; }
+  .tag-selected-car { background: rgba(56, 189, 248, 0.25); color: #7dd3fc; border: 1px solid #38bdf8; }
+  .tag-price { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid #f59e0b; }
+
+  .car-specs {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .spec-pill {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    font-weight: 700;
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    line-height: 1.35;
+    margin-top: 6px;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 9px;
+    border: none;
+    font-weight: 800;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 0.7px;
+  }
+
+  .btn-select { background: #334155; color: #f8fafc; }
+  .btn-active-car { background: #0284c7; color: #fff; }
+  .btn-active-map { background: #dc2626; color: #fff; }
+  .btn-buy { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; }
+  .btn-buy:disabled { background: #1e293b; color: #64748b; cursor: not-allowed; }
+
+  .lobby-footer {
+    text-align: center;
+    flex-shrink: 0;
+    padding-bottom: 16px;
+  }
+
+  #startBtn {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: #fff;
+    border: none;
+    padding: 15px 50px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.55);
+    text-transform: uppercase;
+  }
+
+  #startBtn:active { transform: scale(0.97); }
+
+  .controls-hint {
+    margin-top: 8px;
+    font-size: 0.76rem;
+    color: #94a3b8;
+  }
+
+  /* ================= 2ª ABA: GARAGEM 3D & MONSTROS ================= */
+  #showcaseScreen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, #111827 0%, #05070c 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 20px 44px;
+    gap: 16px;
+    z-index: 25;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .showcase-header {
+    width: 100%;
+    max-width: 1040px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .showcase-header h2 {
+    font-size: clamp(1.3rem, 3.5vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #f8fafc;
+  }
+
+  #backFromShowcaseBtn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #f8fafc;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .showcase-panel {
+    width: 100%;
+    max-width: 1040px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .showcase-split {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+
+  @media (max-width: 780px) {
+    .showcase-split {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .turntable-box {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9) 0%, rgba(9, 13, 22, 0.98) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .turntable-box.monster-box {
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  .turntable-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .turntable-label {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .stats-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stats-box h3 {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .stats-box p {
+    font-size: 0.84rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-row-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #e2e8f0;
+  }
+
+  .stat-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    border-radius: 999px;
+  }
+
+  .stat-bar-fill.danger-fill {
+    background: linear-gradient(90deg, #dc2626, #f87171);
+  }
+
+  .owned-cars-selector {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .owned-car-pill {
+    background: rgba(30, 41, 59, 0.9);
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    color: #f8fafc;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .owned-car-pill.active {
+    border-color: #38bdf8;
+    background: rgba(2, 132, 199, 0.35);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+  }
+
+  /* ================= HUD IN-GAME ================= */
+  #hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    z-index: 10;
+    touch-action: none;
+  }
+
+  .top-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 14px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hud-panel {
+    background: rgba(10, 14, 23, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 7px 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .hud-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: #94a3b8;
+  }
+
+  .hud-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #speedValue { color: #38bdf8; }
+  #coinsRunValue { color: #fbbf24; }
+
+  #gearIndicator {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.72rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #1e293b;
+    color: #f8fafc;
+  }
+
+  .durability-bar-bg {
+    width: 110px;
+    height: 7px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  #durabilityBarFill {
+    height: 100%;
+    width: 100%;
+    background: #10b981;
+    transition: width 0.15s ease, background 0.15s ease;
+  }
+
+  #defectsContainer {
+    position: absolute;
+    top: 66px;
+    left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .defect-badge {
+    background: rgba(153, 27, 27, 0.88);
+    border: 1px solid #f87171;
+    color: #fecaca;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #dangerContainer {
+    text-align: center;
+    min-width: 165px;
+  }
+
+  #monsterDistText {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #f87171;
+  }
+
+  .danger-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  #dangerBarFill {
+    height: 100%;
+    width: 15%;
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+  }
+
+  #eventBanner {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid #f59e0b;
+    color: #fde68a;
+    padding: 5px 15px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    white-space: nowrap;
+  }
+
+  #surfaceWarning {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 58, 138, 0.85);
+    border: 1px solid #60a5fa;
+    color: #dbeafe;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: none;
+  }
+
+  #crackedGlassOverlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    opacity: 0.78;
+  }
+
+  #dangerVignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 0px rgba(220, 38, 38, 0);
+    transition: box-shadow 0.15s ease;
+  }
+
+  #exitRunBtn {
+    pointer-events: auto;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  /* ================= CONTROLES TOUCH / TELA ================= */
+  .controls-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .left-pedals {
+    position: absolute;
+    left: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  .right-arrows {
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  .ctrl-btn {
+    background: rgba(15, 23, 42, 0.72);
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    color: #f8fafc;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    touch-action: none;
+  }
+
+  .ctrl-btn:active, .ctrl-btn.active {
+    transform: scale(0.93);
+    background: rgba(239, 68, 68, 0.45);
+    border-color: #ef4444;
+  }
+
+  #btnBrake {
+    width: 102px;
+    height: 64px;
+    border-color: rgba(248, 113, 113, 0.45);
+  }
+
+  #btnBrake span.main-lbl { font-size: 0.92rem; letter-spacing: 1px; }
+  #btnBrake span.sub-lbl { font-size: 0.6rem; color: #fca5a5; margin-top: 2px; }
+
+  #btnGas {
+    width: 102px;
+    height: 84px;
+    border-color: rgba(52, 211, 153, 0.5);
+  }
+
+  #btnGas:active, #btnGas.active {
+    background: rgba(16, 185, 129, 0.45);
+    border-color: #34d399;
+  }
+
+  #btnGas span.main-lbl { font-size: 0.98rem; letter-spacing: 1px; }
+
+  .arrow-btn {
+    width: 78px;
+    height: 78px;
+    font-size: 1.9rem;
+  }
+
+  /* ================= GAME OVER ================= */
+  #gameOverScreen {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 4, 4, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    text-align: center;
+    padding: 24px;
+    backdrop-filter: blur(6px);
+  }
+
+  #gameOverScreen h1 {
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    color: #ef4444;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+  }
+
+  #gameOverScreen p {
+    font-size: 1.05rem;
+    color: #e2e8f0;
+    margin: 10px 0 8px;
+  }
+
+  #earnedCoinsText {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #fbbf24;
+    margin-bottom: 22px;
+  }
+
+  .gameover-btns {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-secondary {
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid #475569;
+    padding: 13px 26px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    padding: 13px 30px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- ================= 1ª ABA: LOBBY PRINCIPAL ================= -->
+<div id="lobbyScreen">
+  <div class="lobby-topbar">
+    <div class="lobby-title-wrap">
+      <h1>ROAD-37</h1>
+      <p>Fuga Infinita 3D • +10 moedas a cada 500m percorridos</p>
+    </div>
+    <div class="topbar-right-actions">
+      <button id="openShowcaseBtn">🚘 GARAGEM 3D & MONSTROS</button>
+      <div class="coin-wallet">
+        <span>🪙</span>
+        <span id="totalCoinsDisplay">0</span>
+        <span style="font-size:0.76rem;color:#fde68a;">MOEDAS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loja de Carros -->
+  <div class="section-box">
+    <div class="section-header">
+      <span>1. Veículos & Loja</span>
+      <span>Compre ou equipe seu carro para a fuga</span>
+    </div>
+    <div class="shop-grid" id="carsGrid"></div>
+  </div>
+
+  <!-- Loja de Mapas -->
+  <div class="section-box">
+    <div class="section-header">
+      <span>2. Mapas & Estradas</span>
+      <span>Escolha a pista da corrida</span>
+    </div>
+    <div class="shop-grid" id="mapsGrid"></div>
+  </div>
+
+  <div class="lobby-footer">
+    <button id="startBtn">COMEÇAR PARTIDA</button>
+    <div class="controls-hint">
+      Controles: <b>W / ↑</b> (Acelerar), <b>S / ↓</b> (Frear / Ré em 0 km/h), <b>A / D</b> ou <b>← / →</b> (Virar)
+    </div>
+  </div>
+</div>
+
+<!-- ================= 2ª ABA: GARAGEM 3D & MONSTROS ================= -->
+<div id="showcaseScreen">
+  <div class="showcase-header">
+    <h2>🚘 Garagem 3D & Bestiário</h2>
+    <button id="backFromShowcaseBtn">◀ VOLTAR AO LOBBY</button>
+  </div>
+
+  <!-- Seção 1: Meus Carros + Modelo 3D Girando -->
+  <div class="showcase-panel">
+    <div class="section-header" style="margin-bottom:0;">
+      <span>Seus Carros Adquiridos (Selecione para inspecionar em 3D)</span>
+      <span id="ownedCarsCountBadge">1 Carro</span>
+    </div>
+
+    <div class="owned-cars-selector" id="ownedCarsSelector"></div>
+
+    <div class="showcase-split">
+      <div class="turntable-box">
+        <canvas id="carPreviewCanvas" class="turntable-canvas"></canvas>
+        <div class="turntable-label" id="carPreviewLabel">MODELO 3D • GIRANDO</div>
+      </div>
+
+      <div class="stats-box">
+        <h3 id="inspectCarName">Carro Velho</h3>
+        <p id="inspectCarDesc">Descrição do veículo.</p>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>VELOCIDADE MÁXIMA</span>
+            <span id="statCarSpeedText">90 km/h</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="statCarSpeedBar" style="width:35%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>DURABILIDADE (LATARIA)</span>
+            <span id="statCarDurabilityText">100 HP</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="statCarDurabilityBar" style="width:22%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>ACELERAÇÃO</span>
+            <span id="statCarAccelText">34</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="statCarAccelBar" style="width:35%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>CONTROLE DE CURVA</span>
+            <span id="statCarTurnText">Normal</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="statCarTurnBar" style="width:65%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>RESISTÊNCIA A DEFEITOS</span>
+            <span id="statCarReliabilityText">58%</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="statCarReliabilityBar" style="width:58%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seção 2: Monstros + Modelo 3D Girando -->
+  <div class="showcase-panel">
+    <div class="section-header" style="margin-bottom:0;">
+      <span>Entidades & Monstros (1 Descoberto)</span>
+      <span style="color:#f87171;">PERIGO EXTREMO</span>
+    </div>
+
+    <div class="showcase-split">
+      <div class="turntable-box monster-box">
+        <canvas id="monsterPreviewCanvas" class="turntable-canvas"></canvas>
+        <div class="turntable-label" style="color:#fca5a5;">ENTIDADE #01 • GIRANDO</div>
+      </div>
+
+      <div class="stats-box">
+        <h3 style="color:#f87171;">O Perseguidor da ROAD-37</h3>
+        <p>Criatura sombria de olhos carmesim que permanece adormecida até ouvir o ronco do motor. Quanto mais longe você foge, mais rápido ela corre.</p>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>VELOCIDADE INICIAL</span>
+            <span>84 km/h</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" style="width:45%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>VELOCIDADE MÁXIMA DE CAÇA</span>
+            <span>185 km/h</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" style="width:82%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>LETALIDADE AO ALCANÇAR</span>
+            <span>100% (INSTANTÂNEA)</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill danger-fill" style="width:100%;"></div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-row-top">
+            <span>GATILHO DE DESPERTAR</span>
+            <span>Movimento acima de 2.5 km/h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= HUD DO JOGO ================= -->
+<div id="hud">
+  <svg id="crackedGlassOverlay" viewBox="0 0 1000 600" preserveAspectRatio="none">
+    <g stroke="rgba(226, 232, 240, 0.72)" stroke-width="2.2" fill="none">
+      <polyline points="240,180 180,110 90,60 15,20" />
+      <polyline points="240,180 290,95 340,25" />
+      <polyline points="240,180 350,170 460,145 530,110" />
+      <polyline points="240,180 310,260 390,340 430,450" />
+      <polyline points="240,180 210,290 165,410 120,560" />
+      <polyline points="240,180 135,215 45,260 0,310" />
+      <polygon points="215,155 262,148 282,192 252,222 206,204" stroke-width="1.6" />
+      <polygon points="185,125 288,112 325,205 270,262 175,232" stroke-width="1.3" />
+      <polyline points="780,410 850,330 940,270 1000,230" />
+      <polyline points="780,410 860,460 950,530 1000,580" />
+      <polyline points="780,410 710,490 660,590" />
+      <polyline points="780,410 690,360 610,320" />
+      <polygon points="755,390 805,382 818,430 772,445" stroke-width="1.5" />
+    </g>
+  </svg>
+
+  <div id="dangerVignette"></div>
+
+  <div class="top-hud">
+    <div class="hud-panel">
+      <div class="hud-label">Velocidade & Lataria</div>
+      <div class="hud-value">
+        <span id="speedValue">0</span> <small style="font-size:0.72rem;color:#94a3b8;">KM/H</small>
+        <span id="gearIndicator">N</span>
+      </div>
+      <div class="durability-bar-bg">
+        <div id="durabilityBarFill"></div>
+      </div>
+      <div style="font-size:0.65rem;color:#94a3b8;margin-top:2px;">
+        Durabilidade: <strong id="durabilityText" style="color:#f8fafc;">100/100</strong>
+      </div>
+    </div>
+
+    <div class="hud-panel" id="dangerContainer">
+      <div class="hud-label">Distância do Monstro</div>
+      <div id="monsterDistText">DORMINDO</div>
+      <div class="danger-bar-bg">
+        <div id="dangerBarFill"></div>
+      </div>
+    </div>
+
+    <div class="hud-panel" style="text-align:right;">
+      <div class="hud-label">Distância & Moedas</div>
+      <div class="hud-value">
+        <span id="distanceValue">0 m</span>
+        <span style="margin-left:8px;font-size:0.95rem;" id="coinsRunValue">🪙 +0</span>
+      </div>
+      <button id="exitRunBtn">SAIR P/ LOBBY</button>
+    </div>
+  </div>
+
+  <div id="defectsContainer"></div>
+  <div id="eventBanner">⚠️ ALERTA!</div>
+  <div id="surfaceWarning">🌊 TRECHO ALAGADO — REDUÇÃO DE ADERÊNCIA</div>
+
+  <div class="controls-layer">
+    <div class="left-pedals">
+      <button class="ctrl-btn" id="btnBrake">
+        <span class="main-lbl">FREAR</span>
+        <span class="sub-lbl">RÉ EM 0 KM/H</span>
+      </button>
+      <button class="ctrl-btn" id="btnGas">
+        <span class="main-lbl">ACELERAR</span>
+      </button>
+    </div>
+
+    <div class="right-arrows">
+      <button class="ctrl-btn arrow-btn" id="btnLeft">◀</button>
+      <button class="ctrl-btn arrow-btn" id="btnRight">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TELA DE GAME OVER ================= -->
+<div id="gameOverScreen">
+  <h1 id="gameOverTitle">VOCÊ FOI PEGO!</h1>
+  <p id="finalStatsText">O monstro alcançou seu carro.</p>
+  <div id="earnedCoinsText">🪙 +0 moedas ganhas nesta corrida</div>
+  <div class="gameover-btns">
+    <button class="btn-secondary" id="backLobbyBtn">GARAGEM / LOBBY</button>
+    <button class="btn-primary" id="retryBtn">JOGAR NOVAMENTE</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  // ==========================================
+  // 1. TRILHA SONORA DA PARTIDA (SYNTHWAVE / ACTION ROCK SYNTH DO VÍDEO)
+  // ==========================================
+  class MatchMusicEngine {
+    constructor() {
+      this.ctx = null;
+      this.isPlaying = false;
+      this.timerId = null;
+      this.step = 0;
+      this.masterGain = null;
+    }
+
+    start() {
+      if (this.isPlaying) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      if (!this.ctx) {
+        this.ctx = new AudioCtx();
+      }
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
+
+      this.isPlaying = true;
+      this.step = 0;
+
+      // 144 BPM (~104ms por 16th note) — batida eletrônica energética com riffs rápidos
+      const stepMs = 104;
+      this.playStep();
+      this.timerId = setInterval(() => this.playStep(), stepMs);
+    }
+
+    stop() {
+      this.isPlaying = false;
+      if (this.timerId) {
+        clearInterval(this.timerId);
+        this.timerId = null;
+      }
+      if (this.masterGain && this.ctx) {
+        try {
+          this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        } catch (e) {}
+      }
+    }
+
+    playStep() {
+      if (!this.isPlaying || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const s = this.step % 64;
+
+      // Baixo oitavado pulsante (E menor -> C maior -> D maior -> B menor)
+      const rootSeq = [
+        82.41, 82.41, 164.81, 82.41, 82.41, 82.41, 164.81, 82.41,
+        82.41, 82.41, 164.81, 82.41, 82.41, 82.41, 164.81, 82.41,
+        65.41, 65.41, 130.81, 65.41, 65.41, 65.41, 130.81, 65.41,
+        73.42, 73.42, 146.83, 73.42, 61.74, 61.74, 123.47, 61.74
+      ];
+      this.triggerBass(rootSeq[s % 32], now, 0.09);
+
+      // Kick forte em todos os tempos + virada no final do compasso
+      if (s % 4 === 0 || s === 30 || s === 62 || s === 63) {
+        this.triggerKick(now);
+      }
+
+      // Snare / Clap marcante
+      if (s % 8 === 4 || s === 60 || s === 61) {
+        this.triggerSnare(now);
+      }
+
+      // Hi-hat aberto/fechado contínuo
+      if (s % 2 === 1) {
+        this.triggerHat(now, s % 4 === 2 ? 0.07 : 0.035);
+      }
+
+      // Riff principal de sintetizador épico (estilo tema de corrida/ação)
+      const leadNotes = {
+        0: 659.25, 2: 659.25, 3: 783.99, 4: 987.77, 6: 880.00, 8: 783.99,
+        10: 659.25, 12: 587.33, 14: 659.25,
+        16: 523.25, 18: 523.25, 19: 659.25, 20: 783.99, 22: 659.25,
+        24: 587.33, 26: 659.25, 28: 739.99, 30: 783.99,
+        32: 987.77, 34: 987.77, 35: 1174.66, 36: 1318.51, 38: 1174.66, 40: 987.77,
+        42: 880.00, 44: 783.99, 46: 880.00,
+        48: 783.99, 50: 880.00, 52: 987.77, 54: 880.00,
+        56: 739.99, 58: 783.99, 60: 659.25
+      };
+
+      if (leadNotes[s]) {
+        this.triggerLead(leadNotes[s], now, 0.21);
+        // Harmonia uma quinta abaixo para encorpar o som
+        this.triggerLead(leadNotes[s] * 0.667, now, 0.19, 0.09);
+      }
+
+      this.step++;
+    }
+
+    triggerBass(freq, time, dur) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(520, time);
+
+      gain.gain.setValueAtTime(0.45, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + dur);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(time);
+      osc.stop(time + dur);
+    }
+
+    triggerLead(freq, time, dur, vol = 0.20) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2400, time);
+
+      gain.gain.setValueAtTime(vol, time);
+      gain.gain.exponentialRampToValueAtTime(0.008, time + dur);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(time);
+      osc.stop(time + dur);
+    }
+
+    triggerKick(time) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(145, time);
+      osc.frequency.exponentialRampToValueAtTime(38, time + 0.11);
+
+      gain.gain.setValueAtTime(0.8, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(time);
+      osc.stop(time + 0.12);
+    }
+
+    triggerSnare(time) {
+      const bufferSize = this.ctx.sampleRate * 0.11;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(850, time);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.38, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.11);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start(time);
+    }
+
+    triggerHat(time, dur) {
+      const bufferSize = Math.floor(this.ctx.sampleRate * dur);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(6000, time);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.15, time);
+      gain.gain.exponentialRampToValueAtTime(0.005, time + dur);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start(time);
+    }
+  }
+
+  const musicEngine = new MatchMusicEngine();
+
+  // ==========================================
+  // 2. DADOS DOS CARROS E MAPAS
+  // ==========================================
+  const CARS_DATA = [
+    {
+      id: 'carro-velho',
+      name: 'Carro Velho',
+      price: 0,
+      maxSpeed: 90,
+      durability: 100,
+      accel: 34,
+      turnRate: 1.35,
+      turnLabel: 'Normal',
+      gripBonus: 0.0,
+      allTerrain: false,
+      defectChance: 0.42,
+      hoodColor: 0x7c2d12,
+      bodyStyle: 'hatch',
+      desc: 'Muito frágil (100 durabilidade) e propenso a defeitos mecânicos durante a fuga.'
+    },
+    {
+      id: 'sedan-velho',
+      name: 'Sedan Velho',
+      price: 20,
+      maxSpeed: 110,
+      durability: 150,
+      accel: 38,
+      turnRate: 1.02,
+      turnLabel: 'Pesada (Difícil)',
+      gripBonus: -0.06,
+      allTerrain: false,
+      defectChance: 0.30,
+      hoodColor: 0x475569,
+      bodyStyle: 'sedan',
+      desc: 'Mais rápido que o carro velho, porém pesado e difícil de fazer curvas fechadas.'
+    },
+    {
+      id: 'picape',
+      name: 'Picape',
+      price: 45,
+      maxSpeed: 130,
+      durability: 200,
+      accel: 44,
+      turnRate: 1.25,
+      turnLabel: 'Boa',
+      gripBonus: 0.05,
+      allTerrain: false,
+      defectChance: 0.22,
+      hoodColor: 0x1e3a8a,
+      bodyStyle: 'pickup',
+      desc: 'Robusta (200 durabilidade). Menos propensa a falhas que os modelos antigos.'
+    },
+    {
+      id: 'sedan-esportivo',
+      name: 'Sedan Esportivo',
+      price: 80,
+      maxSpeed: 200,
+      durability: 250,
+      accel: 58,
+      turnRate: 1.72,
+      turnLabel: 'Excelente (Ágil)',
+      gripBonus: 0.22,
+      allTerrain: false,
+      defectChance: 0.14,
+      hoodColor: 0x0284c7,
+      bodyStyle: 'sport',
+      desc: 'Alta velocidade (200 km/h) e direção precisa: faz curvas com extrema facilidade.'
+    },
+    {
+      id: 'carro-offroad',
+      name: 'Carro Off-Road',
+      price: 110,
+      maxSpeed: 180,
+      durability: 300,
+      accel: 52,
+      turnRate: 1.48,
+      turnLabel: '4x4 Total',
+      gripBonus: 0.40,
+      allTerrain: true,
+      defectChance: 0.12,
+      hoodColor: 0x15803d,
+      bodyStyle: 'offroad',
+      desc: 'Suspensão preparada: mantém total controle na água, terra e terrenos difíceis.'
+    },
+    {
+      id: 'carro-blindado',
+      name: 'Carro Blindado',
+      price: 150,
+      maxSpeed: 150,
+      durability: 450,
+      accel: 42,
+      turnRate: 1.15,
+      turnLabel: 'Blindada',
+      gripBonus: 0.08,
+      allTerrain: false,
+      defectChance: 0.07,
+      hoodColor: 0x18181b,
+      bodyStyle: 'armored',
+      desc: 'Tanque urbano com 450 de durabilidade: suporta várias pancadas e danos pesados.'
+    },
+    {
+      id: 'ferrari',
+      name: 'Ferrari',
+      price: 220,
+      maxSpeed: 260,
+      durability: 200,
+      accel: 96,
+      turnRate: 1.65,
+      turnLabel: 'Superesportiva',
+      gripBonus: 0.20,
+      allTerrain: false,
+      defectChance: 0.15,
+      hoodColor: 0xdc2626,
+      bodyStyle: 'supercar',
+      desc: 'Superesportivo de 260 km/h com aceleração explosiva que atinge o topo rapidamente.'
+    }
+  ];
+
+  const MAPS_DATA = [
+    {
+      id: 'road-37',
+      name: 'ROAD-37',
+      price: 0,
+      desc: 'Rodovia asfaltada noturna com curvas sinuosas.',
+      skyColor: 0x06080f,
+      fogColor: 0x06080f,
+      groundColor: 0x0b120e,
+      grip: 1.0,
+      dragFactor: 1.0
+    },
+    {
+      id: 'road-47',
+      name: 'ROAD-47',
+      price: 30,
+      desc: 'Pista com buracos e obstáculos! Desvie para não danificar o carro.',
+      skyColor: 0x0b090c,
+      fogColor: 0x0b090c,
+      groundColor: 0x161210,
+      grip: 0.96,
+      dragFactor: 1.02
+    },
+    {
+      id: 'road-99',
+      name: 'ROAD-99',
+      price: 60,
+      desc: 'Pista de terra batida com menor aderência (ideal para Off-Road).',
+      skyColor: 0x110c07,
+      fogColor: 0x110c07,
+      groundColor: 0x24170e,
+      grip: 0.60,
+      dragFactor: 1.15
+    },
+    {
+      id: 'road-105',
+      name: 'ROAD-105',
+      price: 100,
+      desc: 'Partes da pista alagadas! A água freia carros comuns e tira estabilidade.',
+      skyColor: 0x050d17,
+      fogColor: 0x050d17,
+      groundColor: 0x081726,
+      grip: 0.85,
+      dragFactor: 1.0
+    }
+  ];
+
+  let savedCoins = parseInt(localStorage.getItem('road37_coins') || '0', 10);
+  let unlockedCars = JSON.parse(localStorage.getItem('road37_unlocked_cars') || '["carro-velho"]');
+  let selectedCarId = localStorage.getItem('road37_selected_car') || 'carro-velho';
+  if (!unlockedCars.includes(selectedCarId)) selectedCarId = 'carro-velho';
+
+  let unlockedMaps = JSON.parse(localStorage.getItem('road37_unlocked_maps') || '["road-37"]');
+  let selectedMapId = localStorage.getItem('road37_selected_map') || 'road-37';
+  if (!unlockedMaps.includes(selectedMapId)) selectedMapId = 'road-37';
+
+  function saveProgress() {
+    localStorage.setItem('road37_coins', String(savedCoins));
+    localStorage.setItem('road37_unlocked_cars', JSON.stringify(unlockedCars));
+    localStorage.setItem('road37_selected_car', selectedCarId);
+    localStorage.setItem('road37_unlocked_maps', JSON.stringify(unlockedMaps));
+    localStorage.setItem('road37_selected_map', selectedMapId);
+  }
+
+  function getCurrentCar() {
+    return CARS_DATA.find(c => c.id === selectedCarId) || CARS_DATA[0];
+  }
+
+  function getCurrentMap() {
+    return MAPS_DATA.find(m => m.id === selectedMapId) || MAPS_DATA[0];
+  }
+
+  // ==========================================
+  // 3. ESTADO DA PARTIDA
+  // ==========================================
+  let gameState = 'LOBBY';
+
+  const ROAD_WIDTH = 16;
+  const SEGMENT_LENGTH = 5;
+  const AHEAD_SEGMENTS = 85;
+  const BEHIND_SEGMENTS = 18;
+  const MAX_REVERSE_KMH = 45;
+
+  let carZ = 0;
+  let carX = 0;
+  let carSpeedKmh = 0;
+  let carYaw = 0;
+  let steeringInput = 0;
+  let carAngularVel = 0;
+  let bumpShakeTimer = 0;
+
+  let currentDurability = 100;
+  let maxDurability = 100;
+  let lastDefectTime = 0;
+  const defects = {
+    tireDamaged: false,
+    engineDamaged: false,
+    glassBroken: false,
+    lightsBroken: false
+  };
+
+  let runCoinsEarned = 0;
+  let nextCoinMilestone = 500;
+
+  let monsterAwake = false;
+  let monsterZ = 38;
+  let monsterSpeedKmh = 0;
+  let monsterBobPhase = 0;
+
+  const input = { gas: false, brake: false, left: false, right: false };
+
+  // ==========================================
+  // 4. CENA 3D PRINCIPAL (CORRIDA)
+  // ==========================================
+  const canvas = document.getElementById('gameCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x06080f);
+  scene.fog = new THREE.FogExp2(0x06080f, 0.0085);
+
+  const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 460);
+
+  const ambientLight = new THREE.AmbientLight(0x334155, 0.9);
+  scene.add(ambientLight);
+
+  const moonLight = new THREE.DirectionalLight(0x94a3b8, 0.6);
+  moonLight.position.set(30, 80, -40);
+  scene.add(moonLight);
+
+  function getRoadCenterX(z) {
+    const s = -z;
+    if (s <= 40) return 0;
+    const d = s - 40;
+    const c1 = Math.sin(d * 0.0055) * 34;
+    const c2 = Math.sin(d * 0.0135 + 1.2) * 16;
+    const c3 = Math.cos(d * 0.0023) * 28;
+    const ramp = Math.min(1, d / 90);
+    return (c1 + c2 + (c3 - 28)) * ramp;
+  }
+
+  function getRoadYaw(z) {
+    const delta = 0.5;
+    const x1 = getRoadCenterX(z);
+    const x2 = getRoadCenterX(z - delta);
+    return Math.atan2(-(x2 - x1), delta);
+  }
+
+  function createRoadTexture(type) {
+    const c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 512;
+    const ctx = c.getContext('2d');
+
+    if (type === 'dirt') {
+      ctx.fillStyle = '#4a321f';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 11000; i++) {
+        const r = 55 + Math.floor(Math.random() * 45);
+        const g = 36 + Math.floor(Math.random() * 30);
+        const b = 20 + Math.floor(Math.random() * 18);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 3, 3);
+      }
+      ctx.fillStyle = 'rgba(32, 20, 11, 0.45)';
+      ctx.fillRect(115, 0, 55, 512);
+      ctx.fillRect(342, 0, 55, 512);
+    } else {
+      ctx.fillStyle = '#1b1e26';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 9000; i++) {
+        const v = 20 + Math.floor(Math.random() * 26);
+        ctx.fillStyle = `rgb(${v},${v+2},${v+6})`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+      }
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(18, 0, 10, 512);
+      ctx.fillRect(512 - 28, 0, 10, 512);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(251, 30, 10, 190);
+      ctx.fillRect(251, 290, 10, 190);
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  const asphaltMat = new THREE.MeshStandardMaterial({ map: createRoadTexture('asphalt'), roughness: 0.88, metalness: 0.05 });
+  const dirtMat = new THREE.MeshStandardMaterial({ map: createRoadTexture('dirt'), roughness: 0.98, metalness: 0.0 });
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x0b120e, roughness: 1 });
+  const postMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+  const reflectorMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x291d18 });
+  const foliageMat = new THREE.MeshStandardMaterial({ color: 0x0f2419 });
+
+  const potholeMat = new THREE.MeshStandardMaterial({ color: 0x07080a, roughness: 1 });
+  const barrierMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+  const barrierStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0x0284c7, roughness: 0.15, metalness: 0.7, transparent: true, opacity: 0.78
+  });
+
+  const segGeo = new THREE.PlaneGeometry(ROAD_WIDTH, SEGMENT_LENGTH + 0.12);
+  segGeo.rotateX(-Math.PI / 2);
+  const groundGeo = new THREE.PlaneGeometry(260, SEGMENT_LENGTH + 0.15);
+  groundGeo.rotateX(-Math.PI / 2);
+  const postGeo = new THREE.BoxGeometry(0.18, 1.1, 0.18);
+  const refGeo = new THREE.BoxGeometry(0.22, 0.18, 0.22);
+  const trunkGeo = new THREE.CylinderGeometry(0.35, 0.5, 3.2, 6);
+  const coneGeo = new THREE.ConeGeometry(2.4, 6.5, 7);
+  const potholeGeo = new THREE.CircleGeometry(1.45, 14);
+  potholeGeo.rotateX(-Math.PI / 2);
+  const barrierGeo = new THREE.BoxGeometry(2.8, 0.95, 0.55);
+  const waterGeo = new THREE.PlaneGeometry(ROAD_WIDTH - 0.8, SEGMENT_LENGTH + 0.1);
+  waterGeo.rotateX(-Math.PI / 2);
+
+  const activeSegments = new Map();
+
+  function clearAllSegments() {
+    for (const [, data] of activeSegments.entries()) {
+      scene.remove(data.group);
+    }
+    activeSegments.clear();
+  }
+
+  function seededRandom(seed) {
+    const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  function spawnSegment(segIdx) {
+    if (activeSegments.has(segIdx)) return;
+
+    const mapCfg = getCurrentMap();
+    const zPos = -segIdx * SEGMENT_LENGTH;
+    const centerX = getRoadCenterX(zPos);
+    const segYaw = getRoadYaw(zPos);
+
+    const group = new THREE.Group();
+    group.position.set(centerX, 0, zPos);
+    group.rotation.y = segYaw;
+
+    const surfaceMat = mapCfg.id === 'road-99' ? dirtMat : asphaltMat;
+    group.add(new THREE.Mesh(segGeo, surfaceMat));
+
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.position.y = -0.05;
+    group.add(groundMesh);
+
+    if (mapCfg.id !== 'road-99' && Math.abs(segIdx) % 4 === 0) {
+      const leftPost = new THREE.Mesh(postGeo, postMat);
+      leftPost.position.set(-ROAD_WIDTH / 2 - 0.6, 0.55, 0);
+      const leftRef = new THREE.Mesh(refGeo, reflectorMat);
+      leftRef.position.set(-ROAD_WIDTH / 2 - 0.6, 0.95, 0);
+
+      const rightPost = new THREE.Mesh(postGeo, postMat);
+      rightPost.position.set(ROAD_WIDTH / 2 + 0.6, 0.55, 0);
+      const rightRef = new THREE.Mesh(refGeo, reflectorMat);
+      rightRef.position.set(ROAD_WIDTH / 2 + 0.6, 0.95, 0);
+
+      group.add(leftPost, leftRef, rightPost, rightRef);
+    }
+
+    if (Math.abs(segIdx) % 3 === 0) {
+      const r1 = seededRandom(segIdx * 3 + 1);
+      const r2 = seededRandom(segIdx * 3 + 2);
+
+      const treeL = new THREE.Group();
+      const trunkL = new THREE.Mesh(trunkGeo, trunkMat);
+      trunkL.position.y = 1.6;
+      const leavesL = new THREE.Mesh(coneGeo, foliageMat);
+      leavesL.position.y = 5.4;
+      treeL.add(trunkL, leavesL);
+      treeL.position.set(-(ROAD_WIDTH / 2 + 5 + r1 * 18), 0, 0);
+      group.add(treeL);
+
+      const treeR = new THREE.Group();
+      const trunkR = new THREE.Mesh(trunkGeo, trunkMat);
+      trunkR.position.y = 1.6;
+      const leavesR = new THREE.Mesh(coneGeo, foliageMat);
+      leavesR.position.y = 5.4;
+      treeR.add(trunkR, leavesR);
+      treeR.position.set(ROAD_WIDTH / 2 + 5 + r2 * 18, 0, 0);
+      group.add(treeR);
+    }
+
+    const hazards = [];
+    let isFlooded = false;
+
+    if (segIdx > 14) {
+      const chance = seededRandom(segIdx * 17);
+      const laneOffset = (seededRandom(segIdx * 31) - 0.5) * (ROAD_WIDTH - 4.5);
+
+      if (mapCfg.id === 'road-47') {
+        if (chance < 0.16) {
+          const hole = new THREE.Mesh(potholeGeo, potholeMat);
+          hole.position.set(laneOffset, 0.02, 0);
+          group.add(hole);
+          hazards.push({ type: 'pothole', localX: laneOffset, radius: 1.5 });
+        } else if (chance >= 0.16 && chance < 0.27) {
+          const barrier = new THREE.Mesh(barrierGeo, barrierMat);
+          barrier.position.set(laneOffset, 0.48, 0);
+          const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.84, 0.22, 0.58), barrierStripeMat);
+          stripe.position.set(laneOffset, 0.55, 0);
+          group.add(barrier, stripe);
+          hazards.push({ type: 'barrier', localX: laneOffset, radius: 1.7 });
+        }
+      } else {
+        if (chance < 0.045) {
+          const hole = new THREE.Mesh(potholeGeo, potholeMat);
+          hole.position.set(laneOffset, 0.02, 0);
+          group.add(hole);
+          hazards.push({ type: 'pothole', localX: laneOffset, radius: 1.45 });
+        }
+      }
+
+      if (mapCfg.id === 'road-105') {
+        const cycle = segIdx % 38;
+        if (cycle >= 18 && cycle <= 31) {
+          isFlooded = true;
+          const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+          waterMesh.position.y = 0.04;
+          group.add(waterMesh);
+        }
+      }
+    }
+
+    scene.add(group);
+    activeSegments.set(segIdx, { group, hazards, isFlooded });
+  }
+
+  function updateDynamicRoadGeneration() {
+    const currentCarIdx = Math.floor(-carZ / SEGMENT_LENGTH);
+    const lowestNeededIdx = Math.min(currentCarIdx, Math.floor(-monsterZ / SEGMENT_LENGTH)) - BEHIND_SEGMENTS;
+    const highestNeededIdx = currentCarIdx + AHEAD_SEGMENTS;
+
+    for (let idx = lowestNeededIdx; idx <= highestNeededIdx; idx++) {
+      spawnSegment(idx);
+    }
+
+    for (const [idx, data] of activeSegments.entries()) {
+      if (idx < lowestNeededIdx || idx > highestNeededIdx + 5) {
+        scene.remove(data.group);
+        activeSegments.delete(idx);
+      }
+    }
+  }
+
+  // Interior do carro (1ª pessoa)
+  const carCockpit = new THREE.Group();
+  scene.add(carCockpit);
+
+  const hoodMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, metalness: 0.6, roughness: 0.3 });
+  const hoodMesh = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.14, 1.5), hoodMat);
+  hoodMesh.position.set(0, 0.72, -1.35);
+  hoodMesh.rotation.x = 0.06;
+  carCockpit.add(hoodMesh);
+
+  const dashMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.9, 0.38, 0.65),
+    new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 })
+  );
+  dashMesh.position.set(0, 0.76, -0.58);
+  carCockpit.add(dashMesh);
+
+  const pillarGeo = new THREE.BoxGeometry(0.08, 0.95, 0.08);
+  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+  const leftPillar = new THREE.Mesh(pillarGeo, pillarMat);
+  leftPillar.position.set(-0.88, 1.25, -0.52);
+  leftPillar.rotation.z = -0.22;
+  leftPillar.rotation.x = -0.35;
+
+  const rightPillar = new THREE.Mesh(pillarGeo, pillarMat);
+  rightPillar.position.set(0.88, 1.25, -0.52);
+  rightPillar.rotation.z = 0.22;
+  rightPillar.rotation.x = -0.35;
+  carCockpit.add(leftPillar, rightPillar);
+
+  const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.06, 1.2), pillarMat);
+  roofMesh.position.set(0, 1.66, -0.05);
+  carCockpit.add(roofMesh);
+
+  const mirrorFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.1, 0.04),
+    new THREE.MeshStandardMaterial({ color: 0x090d16 })
+  );
+  mirrorFrame.position.set(0, 1.48, -0.45);
+  const mirrorGlassMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+  const mirrorGlass = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.075), mirrorGlassMat);
+  mirrorGlass.position.set(0, 1.48, -0.428);
+  carCockpit.add(mirrorFrame, mirrorGlass);
+
+  const steeringWheelGroup = new THREE.Group();
+  steeringWheelGroup.position.set(-0.36, 0.93, -0.36);
+  steeringWheelGroup.rotation.x = -0.32;
+
+  const wheelRim = new THREE.Mesh(
+    new THREE.TorusGeometry(0.18, 0.024, 10, 24),
+    new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 })
+  );
+  const wheelSpoke = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.035, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0x374151 })
+  );
+  const wheelCenter = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.055, 0.03, 16),
+    new THREE.MeshStandardMaterial({ color: 0xdc2626 })
+  );
+  wheelCenter.rotation.x = Math.PI / 2;
+
+  steeringWheelGroup.add(wheelRim, wheelSpoke, wheelCenter);
+  carCockpit.add(steeringWheelGroup);
+
+  const headlightLeft = new THREE.SpotLight(0xfffbeb, 3.4, 135, Math.PI / 4.2, 0.45, 1);
+  headlightLeft.position.set(-0.65, 0.72, -1.8);
+  headlightLeft.target.position.set(-0.65, 0.2, -25);
+  carCockpit.add(headlightLeft);
+  carCockpit.add(headlightLeft.target);
+
+  const headlightRight = new THREE.SpotLight(0xfffbeb, 3.4, 135, Math.PI / 4.2, 0.45, 1);
+  headlightRight.position.set(0.65, 0.72, -1.8);
+  headlightRight.target.position.set(0.65, 0.2, -25);
+  carCockpit.add(headlightRight);
+  carCockpit.add(headlightRight.target);
+
+  camera.position.set(-0.36, 1.24, -0.05);
+  camera.rotation.set(0, 0, 0);
+  carCockpit.add(camera);
+
+  // Função construtora do modelo 3D do Monstro (usada tanto no jogo quanto no Bestiário 3D)
+  function buildMonster3DModel() {
+    const group = new THREE.Group();
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0b0b0e, roughness: 0.85, metalness: 0.15 });
+    const body = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.4, 8), bodyMat);
+    body.position.y = 2.2;
+    group.add(body);
+
+    const armGeo = new THREE.BoxGeometry(0.35, 2.8, 0.35);
+    const leftArm = new THREE.Mesh(armGeo, bodyMat);
+    leftArm.position.set(-1.55, 2.1, -0.5);
+    leftArm.rotation.z = 0.28;
+    leftArm.rotation.x = -0.4;
+
+    const rightArm = new THREE.Mesh(armGeo, bodyMat);
+    rightArm.position.set(1.55, 2.1, -0.5);
+    rightArm.rotation.z = -0.28;
+    rightArm.rotation.x = -0.4;
+    group.add(leftArm, rightArm);
+
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff1e1e });
+    const eyeGeo = new THREE.SphereGeometry(0.22, 8, 8);
+    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeL.position.set(-0.48, 3.2, -0.85);
+    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeR.position.set(0.48, 3.2, -0.85);
+    group.add(eyeL, eyeR);
+
+    const glow = new THREE.PointLight(0xdc2626, 4.5, 35);
+    glow.position.set(0, 2.8, -1.2);
+    group.add(glow);
+
+    return group;
+  }
+
+  const monsterGroup = buildMonster3DModel();
+  scene.add(monsterGroup);
+
+  // ==========================================
+  // 5. 2ª ABA: SHOWROOM 3D GIRATÓRIO (CARROS + MONSTRO)
+  // ==========================================
+  const showcaseScreen = document.getElementById('showcaseScreen');
+  const carPreviewCanvas = document.getElementById('carPreviewCanvas');
+  const monsterPreviewCanvas = document.getElementById('monsterPreviewCanvas');
+
+  let showcaseActive = false;
+  let inspectedCarId = selectedCarId;
+
+  // Cena 3D do Carro Girando
+  const carPreviewRenderer = new THREE.WebGLRenderer({ canvas: carPreviewCanvas, antialias: true, alpha: true });
+  const carPreviewScene = new THREE.Scene();
+  const carPreviewCamera = new THREE.PerspectiveCamera(45, 1.8, 0.1, 100);
+  carPreviewCamera.position.set(3.8, 2.1, 4.4);
+  carPreviewCamera.lookAt(0, 0.7, 0);
+
+  carPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const carKeyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  carKeyLight.position.set(5, 8, 5);
+  carPreviewScene.add(carKeyLight);
+
+  // Plataforma giratória
+  const platformMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.5, 2.7, 0.15, 32),
+    new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.3 })
+  );
+  platformMesh.position.y = -0.08;
+  carPreviewScene.add(platformMesh);
+
+  let currentPreviewCarMesh = null;
+
+  function buildExteriorCar3D(carCfg) {
+    const group = new THREE.Group();
+    const paintMat = new THREE.MeshStandardMaterial({
+      color: carCfg.hoodColor,
+      metalness: carCfg.bodyStyle === 'supercar' || carCfg.bodyStyle === 'sport' ? 0.75 : 0.45,
+      roughness: 0.28
+    });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.7 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1, opacity: 0.75, transparent: true });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.9 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.8, roughness: 0.2 });
+
+    // Chassi inferior
+    const chassisHeight = carCfg.bodyStyle === 'supercar' ? 0.45 : (carCfg.bodyStyle === 'offroad' ? 0.65 : 0.55);
+    const chassisY = carCfg.bodyStyle === 'offroad' ? 0.62 : 0.46;
+    const bodyWidth = carCfg.bodyStyle === 'armored' ? 2.05 : 1.85;
+    const bodyLength = carCfg.bodyStyle === 'pickup' ? 4.3 : 4.0;
+
+    const chassis = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth, chassisHeight, bodyLength), paintMat);
+    chassis.position.y = chassisY;
+    group.add(chassis);
+
+    // Cabine (varia conforme o estilo do carro)
+    if (carCfg.bodyStyle === 'pickup') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth - 0.1, 0.62, 1.55), paintMat);
+      cab.position.set(0, chassisY + 0.55, -0.35);
+      group.add(cab);
+
+      const bedWall = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth - 0.12, 0.35, 1.65), darkMat);
+      bedWall.position.set(0, chassisY + 0.32, 1.15);
+      group.add(bedWall);
+    } else if (carCfg.bodyStyle === 'supercar') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.46, 1.8), glassMat);
+      cab.position.set(0, chassisY + 0.42, -0.1);
+      group.add(cab);
+
+      // Aerofólio traseiro da Ferrari
+      const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.08, 0.32), darkMat);
+      spoiler.position.set(0, chassisY + 0.55, 1.82);
+      group.add(spoiler);
+    } else if (carCfg.bodyStyle === 'armored') {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.96, 0.68, 2.6), paintMat);
+      cab.position.set(0, chassisY + 0.58, 0.15);
+      group.add(cab);
+
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.22, 2.64), glassMat);
+      visor.position.set(0, chassisY + 0.65, 0.15);
+      group.add(visor);
+    } else {
+      const cabLen = carCfg.bodyStyle === 'hatch' ? 2.2 : 1.95;
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.55, cabLen), paintMat);
+      cab.position.set(0, chassisY + 0.52, 0.1);
+      const win = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.36, cabLen - 0.18), glassMat);
+      win.position.set(0, chassisY + 0.54, 0.1);
+      group.add(cab, win);
+    }
+
+    // Faróis dianteiros e lanternas traseiras
+    const headL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.16, 0.08), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+    headL.position.set(-0.62, chassisY + 0.05, -bodyLength / 2 - 0.01);
+    const headR = headL.clone();
+    headR.position.x = 0.62;
+
+    const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.16, 0.08), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+    tailL.position.set(-0.62, chassisY + 0.05, bodyLength / 2 + 0.01);
+    const tailR = tailL.clone();
+    tailR.position.x = 0.62;
+    group.add(headL, headR, tailL, tailR);
+
+    // 4 Rodas
+    const wheelRadius = carCfg.bodyStyle === 'offroad' ? 0.46 : 0.36;
+    const wheelGeo = new THREE.CylinderGeometry(wheelRadius, wheelRadius, 0.28, 20);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const rimGeo = new THREE.CylinderGeometry(wheelRadius * 0.55, wheelRadius * 0.55, 0.30, 12);
+    rimGeo.rotateZ(Math.PI / 2);
+
+    const wheelPositions = [
+      [-bodyWidth / 2 - 0.04, wheelRadius, -1.25],
+      [ bodyWidth / 2 + 0.04, wheelRadius, -1.25],
+      [-bodyWidth / 2 - 0.04, wheelRadius,  1.25],
+      [ bodyWidth / 2 + 0.04, wheelRadius,  1.25]
+    ];
+
+    wheelPositions.forEach(([wx, wy, wz]) => {
+      const tire = new THREE.Mesh(wheelGeo, wheelMat);
+      tire.position.set(wx, wy, wz);
+      const rim = new THREE.Mesh(rimGeo, rimMat);
+      rim.position.set(wx, wy, wz);
+      group.add(tire, rim);
+    });
+
+    return group;
+  }
+
+  // Cena 3D do Monstro Girando
+  const monsterPreviewRenderer = new THREE.WebGLRenderer({ canvas: monsterPreviewCanvas, antialias: true, alpha: true });
+  const monsterPreviewScene = new THREE.Scene();
+  const monsterPreviewCamera = new THREE.PerspectiveCamera(45, 1.8, 0.1, 100);
+  monsterPreviewCamera.position.set(0, 2.7, 6.2);
+  monsterPreviewCamera.lookAt(0, 2.2, 0);
+
+  monsterPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const monsterKeyLight = new THREE.DirectionalLight(0xf87171, 1.2);
+  monsterKeyLight.position.set(4, 7, 5);
+  monsterPreviewScene.add(monsterKeyLight);
+
+  const monsterPlatform = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.3, 2.5, 0.15, 32),
+    new THREE.MeshStandardMaterial({ color: 0x271010, metalness: 0.5, roughness: 0.4 })
+  );
+  monsterPlatform.position.y = -0.08;
+  monsterPreviewScene.add(monsterPlatform);
+
+  const showcaseMonsterMesh = buildMonster3DModel();
+  // Gira o monstro de frente para a câmera inicialmente
+  showcaseMonsterMesh.rotation.y = Math.PI;
+  monsterPreviewScene.add(showcaseMonsterMesh);
+
+  function resizeShowcaseRenderers() {
+    const carRect = carPreviewCanvas.parentElement.getBoundingClientRect();
+    if (carRect.width > 0 && carRect.height > 0) {
+      carPreviewRenderer.setSize(carRect.width, carRect.height, false);
+      carPreviewCamera.aspect = carRect.width / carRect.height;
+      carPreviewCamera.updateProjectionMatrix();
+    }
+
+    const monRect = monsterPreviewCanvas.parentElement.getBoundingClientRect();
+    if (monRect.width > 0 && monRect.height > 0) {
+      monsterPreviewRenderer.setSize(monRect.width, monRect.height, false);
+      monsterPreviewCamera.aspect = monRect.width / monRect.height;
+      monsterPreviewCamera.updateProjectionMatrix();
+    }
+  }
+
+  function renderShowcaseTab() {
+    if (!unlockedCars.includes(inspectedCarId)) {
+      inspectedCarId = selectedCarId;
+    }
+
+    const ownedCars = CARS_DATA.filter(c => unlockedCars.includes(c.id));
+    document.getElementById('ownedCarsCountBadge').textContent = `${ownedCars.length} ${ownedCars.length === 1 ? 'Carro' : 'Carros'}`;
+
+    const selectorEl = document.getElementById('ownedCarsSelector');
+    selectorEl.innerHTML = '';
+
+    ownedCars.forEach(car => {
+      const btn = document.createElement('button');
+      btn.className = `owned-car-pill ${car.id === inspectedCarId ? 'active' : ''}`;
+      btn.textContent = car.name;
+      btn.addEventListener('click', () => {
+        inspectedCarId = car.id;
+        renderShowcaseTab();
+      });
+      selectorEl.appendChild(btn);
+    });
+
+    const carCfg = CARS_DATA.find(c => c.id === inspectedCarId) || ownedCars[0];
+
+    // Atualiza modelo 3D giratório do carro
+    if (currentPreviewCarMesh) {
+      carPreviewScene.remove(currentPreviewCarMesh);
+    }
+    currentPreviewCarMesh = buildExteriorCar3D(carCfg);
+    carPreviewScene.add(currentPreviewCarMesh);
+
+    // Atualiza estatísticas do carro inspecionado
+    document.getElementById('carPreviewLabel').textContent = `${carCfg.name.toUpperCase()} • MODELO 3D`;
+    document.getElementById('inspectCarName').textContent = carCfg.name;
+    document.getElementById('inspectCarDesc').textContent = carCfg.desc;
+
+    document.getElementById('statCarSpeedText').textContent = `${carCfg.maxSpeed} km/h`;
+    document.getElementById('statCarSpeedBar').style.width = `${Math.min(100, Math.round((carCfg.maxSpeed / 260) * 100))}%`;
+
+    document.getElementById('statCarDurabilityText').textContent = `${carCfg.durability} HP`;
+    document.getElementById('statCarDurabilityBar').style.width = `${Math.min(100, Math.round((carCfg.durability / 450) * 100))}%`;
+
+    document.getElementById('statCarAccelText').textContent = `${carCfg.accel} pts`;
+    document.getElementById('statCarAccelBar').style.width = `${Math.min(100, Math.round((carCfg.accel / 100) * 100))}%`;
+
+    document.getElementById('statCarTurnText').textContent = carCfg.turnLabel;
+    document.getElementById('statCarTurnBar').style.width = `${Math.min(100, Math.round((carCfg.turnRate / 1.8) * 100))}%`;
+
+    const reliabilityPct = Math.round((1 - carCfg.defectChance) * 100);
+    document.getElementById('statCarReliabilityText').textContent = `${reliabilityPct}%`;
+    document.getElementById('statCarReliabilityBar').style.width = `${reliabilityPct}%`;
+
+    requestAnimationFrame(resizeShowcaseRenderers);
+  }
+
+  document.getElementById('openShowcaseBtn').addEventListener('click', () => {
+    inspectedCarId = selectedCarId;
+    lobbyScreen.style.display = 'none';
+    showcaseScreen.style.display = 'flex';
+    showcaseActive = true;
+    renderShowcaseTab();
+  });
+
+  document.getElementById('backFromShowcaseBtn').addEventListener('click', () => {
+    showcaseActive = false;
+    showcaseScreen.style.display = 'none';
+    lobbyScreen.style.display = 'flex';
+  });
+
+  // ==========================================
+  // 6. RENDERIZAÇÃO DA LOJA NO LOBBY
+  // ==========================================
+  const totalCoinsDisplayEl = document.getElementById('totalCoinsDisplay');
+  const carsGridEl = document.getElementById('carsGrid');
+  const mapsGridEl = document.getElementById('mapsGrid');
+
+  function renderLobbyShop() {
+    totalCoinsDisplayEl.textContent = savedCoins;
+
+    carsGridEl.innerHTML = '';
+    CARS_DATA.forEach(car => {
+      const isUnlocked = unlockedCars.includes(car.id);
+      const isSelected = selectedCarId === car.id;
+
+      const card = document.createElement('div');
+      card.className = `shop-card ${isSelected ? 'selected-car' : ''}`;
+
+      let badgeHtml = '';
+      if (isSelected) badgeHtml = `<span class="tag-badge tag-selected-car">Equipado</span>`;
+      else if (isUnlocked) badgeHtml = `<span class="tag-badge tag-owned">Na Garagem</span>`;
+      else badgeHtml = `<span class="tag-badge tag-price">🪙 ${car.price}</span>`;
+
+      let btnHtml = '';
+      if (isSelected) btnHtml = `<button class="action-btn btn-active-car">CARRO SELECIONADO</button>`;
+      else if (isUnlocked) btnHtml = `<button class="action-btn btn-select">SELECIONAR</button>`;
+      else {
+        const canAfford = savedCoins >= car.price;
+        btnHtml = `<button class="action-btn btn-buy" ${canAfford ? '' : 'disabled'}>
+          ${canAfford ? `COMPRAR (${car.price} MOEDAS)` : `FALTA ${car.price - savedCoins} MOEDAS`}
+        </button>`;
+      }
+
+      card.innerHTML = `
+        <div>
+          <div class="card-top">
+            <h4>${car.name}</h4>
+            ${badgeHtml}
+          </div>
+          <div class="car-specs">
+            <span class="spec-pill">⚡ ${car.maxSpeed} km/h</span>
+            <span class="spec-pill">🛡️ ${car.durability} HP</span>
+          </div>
+          <p class="card-desc">${car.desc}</p>
+        </div>
+        ${btnHtml}
+      `;
+
+      card.addEventListener('click', () => {
+        if (isUnlocked) {
+          selectedCarId = car.id;
+          saveProgress();
+          applyCarVisuals();
+          renderLobbyShop();
+        } else if (savedCoins >= car.price) {
+          savedCoins -= car.price;
+          unlockedCars.push(car.id);
+          selectedCarId = car.id;
+          saveProgress();
+          applyCarVisuals();
+          renderLobbyShop();
+        }
+      });
+
+      carsGridEl.appendChild(card);
+    });
+
+    mapsGridEl.innerHTML = '';
+    MAPS_DATA.forEach(map => {
+      const isUnlocked = unlockedMaps.includes(map.id);
+      const isSelected = selectedMapId === map.id;
+
+      const card = document.createElement('div');
+      card.className = `shop-card ${isSelected ? 'selected' : ''}`;
+
+      let badgeHtml = '';
+      if (isSelected) badgeHtml = `<span class="tag-badge tag-selected-map">Selecionado</span>`;
+      else if (isUnlocked) badgeHtml = `<span class="tag-badge tag-owned">Liberado</span>`;
+      else badgeHtml = `<span class="tag-badge tag-price">🪙 ${map.price}</span>`;
+
+      let btnHtml = '';
+      if (isSelected) btnHtml = `<button class="action-btn btn-active-map">MAPA ATIVO</button>`;
+      else if (isUnlocked) btnHtml = `<button class="action-btn btn-select">SELECIONAR</button>`;
+      else {
+        const canAfford = savedCoins >= map.price;
+        btnHtml = `<button class="action-btn btn-buy" ${canAfford ? '' : 'disabled'}>
+          ${canAfford ? `COMPRAR (${map.price} MOEDAS)` : `FALTA ${map.price - savedCoins} MOEDAS`}
+        </button>`;
+      }
+
+      card.innerHTML = `
+        <div>
+          <div class="card-top">
+            <h4>${map.name}</h4>
+            ${badgeHtml}
+          </div>
+          <p class="card-desc">${map.desc}</p>
+        </div>
+        ${btnHtml}
+      `;
+
+      card.addEventListener('click', () => {
+        if (isUnlocked) {
+          selectedMapId = map.id;
+          saveProgress();
+          applyMapEnvironment();
+          renderLobbyShop();
+        } else if (savedCoins >= map.price) {
+          savedCoins -= map.price;
+          unlockedMaps.push(map.id);
+          selectedMapId = map.id;
+          saveProgress();
+          applyMapEnvironment();
+          renderLobbyShop();
+        }
+      });
+
+      mapsGridEl.appendChild(card);
+    });
+  }
+
+  function applyCarVisuals() {
+    const carCfg = getCurrentCar();
+    hoodMat.color.setHex(carCfg.hoodColor);
+  }
+
+  function applyMapEnvironment() {
+    const mapCfg = getCurrentMap();
+    scene.background.setHex(mapCfg.skyColor);
+    scene.fog.color.setHex(mapCfg.fogColor);
+    groundMat.color.setHex(mapCfg.groundColor);
+
+    clearAllSegments();
+    updateDynamicRoadGeneration();
+  }
+
+  // ==========================================
+  // 7. SISTEMA DE DURABILIDADE E DEFEITOS
+  // ==========================================
+  const durabilityBarFillEl = document.getElementById('durabilityBarFill');
+  const durabilityTextEl = document.getElementById('durabilityText');
+  const defectsContainerEl = document.getElementById('defectsContainer');
+  const crackedGlassOverlayEl = document.getElementById('crackedGlassOverlay');
+  const eventBannerEl = document.getElementById('eventBanner');
+
+  let bannerTimeout = null;
+  function showEventBanner(text, borderColor = '#f59e0b') {
+    eventBannerEl.textContent = text;
+    eventBannerEl.style.borderColor = borderColor;
+    eventBannerEl.style.opacity = '1';
+    if (bannerTimeout) clearTimeout(bannerTimeout);
+    bannerTimeout = setTimeout(() => {
+      eventBannerEl.style.opacity = '0';
+    }, 2800);
+  }
+
+  function updateDurabilityHUD() {
+    const pct = Math.max(0, Math.min(100, (currentDurability / maxDurability) * 100));
+    durabilityBarFillEl.style.width = `${pct}%`;
+    durabilityTextEl.textContent = `${Math.max(0, Math.round(currentDurability))}/${maxDurability}`;
+
+    if (pct > 55) durabilityBarFillEl.style.background = '#10b981';
+    else if (pct > 25) durabilityBarFillEl.style.background = '#f59e0b';
+    else durabilityBarFillEl.style.background = '#ef4444';
+  }
+
+  function updateDefectsHUD() {
+    defectsContainerEl.innerHTML = '';
+    if (defects.tireDamaged) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">🛞 PNEU DANIFICADO (Puxando/Lento)</div>`;
+    }
+    if (defects.engineDamaged) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">⚙️ MOTOR DANIFICADO (Menos potência)</div>`;
+    }
+    if (defects.glassBroken) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">🪟 VIDRO QUEBRADO</div>`;
+      crackedGlassOverlayEl.style.display = 'block';
+    } else {
+      crackedGlassOverlayEl.style.display = 'none';
+    }
+    if (defects.lightsBroken) {
+      defectsContainerEl.innerHTML += `<div class="defect-badge">💡 LUZES QUEBRADAS (Faróis falhando)</div>`;
+    }
+  }
+
+  function tryTriggerRandomDefect(forceBonusChance = 0) {
+    const now = performance.now();
+    if (now - lastDefectTime < 12000) return;
+
+    const carCfg = getCurrentCar();
+    const chance = Math.min(0.85, carCfg.defectChance + forceBonusChance);
+
+    if (Math.random() > chance) return;
+
+    const available = [];
+    if (!defects.tireDamaged) available.push('tireDamaged');
+    if (!defects.engineDamaged) available.push('engineDamaged');
+    if (!defects.glassBroken) available.push('glassBroken');
+    if (!defects.lightsBroken) available.push('lightsBroken');
+
+    if (available.length === 0) return;
+
+    const chosen = available[Math.floor(Math.random() * available.length)];
+    defects[chosen] = true;
+    lastDefectTime = now;
+    updateDefectsHUD();
+
+    const labels = {
+      tireDamaged: '⚠️ DEFEITO: PNEU DANIFICADO!',
+      engineDamaged: '⚠️ DEFEITO: MOTOR DANIFICADO!',
+      glassBroken: '⚠️ DEFEITO: VIDRO QUEBRADO!',
+      lightsBroken: '⚠️ DEFEITO: LUZES QUEBRADAS!'
+    };
+    showEventBanner(labels[chosen], '#ef4444');
+  }
+
+  function applyVehicleDamage(amount, defectBonus = 0.15) {
+    currentDurability -= amount;
+    bumpShakeTimer = 0.4;
+    updateDurabilityHUD();
+
+    if (currentDurability <= 0) {
+      currentDurability = 0;
+      triggerGameOver('DESTRUIDO');
+      return true;
+    }
+
+    tryTriggerRandomDefect(defectBonus);
+    return false;
+  }
+
+  // ==========================================
+  // 8. CONTROLES E FLUXO DO JOGO
+  // ==========================================
+  const lobbyScreen = document.getElementById('lobbyScreen');
+  const hud = document.getElementById('hud');
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const gameOverTitleEl = document.getElementById('gameOverTitle');
+  const speedValueEl = document.getElementById('speedValue');
+  const gearIndicatorEl = document.getElementById('gearIndicator');
+  const distanceValueEl = document.getElementById('distanceValue');
+  const coinsRunValueEl = document.getElementById('coinsRunValue');
+  const monsterDistTextEl = document.getElementById('monsterDistText');
+  const dangerBarFillEl = document.getElementById('dangerBarFill');
+  const surfaceWarningEl = document.getElementById('surfaceWarning');
+  const dangerVignetteEl = document.getElementById('dangerVignette');
+  const finalStatsTextEl = document.getElementById('finalStatsText');
+  const earnedCoinsTextEl = document.getElementById('earnedCoinsText');
+
+  function resetGame() {
+    const carCfg = getCurrentCar();
+    carZ = 0;
+    carX = 0;
+    carSpeedKmh = 0;
+    carYaw = 0;
+    steeringInput = 0;
+    carAngularVel = 0;
+    bumpShakeTimer = 0;
+
+    maxDurability = carCfg.durability;
+    currentDurability = maxDurability;
+    lastDefectTime = performance.now();
+
+    defects.tireDamaged = false;
+    defects.engineDamaged = false;
+    defects.glassBroken = false;
+    defects.lightsBroken = false;
+    updateDurabilityHUD();
+    updateDefectsHUD();
+
+    runCoinsEarned = 0;
+    nextCoinMilestone = 500;
+
+    monsterAwake = false;
+    monsterZ = 38;
+    monsterSpeedKmh = 0;
+
+    input.gas = false;
+    input.brake = false;
+    input.left = false;
+    input.right = false;
+
+    eventBannerEl.style.opacity = '0';
+    surfaceWarningEl.style.display = 'none';
+    monsterDistTextEl.textContent = 'DORMINDO (ANDE P/ INICIAR)';
+    monsterDistTextEl.style.color = '#94a3b8';
+    dangerBarFillEl.style.width = '10%';
+    dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
+    mirrorGlassMat.color.setHex(0x1e293b);
+    coinsRunValueEl.textContent = '🪙 +0';
+
+    headlightLeft.intensity = 3.4;
+    headlightRight.intensity = 3.4;
+
+    applyCarVisuals();
+    applyMapEnvironment();
+    updateTransforms(0);
+  }
+
+  function startGame() {
+    resetGame();
+    gameState = 'PLAYING';
+    showcaseActive = false;
+    lobbyScreen.style.display = 'none';
+    showcaseScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    hud.style.display = 'block';
+    musicEngine.start();
+  }
+
+  function exitToLobby() {
+    musicEngine.stop();
+    resetGame();
+    gameState = 'LOBBY';
+    showcaseActive = false;
+    gameOverScreen.style.display = 'none';
+    showcaseScreen.style.display = 'none';
+    hud.style.display = 'none';
+    lobbyScreen.style.display = 'flex';
+    renderLobbyShop();
+  }
+
+  function triggerGameOver(reason = 'MONSTRO') {
+    musicEngine.stop();
+    gameState = 'GAMEOVER';
+    hud.style.display = 'none';
+    gameOverScreen.style.display = 'flex';
+
+    const meters = Math.max(0, Math.floor(-carZ));
+    if (reason === 'DESTRUIDO') {
+      gameOverTitleEl.textContent = 'CARRO DESTRUÍDO!';
+      finalStatsTextEl.textContent = `A durabilidade do seu ${getCurrentCar().name} chegou a 0 após ${meters} metros!`;
+    } else {
+      gameOverTitleEl.textContent = 'VOCÊ FOI PEGO!';
+      finalStatsTextEl.textContent = `O monstro alcançou seu ${getCurrentCar().name} após ${meters} metros em ${getCurrentMap().name}!`;
+    }
+    earnedCoinsTextEl.textContent = `🪙 +${runCoinsEarned} moedas ganhas nesta corrida`;
+    renderLobbyShop();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  document.getElementById('backLobbyBtn').addEventListener('click', exitToLobby);
+  document.getElementById('exitRunBtn').addEventListener('click', exitToLobby);
+
+  function bindControlButton(elementId, keyName) {
+    const el = document.getElementById(elementId);
+    const press = (e) => { e.preventDefault(); input[keyName] = true; el.classList.add('active'); };
+    const release = (e) => { e.preventDefault(); input[keyName] = false; el.classList.remove('active'); };
+    el.addEventListener('pointerdown', press);
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointerleave', release);
+    el.addEventListener('pointercancel', release);
+  }
+
+  bindControlButton('btnGas', 'gas');
+  bindControlButton('btnBrake', 'brake');
+  bindControlButton('btnLeft', 'left');
+  bindControlButton('btnRight', 'right');
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { input.gas = true; document.getElementById('btnGas').classList.add('active'); }
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') { input.brake = true; document.getElementById('btnBrake').classList.add('active'); }
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') { input.left = true; document.getElementById('btnLeft').classList.add('active'); }
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') { input.right = true; document.getElementById('btnRight').classList.add('active'); }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { input.gas = false; document.getElementById('btnGas').classList.remove('active'); }
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') { input.brake = false; document.getElementById('btnBrake').classList.remove('active'); }
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') { input.left = false; document.getElementById('btnLeft').classList.remove('active'); }
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') { input.right = false; document.getElementById('btnRight').classList.remove('active'); }
+  });
+
+  // ==========================================
+  // 9. FÍSICA DO VEÍCULO E PERSEGUIÇÃO
+  // ==========================================
+  function updatePhysics(dt, now) {
+    if (gameState !== 'PLAYING') return;
+
+    const carCfg = getCurrentCar();
+    const mapCfg = getCurrentMap();
+    const currentSegIdx = Math.floor(-carZ / SEGMENT_LENGTH);
+    const currentSegData = activeSegments.get(currentSegIdx);
+
+    const inWater = currentSegData ? currentSegData.isFlooded : false;
+    surfaceWarningEl.style.display = inWater ? 'block' : 'none';
+
+    const isOffRoad = carCfg.allTerrain;
+    const baseTerrainGrip = isOffRoad ? 1.05 : (inWater ? 0.58 : mapCfg.grip);
+    const effectiveGrip = Math.min(1.2, Math.max(0.45, baseTerrainGrip + carCfg.gripBonus));
+
+    let effectiveMaxSpeed = carCfg.maxSpeed;
+    if (!isOffRoad && inWater) effectiveMaxSpeed = Math.min(effectiveMaxSpeed, 125);
+    if (!isOffRoad && mapCfg.id === 'road-99') effectiveMaxSpeed *= 0.90;
+    if (defects.engineDamaged) effectiveMaxSpeed *= 0.72;
+    if (defects.tireDamaged) effectiveMaxSpeed *= 0.80;
+
+    const surfaceDrag = (!isOffRoad && inWater) ? 28 : 14 * (isOffRoad ? 1.0 : mapCfg.dragFactor);
+    const accelRate = (defects.engineDamaged ? carCfg.accel * 0.62 : carCfg.accel) * ((!isOffRoad && inWater) ? 0.75 : 1);
+    const brakeRate = (!isOffRoad && inWater) ? 58 : 88;
+    const reverseAccel = 28;
+
+    if (input.gas) {
+      if (carSpeedKmh < 0) {
+        carSpeedKmh += brakeRate * dt;
+        if (carSpeedKmh > 0) carSpeedKmh = 0;
+      } else {
+        carSpeedKmh = Math.min(effectiveMaxSpeed, carSpeedKmh + accelRate * dt);
+      }
+    } else if (input.brake) {
+      if (carSpeedKmh > 0.5) {
+        carSpeedKmh = Math.max(0, carSpeedKmh - brakeRate * dt);
+      } else {
+        carSpeedKmh = Math.max(-MAX_REVERSE_KMH, carSpeedKmh - reverseAccel * dt);
+      }
+    } else {
+      if (carSpeedKmh > 0) {
+        carSpeedKmh = Math.max(0, carSpeedKmh - surfaceDrag * dt);
+      } else if (carSpeedKmh < 0) {
+        carSpeedKmh = Math.min(0, carSpeedKmh + surfaceDrag * dt);
+      }
+    }
+
+    if (carSpeedKmh > effectiveMaxSpeed) {
+      carSpeedKmh = Math.max(effectiveMaxSpeed, carSpeedKmh - 40 * dt);
+    }
+
+    if (!monsterAwake && Math.abs(carSpeedKmh) > 2.5) {
+      monsterAwake = true;
+      monsterZ = carZ + 38;
+      monsterSpeedKmh = 65;
+      showEventBanner('⚠️ O MONSTRO ACORDOU E ESTÁ CAÇANDO VOCÊ!', '#ef4444');
+    }
+
+    if (Math.abs(carSpeedKmh) > 35 && now - lastDefectTime > 18000) {
+      if (Math.random() < carCfg.defectChance * 0.18 * dt) {
+        tryTriggerRandomDefect(0);
+      }
+    }
+
+    const tirePull = defects.tireDamaged ? -0.14 : 0;
+    const targetSteer = (input.left ? 1 : 0) + (input.right ? -1 : 0) + tirePull;
+    const steerResponsiveness = 4.5 + effectiveGrip * 7.5;
+    steeringInput += (targetSteer - steeringInput) * Math.min(1, dt * steerResponsiveness);
+
+    const speedFactor = Math.min(1, Math.abs(carSpeedKmh) / 25);
+    const reverseSign = carSpeedKmh >= 0 ? 1 : -1;
+    const turnMultiplier = defects.tireDamaged ? carCfg.turnRate * 0.78 : carCfg.turnRate;
+    const desiredAngularVel = steeringInput * turnMultiplier * speedFactor * reverseSign;
+
+    const angularInertia = 3.5 + effectiveGrip * 9.5;
+    carAngularVel += (desiredAngularVel - carAngularVel) * Math.min(1, dt * angularInertia);
+    carYaw += carAngularVel * dt;
+
+    const metersPerSec = carSpeedKmh / 3.6;
+    const roadYaw = getRoadYaw(carZ);
+    const totalYaw = roadYaw + carYaw;
+
+    carX += -Math.sin(totalYaw) * metersPerSec * dt;
+    carZ += -Math.cos(totalYaw) * metersPerSec * dt;
+
+    const roadCenter = getRoadCenterX(carZ);
+    const relX = carX - roadCenter;
+
+    if (currentSegData && currentSegData.hazards.length > 0) {
+      for (let i = currentSegData.hazards.length - 1; i >= 0; i--) {
+        const h = currentSegData.hazards[i];
+        if (Math.abs(relX - h.localX) < h.radius) {
+          currentSegData.hazards.splice(i, 1);
+          if (h.type === 'pothole') {
+            carSpeedKmh *= 0.76;
+            showEventBanner('💥 PASSOU NO BURACO! (-22 DURABILIDADE)', '#f59e0b');
+            if (applyVehicleDamage(22, 0.25)) return;
+          } else if (h.type === 'barrier') {
+            carSpeedKmh *= 0.48;
+            showEventBanner('🚧 BATEU NO OBSTÁCULO! (-45 DURABILIDADE)', '#ef4444');
+            if (applyVehicleDamage(45, 0.40)) return;
+          }
+        }
+      }
+    }
+
+    if (bumpShakeTimer > 0) bumpShakeTimer -= dt;
+
+    const maxOffset = ROAD_WIDTH / 2 - 1.1;
+    if (relX > maxOffset || relX < -maxOffset) {
+      carX = roadCenter + (relX > maxOffset ? maxOffset : -maxOffset);
+      if (Math.abs(carSpeedKmh) > 45 && bumpShakeTimer <= 0) {
+        const wallDamage = Math.round(Math.abs(carSpeedKmh) * 0.22);
+        showEventBanner(`💥 BATEU NA LATERAL! (-${wallDamage} DURABILIDADE)`, '#f59e0b');
+        if (applyVehicleDamage(wallDamage, 0.22)) return;
+      }
+      carYaw *= 0.82;
+      carSpeedKmh *= 0.90;
+    }
+
+    const distanceTraveled = Math.max(0, Math.floor(-carZ));
+    if (distanceTraveled >= nextCoinMilestone) {
+      runCoinsEarned += 10;
+      savedCoins += 10;
+      saveProgress();
+      nextCoinMilestone += 500;
+      coinsRunValueEl.textContent = `🪙 +${runCoinsEarned}`;
+      showEventBanner(`🪙 +10 MOEDAS! (${distanceTraveled}m PERCORRIDOS)`, '#fbbf24');
+    }
+
+    if (monsterAwake) {
+      const baseMonsterSpeed = Math.min(185, 84 + distanceTraveled * 0.016);
+      const gap = monsterZ - carZ;
+      const rubberBand = gap > 60 ? (gap - 60) * 0.65 : 0;
+      const targetMonsterSpeed = baseMonsterSpeed + rubberBand;
+
+      monsterSpeedKmh += (targetMonsterSpeed - monsterSpeedKmh) * Math.min(1, dt * 2.0);
+      monsterZ -= (monsterSpeedKmh / 3.6) * dt;
+      monsterBobPhase += dt * 14;
+
+      if (monsterZ <= carZ + 2.4) {
+        triggerGameOver('MONSTRO');
+        return;
+      }
+    }
+
+    updateDynamicRoadGeneration();
+
+    speedValueEl.textContent = Math.round(Math.abs(carSpeedKmh));
+    if (carSpeedKmh < -0.5) {
+      gearIndicatorEl.textContent = 'R';
+      gearIndicatorEl.style.background = '#dc2626';
+    } else if (carSpeedKmh > 0.5) {
+      gearIndicatorEl.textContent = 'D';
+      gearIndicatorEl.style.background = '#059669';
+    } else {
+      gearIndicatorEl.textContent = 'N';
+      gearIndicatorEl.style.background = '#1e293b';
+    }
+
+    distanceValueEl.textContent = `${distanceTraveled} m`;
+
+    if (monsterAwake) {
+      const gapMeters = Math.max(0, Math.round(monsterZ - carZ));
+      monsterDistTextEl.textContent = `${gapMeters} m ATRÁS`;
+      monsterDistTextEl.style.color = gapMeters < 18 ? '#ef4444' : '#fbbf24';
+
+      const dangerPct = Math.max(5, Math.min(100, ((45 - gapMeters) / 42) * 100));
+      dangerBarFillEl.style.width = `${dangerPct}%`;
+
+      if (gapMeters < 22) {
+        const intensity = (22 - gapMeters) / 22;
+        dangerVignetteEl.style.boxShadow = `inset 0 0 ${Math.round(intensity * 95)}px rgba(220, 38, 38, ${0.65 * intensity})`;
+        mirrorGlassMat.color.setRGB(0.2 + intensity * 0.8, 0.05, 0.05);
+      } else {
+        dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
+        mirrorGlassMat.color.setHex(0x1e293b);
+      }
+    }
+  }
+
+  function updateTransforms(time) {
+    const roadYaw = getRoadYaw(carZ);
+    carCockpit.position.set(carX, 0, carZ);
+    carCockpit.rotation.y = roadYaw + carYaw;
+
+    if (defects.lightsBroken) {
+      headlightRight.intensity = 0;
+      headlightLeft.intensity = Math.sin(time * 0.035) > 0.1 ? 1.1 : 0.15;
+    } else {
+      headlightLeft.intensity = 3.4;
+      headlightRight.intensity = 3.4;
+    }
+
+    const mapCfg = getCurrentMap();
+    const baseShake = (Math.abs(carSpeedKmh) / 180) * (mapCfg.id === 'road-99' ? 0.025 : 0.011);
+    const tireShake = defects.tireDamaged ? 0.018 : 0;
+    const impactShake = bumpShakeTimer > 0 ? 0.065 : 0;
+    camera.position.y = 1.24 + Math.sin(time * 0.06) * (baseShake + tireShake + impactShake);
+
+    steeringWheelGroup.rotation.z = steeringInput * 0.65;
+
+    const monsterRoadX = getRoadCenterX(monsterZ);
+    const monsterYaw = getRoadYaw(monsterZ);
+    monsterGroup.position.set(
+      monsterRoadX + Math.sin(monsterBobPhase * 0.5) * 1.4,
+      Math.abs(Math.sin(monsterBobPhase)) * 0.45,
+      monsterZ
+    );
+    monsterGroup.rotation.y = monsterYaw;
+  }
+
+  // ==========================================
+  // 10. LOOP PRINCIPAL
+  // ==========================================
+  let lastTime = performance.now();
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+
+    if (showcaseActive) {
+      // Gira suavemente os modelos 3D na 2ª aba
+      if (currentPreviewCarMesh) {
+        currentPreviewCarMesh.rotation.y += dt * 1.15;
+      }
+      showcaseMonsterMesh.rotation.y += dt * 1.15;
+      carPreviewRenderer.render(carPreviewScene, carPreviewCamera);
+      monsterPreviewRenderer.render(monsterPreviewScene, monsterPreviewCamera);
+    } else if (gameState === 'LOBBY') {
+      carZ -= 14 * dt;
+      carX = getRoadCenterX(carZ);
+      carYaw = 0;
+      monsterZ = carZ + 32;
+      updateDynamicRoadGeneration();
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    } else if (gameState === 'PLAYING') {
+      updatePhysics(dt, now);
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    } else {
+      updateTransforms(now);
+      renderer.render(scene, camera);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (showcaseActive) resizeShowcaseRenderers();
+  });
+
+  renderLobbyShop();
+  applyCarVisuals();
+  applyMapEnvironment();
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
