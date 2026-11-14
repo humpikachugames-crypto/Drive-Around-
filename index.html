@@ -2329,6 +2329,20 @@
   rightPillar.rotation.x = -0.35;
   cockpitVisuals.add(leftPillar, rightPillar);
 
+  // Para-brisa dos barcos (visível só quando o veículo ativo é um barco)
+  const boatWindshield = new THREE.Mesh(
+    new THREE.BoxGeometry(1.72, 0.9, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0x7dd3fc, metalness: 0.5, roughness: 0.15, transparent: true, opacity: 0.28, depthWrite: false })
+  );
+  boatWindshield.position.set(0, 1.25, -0.52);
+  boatWindshield.rotation.x = -0.35;
+  boatWindshield.visible = false;
+  cockpitVisuals.add(boatWindshield);
+  const boatWindshieldTop = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 0.06), pillarMat);
+  boatWindshieldTop.position.set(0, 1.69, -0.68);
+  boatWindshieldTop.visible = false;
+  cockpitVisuals.add(boatWindshieldTop);
+
   const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.06, 1.2), pillarMat);
   roofMesh.position.set(0, 1.66, -0.05);
   cockpitVisuals.add(roofMesh);
@@ -3141,13 +3155,15 @@
       specialCockpitVisuals.remove(child);
     }
     const style = vehCfg.bodyStyle;
-    const special = vehCfg.category === 'boat' || ['horse','motorcycle','van','cybertruck'].includes(style);
+    const special = ['horse','motorcycle','van','cybertruck'].includes(style);
     cockpitVisuals.visible = !special;
     specialCockpitVisuals.visible = special;
     roofMesh.visible = !special && vehCfg.category !== 'boat';
     mirrorFrame.visible = !special && vehCfg.category !== 'boat';
     mirrorGlass.visible = !special && vehCfg.category !== 'boat';
     steeringWheelGroup.visible = !special;
+    boatWindshield.visible = vehCfg.category === 'boat';
+    boatWindshieldTop.visible = vehCfg.category === 'boat';
     headlightLeft.visible = vehCfg.category !== 'boat' && style !== 'horse';
     headlightRight.visible = vehCfg.category !== 'boat' && style !== 'horse';
 
@@ -3181,16 +3197,6 @@
       for(const x of [-0.2,0.2]){const ear=new THREE.Mesh(new THREE.ConeGeometry(0.11,0.38,5),brown);ear.position.set(x,1.42,-1.43);ear.rotation.z=x<0?0.18:-0.18;specialCockpitVisuals.add(ear);}
       addBox(0.95,0.12,0.2,leather,0,0.38,-0.45);
       cockpitCameraBaseY=1.62; camera.position.set(0,cockpitCameraBaseY,0.12);
-    } else if (vehCfg.category === 'boat') {
-      const hull=mat(vehCfg.hoodColor,0.55,0.32);
-      addBox(1.55,0.18,1.9,hull,0,0.42,-1.15);
-      addBox(1.35,0.12,0.35,dark,0,0.68,-0.72);
-      addBox(0.08,0.5,0.08,dark,-0.78,0.68,-1.05,0.15);
-      addBox(0.08,0.5,0.08,dark,0.78,0.68,-1.05,0.15);
-      addBox(0.08,0.5,0.08,dark,-0.78,0.68,-1.9,-0.15);
-      addBox(0.08,0.5,0.08,dark,0.78,0.68,-1.9,-0.15);
-      if(vehCfg.level>=2){addBox(0.62,0.48,0.48,dark,0,0.84,-0.55);addBox(0.52,0.25,0.05,glass,0,1.12,-0.78);}
-      cockpitCameraBaseY=1.22; camera.position.set(0,cockpitCameraBaseY,0);
     } else if (style === 'van') {
       const paint=mat(vehCfg.hoodColor,0.35,0.42);
       addBox(1.9,0.22,1.1,paint,0,0.63,-1.05);
@@ -3522,7 +3528,7 @@
     if(!onFoot)return; onFoot=false;footInput.forward=footInput.back=footInput.left=footInput.right=false;footStick.style.transform='translate(0,0)';document.getElementById('onFootPanel').style.display='none';document.querySelector('.controls-layer').style.display='block';
     if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);
     document.getElementById('itemUsePanel').style.display='flex'; renderItemButtons();
-    monsterAwake=true;monsterZ=carZ+40;monsterSpeedKmh=activeRunMonster.baseSpeed*.55;
+    monsterAwake=true;monsterZ=carZ+100;monsterSpeedKmh=activeRunMonster.baseSpeed*.55;
     showEventBanner('⚠️ O MONSTRO ACORDOU! VOLTE A ACELERAR!','#ef4444');
     currentStop=null;
   }
