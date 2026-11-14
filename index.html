@@ -1568,6 +1568,26 @@
   ];
 
   const GENERAL_STORE_ONLY_IDS=['cybertruck','cavalo','hatch-popular','van','carro-rally','suv-militar','moto'];
+  // ===== GARAGE UPDATE: 12 novos veículos (modelo 3D e cabine próprios) =====
+  const NEW_CARS_DATA = [
+    { id:'gt-esportivo', name:'Esportivo GT', price:280, maxSpeed:240, durability:150, accel:92, turnRate:1.55, turnLabel:'Ágil', gripBonus:0.12, allTerrain:false, defectChance:0.14, hoodColor:0x0ea5e9, bodyStyle:'gt', weight:1250, pros:'Velocidade altíssima', cons:'Pouca resistência', lore:'Protótipo de pista do Projeto ROAD, abandonado na rodovia depois que o piloto sumiu.', desc:'Velocidade muito alta, mas a lataria é frágil.' },
+    { id:'caminhonete', name:'Caminhonete', price:240, maxSpeed:150, durability:380, accel:52, turnRate:1.0, turnLabel:'Estável', gripBonus:0.10, allTerrain:false, defectChance:0.08, hoodColor:0xb45309, bodyStyle:'caminhonete', weight:2100, pros:'Resistente e estável', cons:'Aceleração baixa', lore:'Usada por equipes de resgate para levar suprimentos pela ROAD-37.', desc:'Boa resistência e espaço de carga.' },
+    { id:'jipe-explorador', name:'Jipe Explorador', price:260, maxSpeed:135, durability:300, accel:60, turnRate:1.35, turnLabel:'Firme', gripBonus:0.30, allTerrain:true, defectChance:0.08, hoodColor:0x4d7c0f, bodyStyle:'jipe', weight:1600, pros:'Excelente em terrenos difíceis', cons:'Velocidade moderada', lore:'Jipe de uma expedição que mapeava as estradas de terra antes dos monstros.', desc:'Aderência altíssima em terreno ruim.' },
+    { id:'onibus-antigo', name:'Ônibus Antigo', price:300, maxSpeed:95, durability:560, accel:26, turnRate:0.7, turnLabel:'Pesado', gripBonus:-0.12, allTerrain:false, defectChance:0.10, hoodColor:0xca8a04, bodyStyle:'onibus', weight:7800, pros:'Muito resistente', cons:'Lento e pesado nas curvas', lore:'Último ônibus da linha 37, que nunca chegou ao destino.', desc:'Aguenta muito dano, mas é lento.' },
+    { id:'caminhao', name:'Caminhão', price:340, maxSpeed:100, durability:640, accel:28, turnRate:0.62, turnLabel:'Muito pesado', gripBonus:-0.10, allTerrain:false, defectChance:0.09, hoodColor:0x1d4ed8, bodyStyle:'caminhao', weight:9500, pros:'Resistência enorme', cons:'Velocidade baixa', lore:'Caminhão de carga do comboio que sumiu perto do km 37.', desc:'Grande resistência e velocidade baixa.' },
+    { id:'blindado-comboio', name:'Blindado de Comboio', price:430, maxSpeed:125, durability:720, accel:36, turnRate:0.78, turnLabel:'Pesado', gripBonus:0.05, allTerrain:false, defectChance:0.06, hoodColor:0x3f3f46, bodyStyle:'comboio', weight:5200, pros:'Proteção elevada', cons:'Pesado e sedento', lore:'Escoltava os comboios do Projeto ROAD, com blindagem feita para os monstros.', desc:'Proteção elevada, com consumo maior.' },
+    { id:'buggy', name:'Buggy', price:200, maxSpeed:150, durability:170, accel:74, turnRate:1.9, turnLabel:'Muito ágil', gripBonus:0.28, allTerrain:true, defectChance:0.18, hoodColor:0xf59e0b, bodyStyle:'buggy', weight:720, pros:'Ótimo em terreno irregular', cons:'Frágil', lore:'Montado por mecânicos das dunas com peças de vários carros abandonados.', desc:'Leve e ágil em qualquer terreno.' },
+    { id:'trator', name:'Trator', price:170, maxSpeed:70, durability:480, accel:22, turnRate:0.95, turnLabel:'Lento', gripBonus:0.35, allTerrain:true, defectChance:0.07, hoodColor:0x15803d, bodyStyle:'trator', weight:4300, pros:'Atravessa terrenos difíceis', cons:'Muito lento', lore:'Trator de uma fazenda vizinha da estrada, o único que o monstro nunca alcançou.', desc:'Lento, mas aderência e resistência altas.' },
+    { id:'anfibio', name:'Veículo Anfíbio', price:360, maxSpeed:120, durability:330, accel:48, turnRate:1.1, turnLabel:'Estável', gripBonus:0.15, allTerrain:true, defectChance:0.11, hoodColor:0x0891b2, bodyStyle:'anfibio', weight:2600, pros:'Casco vedado e aderente', cons:'Nada de especial em velocidade', lore:'Criado para atravessar as áreas alagadas da ROAD-105.', desc:'Casco anfíbio, bom em terreno alagado.' },
+    { id:'carro-eletrico', name:'Carro Elétrico', price:310, maxSpeed:175, durability:240, accel:90, turnRate:1.5, turnLabel:'Ágil', gripBonus:0.18, allTerrain:false, defectChance:0.05, hoodColor:0x14b8a6, bodyStyle:'ecar', weight:1700, pros:'Silencioso e confiável', cons:'Resistência média', lore:'Protótipo silencioso: os monstros demoram mais a ouvi-lo.', desc:'Rápido, silencioso e muito confiável.' },
+    { id:'quadriciclo', name:'Quadriciclo', price:150, maxSpeed:105, durability:150, accel:62, turnRate:1.95, turnLabel:'Muito ágil', gripBonus:0.25, allTerrain:true, defectChance:0.12, hoodColor:0xdc2626, bodyStyle:'quad', weight:380, pros:'Pequeno e ágil', cons:'Frágil', lore:'Quadriciclo de um guarda-florestal que patrulhava os atalhos.', desc:'Pequeno, ágil e bom fora de estrada.' },
+    { id:'corrida-antigo', name:'Carro de Corrida Antigo', price:290, maxSpeed:190, durability:140, accel:100, turnRate:1.45, turnLabel:'Ágil', gripBonus:0.10, allTerrain:false, defectChance:0.20, hoodColor:0x166534, bodyStyle:'racer', weight:820, pros:'Aceleração excelente', cons:'Frágil e pouco confiável', lore:'Relíquia de uma corrida clandestina que acontecia na ROAD-37.', desc:'Aceleração explosiva, mas frágil.' }
+  ];
+  NEW_CARS_DATA.forEach(c => { c.category = 'car'; CARS_DATA.push(c); });
+  const NEW_STYLE_SET = new Set(NEW_CARS_DATA.map(c => c.bodyStyle));
+  let vehiclePaints = {};
+  try { vehiclePaints = JSON.parse(localStorage.getItem('road37_paints') || '{}'); } catch (e) { vehiclePaints = {}; }
+  function getVehiclePaint(v) { return vehiclePaints[v.id] != null ? vehiclePaints[v.id] : v.hoodColor; }
 
   // MAPAS TERRESTRES (Agora com subidas e descidas 3D!)
   const LAND_MAPS_DATA = [
@@ -2593,10 +2613,139 @@
     scene.add(monsterGroup);
   }
 
+  // Cabine em 1ª pessoa de cada novo veículo: câmera [x,y,z], capô [escalaX,Y,Z,posY,posZ], teto, espelho, barras, etc.
+  const FP_SPECS = {
+    gt:{cam:[-.36,.98,-.05],roof:true,mirror:true,hood:[1,1.2,1.25,.55,-1.55]},
+    caminhonete:{cam:[-.36,1.5,0],roof:true,mirror:true,hood:[1,1.5,1.1,.9,-1.4]},
+    jipe:{cam:[-.36,1.45,0],roof:false,mirror:false,bars:true,hood:[.9,1,.8,.85,-1.25]},
+    onibus:{cam:[-.5,1.95,.2],roof:true,mirror:false,noHood:true},
+    caminhao:{cam:[-.5,2.0,.1],roof:true,mirror:true,noHood:true},
+    comboio:{cam:[-.36,1.55,0],roof:true,mirror:false,slit:true,hood:[1.15,1.3,.9,.9,-1.3]},
+    buggy:{cam:[0,1.15,.2],roof:false,mirror:false,bars:true,open:true,hood:[.7,1,.7,.5,-1.2]},
+    trator:{cam:[0,2.1,.3],roof:true,mirror:false,hood:[.85,2,1.2,1.1,-1.6]},
+    anfibio:{cam:[-.36,1.35,0],roof:false,mirror:false,glass:true,hood:[1,1.4,1,.75,-1.4]},
+    ecar:{cam:[-.36,1.15,-.05],roof:true,mirror:true,led:true,hood:[1,.8,1,.7,-1.35]},
+    quad:{cam:[0,1.35,.1],roof:false,mirror:false,open:true,noHood:true},
+    racer:{cam:[0,1.0,.3],roof:false,mirror:false,open:true,hood:[.55,1,1.4,.6,-1.6]}
+  };
+
+  function buildNewVehicleExterior(v) {
+    const g = new THREE.Group(), st = v.bodyStyle;
+    const M = (c, m = .45, r = .4) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: r });
+    const paint = M(getVehiclePaint(v)), dark = M(0x111827, .1, .8), tire = M(0x09090b, 0, .9), rim = M(0xcbd5e1, .8, .2), white = M(0xe5e7eb, .1, .6);
+    const glass = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: .9, roughness: .1, opacity: .75, transparent: true });
+    const lamp = new THREE.MeshBasicMaterial({ color: 0xfef08a }), red = new THREE.MeshBasicMaterial({ color: 0xef4444 }), cyan = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+    const B = (w, h, d, m, x, y, z, rx = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.rotation.x = rx; g.add(o); return o; };
+    const W = (x, y, z, r, w = .3) => {
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 18), tire); t.rotation.z = Math.PI / 2; t.position.set(x, y, z); g.add(t);
+      const h = new THREE.Mesh(new THREE.CylinderGeometry(r * .5, r * .5, w + .02, 10), rim); h.rotation.z = Math.PI / 2; h.position.set(x, y, z); g.add(h);
+    };
+    const L = (w, y, zf, zr) => { B(.3, .14, .08, lamp, -w, y, -zf); B(.3, .14, .08, lamp, w, y, -zf); B(.3, .14, .08, red, -w, y, zr); B(.3, .14, .08, red, w, y, zr); };
+    if (st === 'gt') {
+      B(1.9, .38, 4.3, paint, 0, .45, 0); B(1.5, .4, 1.7, glass, 0, .82, .2); B(1.9, .06, .4, dark, 0, .98, 2.05);
+      for (const x of [-1, 1]) for (const z of [-1.35, 1.35]) W(x, .34, z, .34);
+      L(.62, .5, 2.16, 2.16);
+    } else if (st === 'caminhonete') {
+      B(2, .7, 4.6, paint, 0, .7, 0); B(1.9, .8, 1.6, paint, 0, 1.4, -.5); B(1.92, .5, 1.62, glass, 0, 1.45, -.5); B(2, .35, 1.9, dark, 0, 1.2, 1.3); B(1.9, .08, .08, dark, 0, 1.95, .2);
+      for (const x of [-1.05, 1.05]) for (const z of [-1.5, 1.5]) W(x, .45, z, .45);
+      L(.7, .75, 2.31, 2.31);
+    } else if (st === 'jipe') {
+      B(1.9, .7, 3.6, paint, 0, .75, 0); B(1.8, .5, .08, glass, 0, 1.3, -.55); B(1.8, .08, .08, dark, 0, 1.75, .9); B(1.8, .08, .08, dark, 0, 1.75, -.55);
+      for (const x of [-.85, .85]) { B(.08, .7, .08, dark, x, 1.4, .9); B(.08, .7, .08, dark, x, 1.4, -.55); }
+      B(.8, .8, .3, tire, 0, 1.0, 1.95);
+      for (const x of [-1, 1]) for (const z of [-1.2, 1.2]) W(x, .48, z, .48);
+      L(.65, .8, 1.81, 1.81);
+    } else if (st === 'onibus') {
+      B(2.3, 1.9, 6.6, paint, 0, 1.35, 0); B(2.32, .6, 5.8, glass, 0, 1.75, .1); B(2.32, .18, 6.6, white, 0, 1.0, 0); B(2.3, .3, .1, dark, 0, .7, -3.31);
+      for (const x of [-1.15, 1.15]) for (const z of [-2.1, 2.1]) W(x, .5, z, .5, .35);
+      L(.8, .8, 3.31, 3.31);
+    } else if (st === 'caminhao') {
+      B(2.2, 1.7, 1.7, paint, 0, 1.35, -2.4); B(2, .55, .08, glass, 0, 1.7, -3.27); B(2.4, 2.2, 4.8, white, 0, 1.75, .7); B(2.1, .35, 6.6, dark, 0, .6, 0);
+      for (const x of [-1.1, 1.1]) for (const z of [-2.4, 1.2, 2.6]) W(x, .5, z, .5, .35);
+      L(.7, .9, 3.31, 3.12);
+    } else if (st === 'comboio') {
+      B(2.3, .9, 4.8, paint, 0, .85, 0); B(2.1, .7, 2.8, paint, 0, 1.6, .2); B(2.12, .2, 2.82, glass, 0, 1.7, .2); B(.9, .35, .9, dark, 0, 2.1, .3); B(.12, .12, 1.2, dark, 0, 2.12, -.6); B(2.4, .5, .3, dark, 0, .6, -2.45);
+      for (const x of [-1.2, 1.2]) for (const z of [-1.5, 1.5]) W(x, .5, z, .5, .4);
+      L(.8, .9, 2.41, 2.41);
+    } else if (st === 'buggy') {
+      B(1.5, .3, 3.2, paint, 0, .55, 0); B(.9, .15, .7, dark, 0, .85, .3); B(.9, .5, .7, dark, 0, .8, 1.4); B(1.5, .08, 1.3, dark, 0, 1.6, .3);
+      for (const x of [-.7, .7]) { B(.08, 1, .08, dark, x, 1.1, -.3); B(.08, 1, .08, dark, x, 1.1, .9); }
+      for (const x of [-1, 1]) { W(x, .38, -1.2, .38); W(x * 1.1, .55, 1.3, .55, .5); }
+      L(.45, .6, 1.61, 1.61);
+    } else if (st === 'trator') {
+      B(1.5, .8, 2.6, paint, 0, 1.0, -.9); B(1.6, 1.3, 1.4, paint, 0, 1.9, .7); B(1.62, .9, 1.42, glass, 0, 1.95, .7); B(1.9, .1, 1.7, dark, 0, 2.65, .7); B(.12, .9, .12, dark, .4, 1.9, -1.6);
+      for (const x of [-1.1, 1.1]) W(x, .85, .8, .85, .5);
+      for (const x of [-.9, .9]) W(x, .45, -1.7, .45);
+      L(.5, 1.0, 2.21, 1.42);
+    } else if (st === 'anfibio') {
+      B(2.1, .7, 4.4, paint, 0, .7, 0); B(1.7, .5, .8, paint, 0, .6, -2.4); B(1.6, .6, 1.6, glass, 0, 1.3, .1); B(2.12, .12, 4.4, white, 0, .95, 0); B(.5, .5, .2, dark, 0, .4, 2.3);
+      for (const x of [-1.1, 1.1]) for (const z of [-1.4, 1.4]) W(x, .35, z, .4);
+      L(.6, .75, 2.81, 2.21);
+    } else if (st === 'ecar') {
+      B(1.85, .5, 4.1, paint, 0, .55, 0); B(1.6, .5, 2.0, glass, 0, 1.0, .15); B(1.8, .06, .06, cyan, 0, .62, -2.06); B(1.8, .06, .06, cyan, 0, .62, 2.06);
+      for (const x of [-1, 1]) for (const z of [-1.3, 1.3]) W(x, .36, z, .36);
+      L(.62, .5, 2.06, 2.06);
+    } else if (st === 'quad') {
+      B(.9, .5, 1.6, paint, 0, .7, 0); B(.5, .15, .8, dark, 0, 1.0, .3); B(.9, .06, .06, dark, 0, 1.2, -.5); B(.08, .5, .08, dark, 0, 1.0, -.5); B(.4, .2, .08, lamp, 0, .8, -.85);
+      for (const x of [-.7, .7]) for (const z of [-.85, .85]) W(x, .4, z, .4, .35);
+    } else {
+      B(.8, .5, 2.0, paint, 0, .6, -1.2); B(1.3, .5, 1.6, paint, 0, .65, .6); B(.7, .1, .7, dark, 0, .95, .3); B(.5, .5, .04, white, 0, .7, -2.22); B(.7, .25, .05, glass, 0, 1.0, -.2, -.5);
+      for (const x of [-.95, .95]) { W(x, .45, -1.5, .45, .22); W(x, .45, 1.4, .45, .22); }
+    }
+    return g;
+  }
+
+  // ===== Garagem: giro com o dedo/mouse, vistas, pintura, detalhes e comparação =====
+  let previewAuto = true;
+  function setPreviewAngle(a) { if (currentPreviewVehicleMesh) { previewAuto = false; currentPreviewVehicleMesh.rotation.y = a; } }
+  function renderGarageExtras(v) {
+    let box = document.getElementById('garageExtras');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'garageExtras';
+      box.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin:8px 0;font-size:.78rem;color:#cbd5e1;';
+      const up = document.getElementById('upgradesContainer'); up.parentNode.insertBefore(box, up);
+      const cv = document.getElementById('carPreviewCanvas'); let dragX = null; cv.style.touchAction = 'none';
+      cv.addEventListener('pointerdown', e => { dragX = e.clientX; previewAuto = false; cv.setPointerCapture(e.pointerId); });
+      cv.addEventListener('pointermove', e => { if (dragX === null || !currentPreviewVehicleMesh) return; currentPreviewVehicleMesh.rotation.y += (e.clientX - dragX) * .012; dragX = e.clientX; });
+      ['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { dragX = null; }));
+    }
+    const m = getMasteryBucket(v.category === 'boat' ? 'boats' : 'cars', v.id);
+    const swatches = [['Original', null], ['Vermelho', 0xdc2626], ['Azul', 0x2563eb], ['Verde', 0x16a34a], ['Preto', 0x1f2937], ['Branco', 0xf1f5f9], ['Laranja', 0xf97316], ['Roxo', 0x7c3aed], ['★ Dourado', 0xfacc15], ['★ Cromado', 0xcbd5e1]];
+    const owned = [...CARS_DATA.filter(c => unlockedCars.includes(c.id)), ...BOATS_DATA.filter(b => unlockedBoats.includes(b.id))].filter(o => o.id !== v.id);
+    const bs = 'background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:5px 9px;font-size:.74rem;cursor:pointer;';
+    box.innerHTML = `
+      <div>${v.lore ? '📖 ' + v.lore : ''}</div>
+      <div>${v.weight ? '⚖️ Peso: <b>' + v.weight + ' kg</b> • ' : ''}${v.pros ? '✅ ' + v.pros + ' • ❌ ' + v.cons + ' • ' : ''}🛣️ Percorrido: <b>${Math.round(m.distance)} m</b></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">👁️ Vista:
+        <button style="${bs}" data-a="3.85">Frente</button><button style="${bs}" data-a="-0.86">Lateral</button><button style="${bs}" data-a="0.71">Traseira</button><button style="${bs}" data-a="auto">Girar</button></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">🎨 Pintura:
+        ${swatches.map(([n, c]) => `<button style="${bs}border-left:14px solid ${c === null ? '#64748b' : '#' + c.toString(16).padStart(6, '0')};" data-c="${c === null ? 'null' : c}">${n}</button>`).join('')}</div>
+      <div>⚖️ Comparar com: <select id="cmpSel" style="${bs}"><option value="">—</option>${owned.map(o => `<option value="${o.id}">${o.name}</option>`).join('')}</select></div>
+      <div id="cmpOut"></div>`;
+    box.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { if (b.dataset.a === 'auto') previewAuto = true; else setPreviewAngle(parseFloat(b.dataset.a)); }));
+    box.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.c === 'null') delete vehiclePaints[v.id]; else vehiclePaints[v.id] = parseInt(b.dataset.c, 10);
+      try { localStorage.setItem('road37_paints', JSON.stringify(vehiclePaints)); } catch (e) {}
+      renderShowcaseTab();
+    }));
+    document.getElementById('cmpSel').addEventListener('change', e => {
+      const o = owned.find(x => x.id === e.target.value), out = document.getElementById('cmpOut');
+      if (!o) { out.innerHTML = ''; return; }
+      const a = getEffectiveVehicleStats(v), b = getEffectiveVehicleStats(o);
+      const rows = [['Vel. máx', 'maxSpeed', ' km/h'], ['Aceleração', 'accel', ''], ['Durabilidade', 'durability', ' HP'], ['Curvas', 'turnRate', 'x'], ['Aderência', 'gripBonus', ''], ['Peso', 'weight', ' kg']];
+      out.innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><th></th><th>${v.name}</th><th>${o.name}</th></tr>${rows.map(([n, k, u]) => {
+        const x = a[k] || 0, y = b[k] || 0, good = k === 'weight' ? 0 : 1;
+        const cA = x === y ? '' : ((x > y) === !!good ? 'color:#4ade80;' : 'color:#f87171;'), cB = x === y ? '' : ((y > x) === !!good ? 'color:#4ade80;' : 'color:#f87171;');
+        return `<tr><td>${n}</td><td style="${cA}">${a[k] != null ? x + u : '—'}</td><td style="${cB}">${b[k] != null ? y + u : '—'}</td></tr>`;
+      }).join('')}</table>`;
+    });
+  }
+
   function buildExteriorVehicle3D(vehCfg) {
+    if (NEW_STYLE_SET.has(vehCfg.bodyStyle)) return buildNewVehicleExterior(vehCfg);
     const group = new THREE.Group();
     const paintMat = new THREE.MeshStandardMaterial({
-      color: vehCfg.hoodColor,
+      color: getVehiclePaint(vehCfg),
       metalness: vehCfg.bodyStyle.includes('supercar') || vehCfg.bodyStyle.includes('hydro') ? 0.78 : 0.45,
       roughness: 0.28
     });
@@ -2858,6 +3007,7 @@
     document.getElementById('carPreviewLabel').textContent = `${baseVehCfg.name.toUpperCase()} • MODELO 3D`;
     document.getElementById('inspectCarName').textContent = baseVehCfg.name;
     document.getElementById('inspectCarDesc').textContent = baseVehCfg.desc;
+    renderGarageExtras(baseVehCfg);
 
     // Renderizar os 5 upgrades (Nível 1 a Nível 5)
     const upgradesContainer = document.getElementById('upgradesContainer');
@@ -3220,7 +3370,10 @@
   let cockpitCameraBaseY = 1.24;
   function applyVehicleVisuals() {
     const vehCfg = getActiveVehicle();
-    hoodMat.color.setHex(vehCfg.hoodColor);
+    hoodMat.color.setHex(getVehiclePaint(vehCfg));
+    hoodMesh.visible = true; hoodMesh.scale.set(1, 1, 1); hoodMesh.position.set(0, 0.72, -1.35);
+    dashMesh.scale.set(1, 1, 1); leftPillar.visible = true; rightPillar.visible = true;
+    const fp = FP_SPECS[vehCfg.bodyStyle];
     // Limpa a cabine especial anterior para nunca reaproveitar o modelo de outro veículo.
     while (specialCockpitVisuals.children.length) {
       const child = specialCockpitVisuals.children[0];
@@ -3229,7 +3382,7 @@
     const style = vehCfg.bodyStyle;
     const special = ['horse','motorcycle','van','cybertruck'].includes(style);
     cockpitVisuals.visible = !special;
-    specialCockpitVisuals.visible = special;
+    specialCockpitVisuals.visible = special || !!fp;
     roofMesh.visible = !special && vehCfg.category !== 'boat';
     mirrorFrame.visible = !special && vehCfg.category !== 'boat';
     mirrorGlass.visible = !special && vehCfg.category !== 'boat';
@@ -3269,6 +3422,15 @@
       for(const x of [-0.2,0.2]){const ear=new THREE.Mesh(new THREE.ConeGeometry(0.11,0.38,5),brown);ear.position.set(x,1.42,-1.43);ear.rotation.z=x<0?0.18:-0.18;specialCockpitVisuals.add(ear);}
       addBox(0.95,0.12,0.2,leather,0,0.38,-0.45);
       cockpitCameraBaseY=1.62; camera.position.set(0,cockpitCameraBaseY,0.12);
+    } else if (fp) {
+      roofMesh.visible = !!fp.roof; mirrorFrame.visible = !!fp.mirror; mirrorGlass.visible = !!fp.mirror;
+      if (fp.noHood) hoodMesh.visible = false; else if (fp.hood) { hoodMesh.scale.set(fp.hood[0], fp.hood[1], fp.hood[2]); hoodMesh.position.set(0, fp.hood[3], fp.hood[4]); }
+      if (fp.open) { leftPillar.visible = false; rightPillar.visible = false; dashMesh.scale.set(.5, .8, .8); }
+      if (fp.bars) { addBox(1.7,.07,.07,dark,0,1.75,-.5); addBox(.07,.9,.07,dark,-.85,1.3,-.5); addBox(.07,.9,.07,dark,.85,1.3,-.5); addBox(1.7,.07,.07,dark,0,1.75,.4); }
+      if (fp.glass) addBox(1.7,.7,.04,glass,0,1.3,-.6);
+      if (fp.slit) addBox(1.95,.4,.08,dark,0,1.5,-.62);
+      if (fp.led) addBox(1.7,.03,.05,new THREE.MeshBasicMaterial({color:0x22d3ee}),0,.96,-.62);
+      cockpitCameraBaseY = fp.cam[1]; camera.position.set(fp.cam[0], fp.cam[1], fp.cam[2]);
     } else if (style === 'van') {
       const paint=mat(vehCfg.hoodColor,0.35,0.42);
       addBox(1.9,0.22,1.1,paint,0,0.63,-1.05);
@@ -3973,7 +4135,7 @@
     lastTime = now;
 
     if (showcaseActive) {
-      if (currentPreviewVehicleMesh) currentPreviewVehicleMesh.rotation.y += dt * 1.15;
+      if (currentPreviewVehicleMesh && previewAuto) currentPreviewVehicleMesh.rotation.y += dt * 1.15;
       if (currentPreviewMonsterMesh) currentPreviewMonsterMesh.rotation.y += dt * 1.15;
       carPreviewRenderer.render(carPreviewScene, carPreviewCamera);
       monsterPreviewRenderer.render(monsterPreviewScene, monsterPreviewCamera);
