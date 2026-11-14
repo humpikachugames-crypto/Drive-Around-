@@ -1567,7 +1567,8 @@
     }
   ];
 
-  const GENERAL_STORE_ONLY_IDS=['cybertruck','cavalo','hatch-popular','van','carro-rally','suv-militar','moto'];
+  const SPECIAL_STORE_IDS=['blindado-comboio','anfibio','carro-eletrico','corrida-antigo'];
+  const GENERAL_STORE_ONLY_IDS=['cybertruck','cavalo','hatch-popular','van','carro-rally','suv-militar','moto',...SPECIAL_STORE_IDS];
   // ===== GARAGE UPDATE: 12 novos veículos (modelo 3D e cabine próprios) =====
   const NEW_CARS_DATA = [
     { id:'gt-esportivo', name:'Esportivo GT', price:280, maxSpeed:240, durability:150, accel:92, turnRate:1.55, turnLabel:'Ágil', gripBonus:0.12, allTerrain:false, defectChance:0.14, hoodColor:0x0ea5e9, bodyStyle:'gt', weight:1250, pros:'Velocidade altíssima', cons:'Pouca resistência', lore:'Protótipo de pista do Projeto ROAD, abandonado na rodovia depois que o piloto sumiu.', desc:'Velocidade muito alta, mas a lataria é frágil.' },
@@ -1579,11 +1580,12 @@
     { id:'buggy', name:'Buggy', price:200, maxSpeed:150, durability:170, accel:74, turnRate:1.9, turnLabel:'Muito ágil', gripBonus:0.28, allTerrain:true, defectChance:0.18, hoodColor:0xf59e0b, bodyStyle:'buggy', weight:720, pros:'Ótimo em terreno irregular', cons:'Frágil', lore:'Montado por mecânicos das dunas com peças de vários carros abandonados.', desc:'Leve e ágil em qualquer terreno.' },
     { id:'trator', name:'Trator', price:170, maxSpeed:70, durability:480, accel:22, turnRate:0.95, turnLabel:'Lento', gripBonus:0.35, allTerrain:true, defectChance:0.07, hoodColor:0x15803d, bodyStyle:'trator', weight:4300, pros:'Atravessa terrenos difíceis', cons:'Muito lento', lore:'Trator de uma fazenda vizinha da estrada, o único que o monstro nunca alcançou.', desc:'Lento, mas aderência e resistência altas.' },
     { id:'anfibio', name:'Veículo Anfíbio', price:360, maxSpeed:120, durability:330, accel:48, turnRate:1.1, turnLabel:'Estável', gripBonus:0.15, allTerrain:true, defectChance:0.11, hoodColor:0x0891b2, bodyStyle:'anfibio', weight:2600, pros:'Casco vedado e aderente', cons:'Nada de especial em velocidade', lore:'Criado para atravessar as áreas alagadas da ROAD-105.', desc:'Casco anfíbio, bom em terreno alagado.' },
-    { id:'carro-eletrico', name:'Carro Elétrico', price:310, maxSpeed:175, durability:240, accel:90, turnRate:1.5, turnLabel:'Ágil', gripBonus:0.18, allTerrain:false, defectChance:0.05, hoodColor:0x14b8a6, bodyStyle:'ecar', weight:1700, pros:'Silencioso e confiável', cons:'Resistência média', lore:'Protótipo silencioso: os monstros demoram mais a ouvi-lo.', desc:'Rápido, silencioso e muito confiável.' },
+    { id:'carro-eletrico', name:'Carro Elétrico', price:310, maxSpeed:175, durability:240, accel:90, turnRate:1.5, turnLabel:'Ágil', gripBonus:0.18, allTerrain:false, defectChance:0.05, hoodColor:0x14b8a6, bodyStyle:'ecar', electric:true, weight:1700, pros:'Silencioso e confiável', cons:'Resistência média', lore:'Protótipo silencioso: os monstros demoram mais a ouvi-lo.', desc:'Rápido, silencioso e muito confiável.' },
     { id:'quadriciclo', name:'Quadriciclo', price:150, maxSpeed:105, durability:150, accel:62, turnRate:1.95, turnLabel:'Muito ágil', gripBonus:0.25, allTerrain:true, defectChance:0.12, hoodColor:0xdc2626, bodyStyle:'quad', weight:380, pros:'Pequeno e ágil', cons:'Frágil', lore:'Quadriciclo de um guarda-florestal que patrulhava os atalhos.', desc:'Pequeno, ágil e bom fora de estrada.' },
     { id:'corrida-antigo', name:'Carro de Corrida Antigo', price:290, maxSpeed:190, durability:140, accel:100, turnRate:1.45, turnLabel:'Ágil', gripBonus:0.10, allTerrain:false, defectChance:0.20, hoodColor:0x166534, bodyStyle:'racer', weight:820, pros:'Aceleração excelente', cons:'Frágil e pouco confiável', lore:'Relíquia de uma corrida clandestina que acontecia na ROAD-37.', desc:'Aceleração explosiva, mas frágil.' }
   ];
   NEW_CARS_DATA.forEach(c => { c.category = 'car'; CARS_DATA.push(c); });
+  BOATS_DATA.push({ id:'anfibio-aquatico', category:'boat', level:1, name:'Veículo Anfíbio (Modo Água)', price:0, maxSpeed:110, durability:330, accel:46, turnRate:1.15, turnLabel:'Estável', gripBonus:0.10, allTerrain:true, defectChance:0.11, hoodColor:0x0891b2, bodyStyle:'anfibio', weight:2600, pros:'Anda na terra e na água', cons:'Não é o mais rápido', lore:'O mesmo anfíbio da ROAD-105, agora com as rodas recolhidas.', desc:'Liberado de graça no modo aquático quando você tem o Veículo Anfíbio.' });
   const NEW_STYLE_SET = new Set(NEW_CARS_DATA.map(c => c.bodyStyle));
   let vehiclePaints = {};
   try { vehiclePaints = JSON.parse(localStorage.getItem('road37_paints') || '{}'); } catch (e) { vehiclePaints = {}; }
@@ -1730,6 +1732,22 @@
       desc: 'Serpente marinha colossal de barbatanas brilhantes que caça embarcações em rios e mares.'
     }
   ];
+  // ===== MONSTER UPDATE: 8 novas criaturas =====
+  const NEW_MONSTERS = [
+    { id:'corredor', number:'#04', name:'O Corredor', baseSpeed:104, maxSpeed:215, aggroLabel:'Muito rápido, mas perde velocidade nas curvas', aggroPct:82, chaseGap:70, snd:{type:'sawtooth',f:140}, ramp:0.018, beh:'corredor', maps:['land'], habitat:'Estradas terrestres', desc:'Quadrúpede magro que corre em linha reta mais rápido que qualquer carro, mas derrapa nas curvas.' },
+    { id:'observador', number:'#05', name:'O Observador', baseSpeed:70, maxSpeed:150, aggroLabel:'Acompanha de longe; só ataca se você reduzir', aggroPct:45, chaseGap:110, snd:{type:'sine',f:90}, beh:'observador', maps:['land'], habitat:'Estradas terrestres', desc:'Figura altíssima com um único olho branco. Segue o carro à distância e ataca quem fica lento demais.' },
+    { id:'subterraneo', number:'#06', name:'O Subterrâneo', baseSpeed:86, maxSpeed:190, aggroLabel:'Surge do chão e acelera ao emergir', aggroPct:70, chaseGap:55, snd:{type:'sawtooth',f:60}, beh:'subterraneo', maps:['road-99','road-105'], habitat:'Estradas de terra e alagadas (ROAD-99 / 105)', desc:'Verme gigante que viaja sob o solo e só emerge quando está perto da presa.' },
+    { id:'naufrago', number:'#07', name:'O Náufrago', baseSpeed:80, maxSpeed:190, aggroLabel:'Avança em ondas de aceleração', aggroPct:78, chaseGap:60, snd:{type:'sine',f:75}, beh:'naufrago', maps:['water'], habitat:'Mapas aquáticos (exclusivo)', desc:'Cadáver afogado coberto de algas, que avança em surtos como as ondas.' },
+    { id:'gigante', number:'#08', name:'O Gigante', baseSpeed:55, maxSpeed:140, aggroLabel:'Muito lento, mas extremamente persistente', aggroPct:95, chaseGap:90, ramp:0.012, snd:{type:'sine',f:45}, beh:'gigante', maps:['all'], habitat:'Todos os mapas', desc:'Colosso de pedra e osso. Nunca corre, mas também nunca desiste.' },
+    { id:'imitador', number:'#09', name:'O Imitador', baseSpeed:88, maxSpeed:195, aggroLabel:'Imita buzinas e sirenes para enganar', aggroPct:68, chaseGap:65, snd:{type:'triangle',f:220}, beh:'imitador', maps:['land'], habitat:'Estradas terrestres', desc:'Massa roxa com faróis falsos. Reproduz sons parecidos com os do ambiente.' },
+    { id:'cacador', number:'#10', name:'O Caçador', baseSpeed:80, maxSpeed:200, aggroLabel:'Fica mais rápido quando você reduz a velocidade', aggroPct:85, chaseGap:60, snd:{type:'sawtooth',f:110}, beh:'cacador', maps:['all'], habitat:'Todos os mapas', desc:'Predador de costas espinhosas que sente a hesitação e dispara.' },
+    { id:'errante', number:'#11', name:'O Errante', baseSpeed:78, maxSpeed:170, aggroLabel:'Patrulha regiões específicas da estrada', aggroPct:60, chaseGap:80, snd:{type:'sine',f:65}, beh:'errante', maps:['land'], habitat:'Estradas terrestres (patrulha entre 1.000 e 2.400 m de cada 3.000 m)', desc:'Vulto encapuzado com uma lanterna. Só persegue dentro da sua região de patrulha.' }
+  ];
+  NEW_MONSTERS.forEach(m => MONSTERS_DATA.push(m));
+  const NEW_MON_IDS = new Set(NEW_MONSTERS.map(m => m.id));
+  let monsterEncounters = {};
+  try { monsterEncounters = JSON.parse(localStorage.getItem('road37_monster_enc') || '{}'); } catch (e) { monsterEncounters = {}; }
+  function isMonsterKnown(m) { return !NEW_MON_IDS.has(m.id) || (monsterEncounters[m.id] || 0) > 0; }
 
   // ==========================================
   // 3. PERSISTÊNCIA E SISTEMA DE UPGRADES (ATÉ NÍVEL 5)
@@ -1761,10 +1779,12 @@
   function allVehicleData(){ return [...CARS_DATA, ...BOATS_DATA]; }
   function refreshGeneralStore(force=false){
     const now=Date.now();
-    if(force || !generalStoreData || !Array.isArray(generalStoreData.ids) || now-generalStoreData.updatedAt>=7200000){
-      const pool=allVehicleData().filter(v=>!unlockedCars.includes(v.id) && !unlockedBoats.includes(v.id));
-      const shuffled=pool.slice().sort(()=>Math.random()-0.5);
-      generalStoreData={ids:shuffled.slice(0,4).map(v=>v.id),updatedAt:now};
+    if(force || !generalStoreData || !Array.isArray(generalStoreData.ids) || generalStoreData.v!==2 || now-generalStoreData.updatedAt>=7200000){
+      const pool=allVehicleData().filter(v=>!unlockedCars.includes(v.id) && !unlockedBoats.includes(v.id) && v.id!=='anfibio-aquatico');
+      const shuf=a=>a.slice().sort(()=>Math.random()-0.5);
+      const specials=shuf(pool.filter(v=>SPECIAL_STORE_IDS.includes(v.id))).slice(0,2);
+      const rest=shuf(pool.filter(v=>!specials.includes(v))).slice(0,4-specials.length);
+      generalStoreData={ids:[...specials,...rest].map(v=>v.id),updatedAt:now,v:2};
       localStorage.setItem('road37_general_store',JSON.stringify(generalStoreData));
     }
   }
@@ -1778,13 +1798,18 @@
     { key: 'accel',       label: 'Aceleração / Motor',  baseCost: 15 },
     { key: 'durability',  label: 'Durabilidade / Casco',baseCost: 15 },
     { key: 'handling',    label: 'Direção & Aderência', baseCost: 12 },
-    { key: 'reliability', label: 'Resistência a Falhas',baseCost: 12 }
+    { key: 'reliability', label: 'Resistência a Falhas',baseCost: 12 },
+    { key: 'tires',       label: 'Pneus',               baseCost: 12 },
+    { key: 'suspension',  label: 'Suspensão (menos dano)', baseCost: 14 },
+    { key: 'brakes',      label: 'Freios',              baseCost: 10 },
+    { key: 'fuel',        label: 'Tanque / Eficiência', baseCost: 10 }
   ];
 
   function getVehicleUpgradeLevels(vehId) {
     if (!vehicleUpgrades[vehId]) {
       vehicleUpgrades[vehId] = { speed: 1, accel: 1, durability: 1, handling: 1, reliability: 1 };
     }
+    for (const k of ['tires', 'suspension', 'brakes', 'fuel']) if (vehicleUpgrades[vehId][k] == null) vehicleUpgrades[vehId][k] = 1;
     return vehicleUpgrades[vehId];
   }
 
@@ -1803,8 +1828,11 @@
       accel: Math.round(vehCfg.accel + aBonus * 11),
       durability: Math.round(vehCfg.durability + dBonus * 45),
       turnRate: Number((vehCfg.turnRate + hBonus * 0.12).toFixed(2)),
-      gripBonus: Number((vehCfg.gripBonus + hBonus * 0.06).toFixed(2)),
+      gripBonus: Number((vehCfg.gripBonus + hBonus * 0.06 + (up.tires - 1) * 0.04).toFixed(2)),
       defectChance: Math.max(0.02, Number((vehCfg.defectChance - rBonus * 0.06).toFixed(2))),
+      dmgFactor: (1 - (up.suspension - 1) * 0.06) * (vehCfg.weight ? 1.12 - Math.min(vehCfg.weight, 9000) / 9000 * 0.3 : 1),
+      brakePower: 1 + (up.brakes - 1) * 0.12,
+      fuelSec: Math.round(15 * (1 + (up.fuel - 1) * 0.2)),
       upgrades: up
     };
   }
@@ -1844,9 +1872,10 @@
   }
 
   function getActiveMonsterForMap(mapCfg) {
-    if (mapCfg.type === 'water') return MONSTERS_DATA[2];
-    if (mapCfg.id === 'road-99' || mapCfg.id === 'road-105') return MONSTERS_DATA[1];
-    return MONSTERS_DATA[0];
+    const base = mapCfg.type === 'water' ? MONSTERS_DATA[2] : ((mapCfg.id === 'road-99' || mapCfg.id === 'road-105') ? MONSTERS_DATA[1] : MONSTERS_DATA[0]);
+    const kind = mapCfg.type === 'water' ? 'water' : 'land';
+    const rare = NEW_MONSTERS.filter(m => m.maps.includes('all') || m.maps.includes(kind) || m.maps.includes(mapCfg.id));
+    return (rare.length && Math.random() < 0.45) ? rare[Math.floor(Math.random() * rare.length)] : base;
   }
 
   // ==========================================
@@ -2444,10 +2473,47 @@
     new THREE.MeshStandardMaterial({ color: 0x090d16 })
   );
   mirrorFrame.position.set(0, 1.48, -0.45);
-  const mirrorGlassMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+  // Retrovisor: uma câmera traseira desenha numa textura pequena (30 fps) que aparece no espelho
+  const rearRT = new THREE.WebGLRenderTarget(320, 96);
+  const rearCam = new THREE.PerspectiveCamera(62, 320 / 96, 0.1, 190);
+  const mirrorGlassMat = new THREE.MeshBasicMaterial({ color: 0xffffff, map: rearRT.texture, side: THREE.DoubleSide });
   const mirrorGlass = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.075), mirrorGlassMat);
   mirrorGlass.position.set(0, 1.48, -0.428);
-  cockpitVisuals.add(mirrorFrame, mirrorGlass);
+  mirrorFrame.scale.set(1.6, 1.75, 1);
+  mirrorGlass.scale.set(-1.667, 2, 1); // x negativo: imagem invertida como num espelho de verdade
+  carCockpit.add(mirrorFrame, mirrorGlass);
+  // Retrovisores laterais da moto e do quadriciclo
+  const bikeMirrors = new THREE.Group();
+  for (const sd of [-1, 1]) {
+    const mg = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.07), mirrorGlassMat);
+    mg.scale.x = -1; mg.position.set(sd * 0.5, 0, 0.012); mg.rotation.y = -sd * 0.4;
+    const mf = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.02), new THREE.MeshStandardMaterial({ color: 0x090d16 }));
+    mf.position.set(sd * 0.5, 0, 0); mf.rotation.y = -sd * 0.4;
+    bikeMirrors.add(mf, mg);
+  }
+  bikeMirrors.visible = false;
+  carCockpit.add(bikeMirrors);
+  let currentMirrorCfg = null, rearFrame = 0;
+  const NO_MIRROR = new Set(['horse', 'buggy', 'racer']);
+  function updateMirrorLayout() {
+    const c = currentMirrorCfg; if (!c) return;
+    const bike = c.bodyStyle === 'motorcycle' || c.bodyStyle === 'quad';
+    const car = !bike && c.category !== 'boat' && !NO_MIRROR.has(c.bodyStyle);
+    mirrorFrame.visible = car; mirrorGlass.visible = car; bikeMirrors.visible = bike;
+    if (car) { const y = cockpitCameraBaseY + 0.24, z = camera.position.z - 0.40; mirrorFrame.position.set(0, y, z); mirrorGlass.position.set(0, y, z + 0.022); }
+    if (bike) bikeMirrors.position.set(0, cockpitCameraBaseY - 0.3, camera.position.z - 0.6);
+  }
+  function renderRearMirror(dt) {
+    updateMirrorLayout();
+    if (!currentMirrorCfg || onFoot || currentStop || !(mirrorGlass.visible || bikeMirrors.visible)) return;
+    if ((rearFrame++ % (dt > 0.03 ? 4 : 2)) !== 0) return;
+    rearCam.position.set(carCockpit.position.x, carCockpit.position.y + cockpitCameraBaseY, carCockpit.position.z);
+    rearCam.rotation.set(0, carCockpit.rotation.y + Math.PI, 0);
+    const hide = [cockpitVisuals, specialCockpitVisuals, mirrorFrame, mirrorGlass, bikeMirrors], was = hide.map(o => o.visible);
+    hide.forEach(o => { o.visible = false; });
+    renderer.setRenderTarget(rearRT); renderer.render(scene, rearCam); renderer.setRenderTarget(null);
+    hide.forEach((o, i) => { o.visible = was[i]; });
+  }
 
   const steeringWheelGroup = new THREE.Group();
   steeringWheelGroup.position.set(-0.36, 0.93, -0.36);
@@ -2490,6 +2556,7 @@
   // 6. CONSTRUTORES DE MODELOS 3D (MONSTROS, CARROS & BARCOS)
   // ==========================================
   function buildMonster3DModel(monsterId = 'perseguidor') {
+    if (NEW_MON_IDS.has(monsterId)) return buildNewMonster(monsterId);
     const group = new THREE.Group();
 
     if (monsterId === 'espreitador-lama') {
@@ -2617,13 +2684,13 @@
   const FP_SPECS = {
     gt:{cam:[-.36,.98,-.05],roof:true,mirror:true,hood:[1,1.2,1.25,.55,-1.55]},
     caminhonete:{cam:[-.36,1.5,0],roof:true,mirror:true,hood:[1,1.5,1.1,.9,-1.4]},
-    jipe:{cam:[-.36,1.45,0],roof:false,mirror:false,bars:true,hood:[.9,1,.8,.85,-1.25]},
-    onibus:{cam:[-.5,1.95,.2],roof:true,mirror:false,noHood:true},
+    jipe:{cam:[-.36,1.45,0],roof:false,mirror:true,bars:true,hood:[.9,1,.8,.85,-1.25]},
+    onibus:{cam:[-.5,1.95,.2],roof:true,mirror:true,noHood:true},
     caminhao:{cam:[-.5,2.0,.1],roof:true,mirror:true,noHood:true},
-    comboio:{cam:[-.36,1.55,0],roof:true,mirror:false,slit:true,hood:[1.15,1.3,.9,.9,-1.3]},
+    comboio:{cam:[-.36,1.55,0],roof:true,mirror:true,slit:true,hood:[1.15,1.3,.9,.9,-1.3]},
     buggy:{cam:[0,1.15,.2],roof:false,mirror:false,bars:true,open:true,hood:[.7,1,.7,.5,-1.2]},
-    trator:{cam:[0,2.1,.3],roof:true,mirror:false,hood:[.85,2,1.2,1.1,-1.6]},
-    anfibio:{cam:[-.36,1.35,0],roof:false,mirror:false,glass:true,hood:[1,1.4,1,.75,-1.4]},
+    trator:{cam:[0,2.1,.3],roof:true,mirror:true,hood:[.85,2,1.2,1.1,-1.6]},
+    anfibio:{cam:[-.36,1.35,0],roof:false,mirror:true,glass:true,hood:[1,1.4,1,.75,-1.4]},
     ecar:{cam:[-.36,1.15,-.05],roof:true,mirror:true,led:true,hood:[1,.8,1,.7,-1.35]},
     quad:{cam:[0,1.35,.1],roof:false,mirror:false,open:true,noHood:true},
     racer:{cam:[0,1.0,.3],roof:false,mirror:false,open:true,hood:[.55,1,1.4,.6,-1.6]}
@@ -2713,13 +2780,19 @@
     const swatches = [['Original', null], ['Vermelho', 0xdc2626], ['Azul', 0x2563eb], ['Verde', 0x16a34a], ['Preto', 0x1f2937], ['Branco', 0xf1f5f9], ['Laranja', 0xf97316], ['Roxo', 0x7c3aed], ['★ Dourado', 0xfacc15], ['★ Cromado', 0xcbd5e1]];
     const owned = [...CARS_DATA.filter(c => unlockedCars.includes(c.id)), ...BOATS_DATA.filter(b => unlockedBoats.includes(b.id))].filter(o => o.id !== v.id);
     const bs = 'background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:5px 9px;font-size:.74rem;cursor:pointer;';
+    const cos = getCos(v);
+    const sel = (k, label, opts) => `<label>${label} <select data-k="${k}" style="${bs}">${opts.map((o, i) => `<option value="${i}" ${i === (cos[k] || 0) ? 'selected' : ''}>${Array.isArray(o) ? o[0] : o}</option>`).join('')}</select></label>`;
+    const cosHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">🔧 Visual:
+      ${sel('wheel', 'Rodas', WHEEL_COLORS)}${sel('light', 'Faróis', LIGHT_COLORS)}${sel('bumper', 'Para-choque', BUMPERS)}${sel('exhaust', 'Escapamento', EXHAUSTS)}${sel('flame', 'Efeito de motor', FLAMES)}${sel('interior', 'Interior', INTERIORS)}
+      ${sel('horn', 'Buzina', HORNS)}<button id="hornTest" style="${bs}">📯 Testar</button></div>`;
     box.innerHTML = `
       <div>${v.lore ? '📖 ' + v.lore : ''}</div>
-      <div>${v.weight ? '⚖️ Peso: <b>' + v.weight + ' kg</b> • ' : ''}${v.pros ? '✅ ' + v.pros + ' • ❌ ' + v.cons + ' • ' : ''}🛣️ Percorrido: <b>${Math.round(m.distance)} m</b></div>
+      <div>${v.weight ? '⚖️ Peso: <b>' + v.weight + ' kg</b> • ' : ''}${v.pros ? '✅ ' + v.pros + ' • ❌ ' + v.cons + ' • ' : ''}🛣️ Percorrido: <b>${Math.round(m.distance)} m</b> • 🏃 Fugas: <b>${m.escapes || 0}</b></div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">👁️ Vista:
         <button style="${bs}" data-a="3.85">Frente</button><button style="${bs}" data-a="-0.86">Lateral</button><button style="${bs}" data-a="0.71">Traseira</button><button style="${bs}" data-a="auto">Girar</button></div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">🎨 Pintura:
         ${swatches.map(([n, c]) => `<button style="${bs}border-left:14px solid ${c === null ? '#64748b' : '#' + c.toString(16).padStart(6, '0')};" data-c="${c === null ? 'null' : c}">${n}</button>`).join('')}</div>
+      ${cosHtml}
       <div>⚖️ Comparar com: <select id="cmpSel" style="${bs}"><option value="">—</option>${owned.map(o => `<option value="${o.id}">${o.name}</option>`).join('')}</select></div>
       <div id="cmpOut"></div>`;
     box.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { if (b.dataset.a === 'auto') previewAuto = true; else setPreviewAngle(parseFloat(b.dataset.a)); }));
@@ -2728,6 +2801,11 @@
       try { localStorage.setItem('road37_paints', JSON.stringify(vehiclePaints)); } catch (e) {}
       renderShowcaseTab();
     }));
+    box.querySelectorAll('[data-k]').forEach(el => el.addEventListener('change', () => {
+      const k = el.dataset.k; cos[k] = k === 'number' ? el.value.replace(/[^0-9]/g, '').slice(0, 3) : parseInt(el.value, 10);
+      saveCos(); renderShowcaseTab();
+    }));
+    document.getElementById('hornTest').addEventListener('click', () => playHorn(cos.horn || 0));
     document.getElementById('cmpSel').addEventListener('change', e => {
       const o = owned.find(x => x.id === e.target.value), out = document.getElementById('cmpOut');
       if (!o) { out.innerHTML = ''; return; }
@@ -2741,7 +2819,217 @@
     });
   }
 
-  function buildExteriorVehicle3D(vehCfg) {
+  // Aparições raras: criaturas surgem de pé ao lado da estrada em distâncias específicas (a cada 9.000 m)
+  const CAMEOS = [[1500, 'observador'], [3300, 'errante'], [5200, 'gigante'], [7700, 'corredor']];
+  let cameoMesh = null, cameoKey = -1, cameoDist = 0;
+  function updateCameos(dist) {
+    if (getActiveMap().type === 'water') return;
+    const cyc = dist % 9000, base = dist - cyc;
+    if (!cameoMesh) {
+      const c = CAMEOS.find(([d]) => cyc >= d - 150 && cyc < d && cameoKey !== base + d);
+      if (!c) return;
+      cameoKey = base + c[0]; cameoDist = cameoKey;
+      const z = -cameoKey, side = Math.random() < .5 ? -1 : 1, mon = MONSTERS_DATA.find(m => m.id === c[1]);
+      cameoMesh = buildNewMonster(c[1]);
+      cameoMesh.position.set(getRoadCenterX(z) + side * 15, getRoadElevationY(z), z);
+      cameoMesh.rotation.y = side * Math.PI / 2 + getRoadYaw(z);
+      scene.add(cameoMesh);
+      monsterEncounters[c[1]] = (monsterEncounters[c[1]] || 0) + 1;
+      try { localStorage.setItem('road37_monster_enc', JSON.stringify(monsterEncounters)); } catch (e) {}
+      showEventBanner('👁️ ' + mon.name.toUpperCase() + ' APARECEU AO LONGE!', '#a78bfa');
+    } else if (dist > cameoDist + 25) { scene.remove(cameoMesh); cameoMesh = null; }
+  }
+  const STOP_GAP = { observador: 150, corredor: 110, errante: 130 };
+  function monsterStopReaction() {
+    const m = activeRunMonster;
+    const msg = { observador: '👁️ O Observador te vigia de longe...', errante: '🏮 A lanterna do Errante brilha ao longe.', gigante: '🪨 O chão treme: o Gigante continua vindo, devagar.', imitador: '📯 O Imitador buzina ao longe...', cacador: '🐺 O Caçador fareja ao redor da parada.', corredor: '💨 O Corredor arranha o asfalto, impaciente.', subterraneo: '🕳️ O chão estala: o Subterrâneo está sob a parada.', naufrago: '🌊 Gotas pingam na escuridão...' }[m.id];
+    if (msg) showEventBanner(msg, '#a78bfa');
+    if (m.beh === 'imitador') playHorn(3);
+  }
+  let observerSlow = 0, erranteWasActive = false, monPulseT = 0, mimicT = 8, monCtx = null;
+  function applyMonsterBehavior(m, spd, gap, dist, dt) {
+    switch (m.beh) {
+      case 'corredor': { const curve = Math.abs(getRoadYaw(monsterZ) - getRoadYaw(monsterZ - 25)); return spd * (1 - Math.min(0.45, curve * 5)); }
+      case 'observador': {
+        observerSlow = Math.abs(carSpeedKmh) < 35 ? observerSlow + dt : Math.max(0, observerSlow - dt * 2);
+        return observerSlow > 2.5 ? spd : Math.max(20, Math.abs(carSpeedKmh) * 0.97) + (gap > 110 ? (gap - 110) * 0.5 : 0);
+      }
+      case 'subterraneo': return gap < 35 ? spd * 1.2 : spd;
+      case 'naufrago': return Math.sin(dist / 45) > 0.7 ? spd * 1.25 : spd * 0.92;
+      case 'gigante': return spd * 0.65 + 10;
+      case 'cacador': return spd + Math.max(0, 120 - Math.abs(carSpeedKmh)) * 0.5;
+      case 'errante': {
+        const active = (dist % 3000) > 1000 && (dist % 3000) < 2400;
+        if (active && !erranteWasActive) showEventBanner('👣 O ERRANTE ENTROU NA SUA REGIÃO!', '#a78bfa');
+        erranteWasActive = active;
+        return active ? spd : Math.max(30, Math.abs(carSpeedKmh) * 0.6);
+      }
+    }
+    return spd;
+  }
+  // Som de aproximação: pulsos mais rápidos e altos conforme o monstro chega perto; o Imitador copia buzina/sirene
+  function monsterAudioTick(m, gap, dt) {
+    if (gap > 160) return;
+    monPulseT -= dt; mimicT -= dt;
+    if (m.beh === 'imitador' && mimicT <= 0) { mimicT = 7 + Math.random() * 6; playHorn(Math.random() < .5 ? 0 : 3); }
+    if (monPulseT > 0) return;
+    monPulseT = Math.max(.28, Math.min(1.5, gap / 70));
+    try {
+      monCtx = monCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = monCtx.currentTime, o = monCtx.createOscillator(), g = monCtx.createGain(), snd = m.snd || { type: 'sine', f: 55 };
+      o.type = snd.type; o.frequency.setValueAtTime(snd.f, t); o.frequency.exponentialRampToValueAtTime(snd.f * .6, t + .25);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, .1 * (1 - gap / 160)), t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + .3);
+      o.connect(g); g.connect(monCtx.destination); o.start(t); o.stop(t + .32);
+    } catch (e) {}
+  }
+  function animateNewMonster(g, ph) {
+    const gp = monsterZ - carZ;   // animação de aproximação: inclina e pula mais quanto mais perto
+    if (monsterAwake && !currentStop && gp < 30) { const k = (30 - gp) / 30; g.rotation.x = -k * .35; g.position.y += Math.abs(Math.sin(ph * 2)) * k * .3; }
+    const a = g.userData.anim; if (!a || currentStop) return;
+    if (a === 'run') { g.rotation.z = Math.sin(ph) * .08; g.position.y += Math.abs(Math.sin(ph)) * .35; }
+    else if (a === 'float') g.position.y += 1.2 + Math.sin(ph * .4) * .5;
+    else if (a === 'sway') g.rotation.z = Math.sin(ph * .5) * .12;
+    else if (a === 'lunge') g.rotation.x += Math.sin(ph * .7) * .1;
+    else if (a === 'bob') g.position.y += Math.abs(Math.sin(ph * .8)) * .4;
+    if (g.userData.burrow) { const gp = monsterZ - carZ; g.position.y += gp > 40 ? -4 : (gp > 25 ? -(gp - 25) / 15 * 4 : 0); }
+  }
+  function buildNewMonster(id) {
+    const g = new THREE.Group();
+    const S = (c, e) => new THREE.MeshStandardMaterial({ color: c, roughness: .85, metalness: .1, emissive: e || 0x000000 });
+    const eye = c => new THREE.MeshBasicMaterial({ color: c });
+    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d), sph = r => new THREE.SphereGeometry(r, 14, 12), cone = (r, h) => new THREE.ConeGeometry(r, h, 8), cyl = (r, h) => new THREE.CylinderGeometry(r, r, h, 10);
+    const add = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, rz = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.x = rx; m.rotation.z = rz; g.add(m); return m; };
+    if (id === 'corredor') {
+      const b = S(0x3b1d1d); add(box(.9, 1.1, 2.6), b, 0, 1.5, 0); add(box(.7, .7, .9), b, 0, 1.9, -1.6); add(cone(.35, .9), b, 0, 1.85, -2.3, 1, 1, 1, -Math.PI / 2);
+      for (const x of [-.45, .45]) for (const z of [-.9, .9]) add(box(.18, 1.5, .18), b, x, .75, z);
+      for (const x of [-.22, .22]) add(sph(.1), eye(0xff2222), x, 2.05, -1.95);
+      g.userData.anim = 'run';
+    } else if (id === 'observador') {
+      const b = S(0x1f2937); add(cyl(.28, 4.2), b, 0, 2.1, 0); add(sph(.55), S(0xe5e7eb), 0, 4.5, 0); add(sph(.3), eye(0xffffff), 0, 4.5, -.4);
+      for (const x of [-1, 1]) add(box(.12, 2.6, .12), b, x * .55, 2.6, 0, 1, 1, 1, 0, x * .25);
+      g.userData.anim = 'float';
+    } else if (id === 'subterraneo') {
+      const b = S(0x4a3728); [[.5, 1.3, 0], [.5, 1.1, 1.4], [.5, .9, 2.6], [.5, .7, 3.5]].forEach(([y, r, z]) => add(sph(r), b, 0, y + .5, z));
+      add(new THREE.TorusGeometry(.8, .18, 8, 16), S(0x7f1d1d), 0, 1.4, -1.2);
+      for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; add(cone(.12, .5), S(0xe5e7eb), Math.cos(a) * .8, 1.4 + Math.sin(a) * .8, -1.25, 1, 1, 1, -Math.PI / 2); }
+      g.userData.anim = 'sway'; g.userData.burrow = true;
+    } else if (id === 'naufrago') {
+      const b = S(0x2f4f4f); add(box(1, 1.6, .6), b, 0, 2, 0); add(sph(.5), S(0x86a89a), 0, 3.2, -.1);
+      for (const x of [-.18, .18]) add(sph(.08), eye(0x38bdf8), x, 3.25, -.55);
+      for (const x of [-.65, .65]) add(box(.2, 1.4, .2), b, x, 2.1, -.3);
+      for (const x of [-.3, .3]) add(box(.25, 1.2, .25), b, x, .6, 0);
+      for (let i = 0; i < 5; i++) add(box(.08, 1.6, .08), S(0x14532d), (i - 2) * .28, 1.4, .35);
+      g.userData.anim = 'sway';
+    } else if (id === 'gigante') {
+      const b = S(0x57534e); add(box(2.2, 2.8, 1.4), b, 0, 3.2, 0); add(box(1, 1, 1), S(0x78716c), 0, 5.1, -.1);
+      for (const x of [-1.5, 1.5]) add(box(.7, 2.6, .7), b, x, 3.3, 0);
+      for (const x of [-.6, .6]) add(box(.8, 2, .8), b, x, 1, 0);
+      for (const x of [-.25, .25]) add(sph(.1), eye(0xff3b3b), x, 5.2, -.6);
+      g.scale.setScalar(1.9); g.userData.anim = 'lunge';
+    } else if (id === 'imitador') {
+      add(sph(1.4), S(0x4c1d95), 0, 1.8, 0, 1.2, 1, 1.5); add(box(1.2, .25, .2), S(0x0f0f0f), 0, 1.2, -2);
+      for (const x of [-.7, .7]) add(sph(.28), eye(0xfef08a), x, 1.7, -1.9);
+      for (const x of [-.45, -.15, .15, .45]) add(box(.1, .2, .1), S(0xf8fafc), x, 1.3, -2.05);
+      add(sph(.14), eye(0x22d3ee), 0, 2.8, -.8);
+      g.userData.anim = 'bob';
+    } else if (id === 'cacador') {
+      const b = S(0x422006); add(box(1, 1, 2.4), b, 0, 1.4, 0); add(box(.8, .7, 1), b, 0, 1.7, -1.7); add(box(.7, .2, .8), S(0x7f1d1d), 0, 1.35, -1.9);
+      for (let i = 0; i < 5; i++) add(cone(.15, .6), S(0x7c2d12), 0, 2.1, -.8 + i * .5);
+      for (const x of [-.4, .4]) for (const z of [-.8, .8]) add(box(.2, 1, .2), b, x, .5, z);
+      for (const x of [-.2, .2]) add(sph(.09), eye(0xfb923c), x, 1.85, -2.15);
+      g.userData.anim = 'run';
+    } else {
+      add(cone(1.1, 3.6), S(0x111827), 0, 1.8, 0); add(sph(.45), S(0x1f2937), 0, 3.9, 0);
+      add(box(.08, 1.4, .08), S(0x1f2937), .9, 2.2, -.3); add(sph(.2), eye(0xfacc15), .9, 1.5, -.3);
+      for (const x of [-.15, .15]) add(sph(.06), eye(0xfef08a), x, 3.95, -.4);
+      g.userData.anim = 'sway';
+    }
+    return g;
+  }
+  function renderMonsterArchiveInfo(m) {
+    let box = document.getElementById('monArchiveExtra');
+    if (!box) { box = document.createElement('div'); box.id = 'monArchiveExtra'; box.style.cssText = 'margin:8px 0;font-size:.8rem;color:#cbd5e1;line-height:1.5;'; document.getElementById('inspectMonsterDesc').after(box); }
+    if (!isMonsterKnown(m)) {
+      document.getElementById('inspectMonsterName').textContent = '??? (registro bloqueado)';
+      document.getElementById('inspectMonsterDesc').textContent = 'Encontre esta criatura numa viagem para liberar o registro.';
+      if (currentPreviewMonsterMesh) currentPreviewMonsterMesh.traverse(o => { if (o.isMesh) o.material = new THREE.MeshBasicMaterial({ color: 0x000000 }); });
+      box.innerHTML = '📍 Habitat: ???';
+      return;
+    }
+    box.innerHTML = `🧠 Comportamento: ${m.aggroLabel}<br>📍 Aparece em: ${m.habitat}<br>📏 Distância de perseguição: ${m.chaseGap || 65} m<br>👁️ Encontros: <b>${monsterEncounters[m.id] || 0}</b>`;
+  }
+
+  const UPGRADE_CAPS = { 'onibus-antigo':{speed:3,accel:3}, 'caminhao':{speed:3,accel:3}, 'trator':{speed:3,accel:3}, 'gt-esportivo':{durability:3}, 'corrida-antigo':{durability:3}, 'buggy':{durability:3}, 'quadriciclo':{durability:3}, 'blindado-comboio':{accel:3} };
+  function fmtUpg(key, e, cfg) {
+    switch (key) {
+      case 'speed': return `${e.maxSpeed} km/h`;
+      case 'accel': return `${e.accel} pts`;
+      case 'durability': return `${e.durability} HP`;
+      case 'handling': return `${e.turnRate}x (${cfg.turnLabel})`;
+      case 'reliability': return `${Math.round((1 - e.defectChance) * 100)}%`;
+      case 'tires': return `aderência ${e.gripBonus}`;
+      case 'suspension': return `-${(e.upgrades.suspension - 1) * 6}% de dano`;
+      case 'brakes': return `freio ${e.brakePower.toFixed(2)}x`;
+      case 'fuel': return `gasolina ${e.fuelSec}s`;
+    }
+    return '';
+  }
+  function previewUpgrade(cfg, key) { const up = getVehicleUpgradeLevels(cfg.id); up[key]++; const e = getEffectiveVehicleStats(cfg); up[key]--; return fmtUpg(key, e, cfg); }
+
+  let runKmMark = 0;
+  const WHEEL_COLORS = [['Original', null], ['Dourada', 0xfacc15], ['Preta', 0x111827], ['Vermelha', 0xdc2626], ['Neon', 0x22d3ee]];
+  const LIGHT_COLORS = [['Original', null], ['Branco', 0xffffff], ['Azul', 0x60a5fa], ['Verde', 0x4ade80], ['Roxo', 0xc084fc]];
+  const BUMPERS = ['Nenhum', 'Esportivo', 'Reforçado'], EXHAUSTS = ['Original', 'Duplo cromado', 'Grosso'];
+  const FLAMES = [['Nenhum', null], ['Laranja', 0xfb923c], ['Azul', 0x38bdf8], ['Verde', 0x4ade80]];
+  const INTERIORS = [['Original', null], ['Vermelho', 0x7f1d1d], ['Azul', 0x1e3a8a], ['Marrom', 0x78350f]];
+  const HORNS = ['Padrão', 'Grave', 'Dupla', 'Sirene', 'Caminhão'];
+  let vehicleCosmetics = {};
+  try { vehicleCosmetics = JSON.parse(localStorage.getItem('road37_cosmetics') || '{}'); } catch (e) { vehicleCosmetics = {}; }
+  function getCos(v) { return vehicleCosmetics[v.id] || (vehicleCosmetics[v.id] = {}); }
+  function saveCos() { try { localStorage.setItem('road37_cosmetics', JSON.stringify(vehicleCosmetics)); } catch (e) {} }
+
+  function applyCosmetics(g, v) {
+    const c = getCos(v);
+    g.traverse(o => {
+      if (!o.isMesh || !o.material || !o.material.color) return;
+      const h = o.material.color.getHex();
+      if (c.wheel && h === 0xcbd5e1 && o.geometry.type === 'CylinderGeometry') { o.material = o.material.clone(); o.material.color.setHex(WHEEL_COLORS[c.wheel][1]); }
+      if (c.light && h === 0xfef08a) { o.material = o.material.clone(); o.material.color.setHex(LIGHT_COLORS[c.light][1]); }
+    });
+    if (v.category === 'boat' || v.bodyStyle === 'horse' || v.bodyStyle === 'motorcycle') return;
+    const bb = new THREE.Box3().setFromObject(g), sz = bb.getSize(new THREE.Vector3()), W = sz.x / 2, Lh = sz.z / 2;
+    const M = (col, mt = .6, r = .3) => new THREE.MeshStandardMaterial({ color: col, metalness: mt, roughness: r });
+    if (c.bumper) { const b = new THREE.Mesh(new THREE.BoxGeometry(sz.x * (c.bumper === 2 ? 1.04 : .9), c.bumper === 2 ? .28 : .14, .22), M(c.bumper === 2 ? 0x27272a : 0xe5e7eb)); b.position.set(0, bb.min.y + .42, bb.min.z - .08); g.add(b); }
+    const xs = c.exhaust === 2 ? [.5] : [-.4, .4];
+    if (c.exhaust) for (const x of xs) { const r = c.exhaust === 2 ? .12 : .07; const e = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .4, 12), M(0xd4d4d8, .9, .2)); e.rotation.x = Math.PI / 2; e.position.set(x, bb.min.y + .3, bb.max.z + .1); g.add(e); }
+    if (c.flame) for (const x of (c.exhaust ? xs : [-.4, .4])) { const f = new THREE.Mesh(new THREE.ConeGeometry(.08, .5, 8), new THREE.MeshBasicMaterial({ color: FLAMES[c.flame][1] })); f.rotation.x = Math.PI / 2; f.position.set(x, bb.min.y + .3, bb.max.z + .4); g.add(f); }
+  }
+
+  let hornCtx = null;
+  function playHorn(idx) {
+    try {
+      hornCtx = hornCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = hornCtx, t = ctx.currentTime, out = ctx.createGain();
+      out.gain.setValueAtTime(.0001, t); out.gain.exponentialRampToValueAtTime(.12, t + .02); out.connect(ctx.destination);
+      const tone = (type, f0, f1, st, dur) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t + st); if (f1) o.frequency.linearRampToValueAtTime(f1, t + st + dur); o.connect(out); o.start(t + st); o.stop(t + st + dur); };
+      let total = .45;
+      if (idx === 1) { tone('sawtooth', 190, 0, 0, .55); total = .55; }
+      else if (idx === 2) { tone('square', 440, 0, 0, .18); tone('square', 440, 0, .28, .18); total = .5; }
+      else if (idx === 3) { tone('square', 500, 800, 0, .6); total = .6; }
+      else if (idx === 4) { tone('sawtooth', 140, 0, 0, .9); tone('square', 175, 0, 0, .9); total = .9; }
+      else tone('square', 380, 0, 0, .4);
+      out.gain.setValueAtTime(.12, t + total - .05); out.gain.exponentialRampToValueAtTime(.0001, t + total);
+    } catch (e) {}
+  }
+  document.addEventListener('keydown', e => { if (e.code === 'KeyH' && gameState === 'PLAYING') playHorn(getCos(getActiveVehicle()).horn || 0); });
+  const hornBtn = document.createElement('button');
+  hornBtn.className = 'ctrl-btn'; hornBtn.textContent = '📯';
+  hornBtn.style.cssText = 'position:absolute;right:8px;top:42%;width:44px;height:44px;padding:0;border-radius:50%;font-size:1.2rem;opacity:.55;pointer-events:auto;z-index:5;';
+  hornBtn.addEventListener('pointerdown', e => { e.preventDefault(); playHorn(getCos(getActiveVehicle()).horn || 0); });
+  document.getElementById('hud').appendChild(hornBtn);
+
+  function buildExteriorVehicle3D(vehCfg) { const g = buildExteriorVehicleBase(vehCfg); applyCosmetics(g, vehCfg); return g; }
+  function buildExteriorVehicleBase(vehCfg) {
     if (NEW_STYLE_SET.has(vehCfg.bodyStyle)) return buildNewVehicleExterior(vehCfg);
     const group = new THREE.Group();
     const paintMat = new THREE.MeshStandardMaterial({
@@ -3013,17 +3301,13 @@
     const upgradesContainer = document.getElementById('upgradesContainer');
     upgradesContainer.innerHTML = '';
 
-    const statDisplays = {
-      speed: `${effVeh.maxSpeed} km/h`,
-      accel: `${effVeh.accel} pts`,
-      durability: `${effVeh.durability} HP`,
-      handling: `${effVeh.turnRate}x (${baseVehCfg.turnLabel})`,
-      reliability: `${Math.round((1 - effVeh.defectChance) * 100)}%`
-    };
+    const statDisplays = Object.fromEntries(UPGRADE_SPECS.map(sp => [sp.key, fmtUpg(sp.key, effVeh, baseVehCfg)]));
 
     UPGRADE_SPECS.forEach(spec => {
+      if (baseVehCfg.category === 'boat' && (spec.key === 'tires' || spec.key === 'brakes')) return;
       const curLv = effVeh.upgrades[spec.key]; // 1..5
-      const isMax = curLv >= 5;
+      const capLv = (UPGRADE_CAPS[baseVehCfg.id] || {})[spec.key] || 5;
+      const isMax = curLv >= capLv;
       const cost = spec.baseCost * curLv;
       const canAfford = savedCoins >= cost;
 
@@ -3039,10 +3323,10 @@
         <div class="upgrade-row-header">
           <div class="upgrade-title-group">
             <span class="upgrade-name">${spec.label} — Nível ${curLv}/5</span>
-            <span class="upgrade-val">Atual: ${statDisplays[spec.key]}</span>
+            <span class="upgrade-val">Atual: ${statDisplays[spec.key]}${isMax ? '' : ' → <b style="color:#4ade80">' + previewUpgrade(baseVehCfg, spec.key) + '</b>'}</span>
           </div>
           <button class="upgrade-btn ${isMax ? 'maxed' : ''}" ${isMax || !canAfford ? 'disabled' : ''}>
-            ${isMax ? 'NÍVEL MÁXIMO (5)' : `MELHORAR (🪙 ${cost})`}
+            ${isMax ? 'NÍVEL MÁXIMO (' + capLv + ')' : `MELHORAR (🪙 ${cost})`}
           </button>
         </div>
         <div class="level-pips">${pipsHtml}</div>
@@ -3070,7 +3354,7 @@
     MONSTERS_DATA.forEach(mon => {
       const btn = document.createElement('button');
       btn.className = `owned-car-pill ${mon.id === inspectedMonsterId ? 'active-monster' : ''}`;
-      btn.textContent = `${mon.number} ${mon.name}`;
+      btn.textContent = isMonsterKnown(mon) ? `${mon.number} ${mon.name}` : `🔒 ${mon.number} ???`;
       btn.addEventListener('click', () => {
         inspectedMonsterId = mon.id;
         renderShowcaseTab();
@@ -3090,6 +3374,7 @@
     document.getElementById('monsterPreviewLabel').textContent = `ENTIDADE ${monCfg.number} • GIRANDO`;
     document.getElementById('inspectMonsterName').textContent = monCfg.name;
     document.getElementById('inspectMonsterDesc').textContent = monCfg.desc;
+    renderMonsterArchiveInfo(monCfg);
 
     document.getElementById('statMonBaseSpeedText').textContent = `${monCfg.baseSpeed} km/h`;
     document.getElementById('statMonBaseSpeedBar').style.width = `${Math.min(100, Math.round((monCfg.baseSpeed / 130) * 100))}%`;
@@ -3183,7 +3468,7 @@
 
     vehiclesGridEl.innerHTML = '';
     const unlockedList = lobbyMode === 'water' ? unlockedBoats : unlockedCars;
-    const listToRender = (lobbyMode === 'water' ? BOATS_DATA : CARS_DATA).filter(v=>!GENERAL_STORE_ONLY_IDS.includes(v.id)||unlockedList.includes(v.id));
+    const listToRender = (lobbyMode === 'water' ? BOATS_DATA : CARS_DATA).filter(v=>!GENERAL_STORE_ONLY_IDS.includes(v.id)||unlockedList.includes(v.id)).filter(v=>v.id!=='anfibio-aquatico'||unlockedCars.includes('anfibio'));
     const currentSelectedId = lobbyMode === 'water' ? selectedBoatId : selectedCarId;
 
     listToRender.forEach(baseItem => {
@@ -3347,7 +3632,7 @@
       const v=allVehicleData().find(x=>x.id===id); if(!v) return;
       const owned=v.category==='boat'?unlockedBoats.includes(id):unlockedCars.includes(id);
       const card=document.createElement('div'); card.className='shop-card';
-      card.innerHTML=`<div><div class="card-top"><h4>${v.category==='boat'?'🚤':'🚗'} ${v.name}</h4><span class="tag-badge tag-price">🪙 ${v.price}</span></div><div class="car-specs"><span class="spec-pill">⚡ ${v.maxSpeed} km/h</span><span class="spec-pill">🛡️ ${v.durability} HP</span></div><p class="card-desc">${v.desc}</p></div><button class="action-btn btn-buy" ${owned||savedCoins<v.price?'disabled':''}>${owned?'ADQUIRIDO':savedCoins>=v.price?'COMPRAR':'MOEDAS INSUFICIENTES'}</button>`;
+      card.innerHTML=`<div><div class="card-top"><h4>${SPECIAL_STORE_IDS.includes(v.id)?'⭐ ':''}${v.category==='boat'?'🚤':'🚗'} ${v.name}</h4><span class="tag-badge tag-price">🪙 ${v.price}</span></div><div class="car-specs"><span class="spec-pill">⚡ ${v.maxSpeed} km/h</span><span class="spec-pill">🛡️ ${v.durability} HP</span></div><p class="card-desc">${v.desc}</p></div><button class="action-btn btn-buy" ${owned||savedCoins<v.price?'disabled':''}>${owned?'ADQUIRIDO':savedCoins>=v.price?'COMPRAR':'MOEDAS INSUFICIENTES'}</button>`;
       card.querySelector('button').addEventListener('click',()=>{
         if(owned||savedCoins<v.price)return; savedCoins-=v.price;
         if(v.category==='boat'){unlockedBoats.push(v.id);selectedBoatId=v.id;}else{unlockedCars.push(v.id);selectedCarId=v.id;}
@@ -3370,9 +3655,11 @@
   let cockpitCameraBaseY = 1.24;
   function applyVehicleVisuals() {
     const vehCfg = getActiveVehicle();
+    currentMirrorCfg = vehCfg;
     hoodMat.color.setHex(getVehiclePaint(vehCfg));
     hoodMesh.visible = true; hoodMesh.scale.set(1, 1, 1); hoodMesh.position.set(0, 0.72, -1.35);
     dashMesh.scale.set(1, 1, 1); leftPillar.visible = true; rightPillar.visible = true;
+    { const ci = getCos(vehCfg).interior; dashMesh.material.color.setHex(ci ? INTERIORS[ci][1] : 0x111827); }
     const fp = FP_SPECS[vehCfg.bodyStyle];
     // Limpa a cabine especial anterior para nunca reaproveitar o modelo de outro veículo.
     while (specialCockpitVisuals.children.length) {
@@ -3465,6 +3752,8 @@
     }
 
     activeRunMonster = getActiveMonsterForMap(mapCfg);
+    monsterEncounters[activeRunMonster.id] = (monsterEncounters[activeRunMonster.id] || 0) + 1;
+    try { localStorage.setItem('road37_monster_enc', JSON.stringify(monsterEncounters)); } catch (e) {}
     setRunMonsterMesh(activeRunMonster.id);
 
     clearAllSegments();
@@ -3554,6 +3843,7 @@
   }
 
   function applyVehicleDamage(amount, defectBonus = 0.15) {
+    amount = Math.round(amount * (getActiveVehicle().dmgFactor || 1));
     currentDurability -= amount;
     bumpShakeTimer = 0.4;
     updateDurabilityHUD();
@@ -3598,7 +3888,7 @@
     steeringInput = 0;
     carAngularVel = 0;
     bumpShakeTimer = 0;
-    lastForkHint = -1; lastLaneHint = -1; laneFollow = 0;
+    lastForkHint = -1; lastLaneHint = -1; laneFollow = 0; runKmMark = 0; observerSlow = 0; erranteWasActive = false; monPulseT = 0; mimicT = 8; if (cameoMesh) { scene.remove(cameoMesh); cameoMesh = null; } cameoKey = -1;
 
     maxDurability = vehCfg.durability;
     currentDurability = maxDurability;
@@ -3636,7 +3926,7 @@
     monsterDistTextEl.style.color = '#94a3b8';
     dangerBarFillEl.style.width = '10%';
     dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
-    mirrorGlassMat.color.setHex(0x1e293b);
+    mirrorGlassMat.color.setHex(0xffffff);
     coinsRunValueEl.textContent = '🪙 +0';
 
     headlightLeft.intensity = 3.4;
@@ -3743,7 +4033,7 @@
   function spawnRoadsideStop(distance){
     const places=['POSTO DE SERVIÇO','LOJA DE VIDEOGAME','CAR PARADISE'];
     currentStop={distance,name:places[Math.floor(Math.random()*places.length)],x:getRoadCenterX(carZ),z:carZ};
-    monsterAwake=false; monsterSpeedKmh=0; monsterZ=carZ+42;
+    monsterAwake=false; monsterSpeedKmh=0; monsterZ=carZ+42; monsterStopReaction();
     document.getElementById('stopName').textContent=currentStop.name;
     document.getElementById('footStopTitle').textContent=currentStop.name;
     document.getElementById('stopPrompt').style.display='block';
@@ -3763,13 +4053,13 @@
     if(!onFoot)return; onFoot=false;footInput.forward=footInput.back=footInput.left=footInput.right=false;footStick.style.transform='translate(0,0)';document.getElementById('onFootPanel').style.display='none';document.querySelector('.controls-layer').style.display='block';
     if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);
     document.getElementById('itemUsePanel').style.display='flex'; renderItemButtons();
-    monsterAwake=true;monsterZ=carZ+100;monsterSpeedKmh=activeRunMonster.baseSpeed*.55;
+    monsterAwake=true;monsterZ=carZ+(STOP_GAP[activeRunMonster.id]||100);monsterSpeedKmh=activeRunMonster.baseSpeed*.55;
     showEventBanner('⚠️ O MONSTRO ACORDOU! VOLTE A ACELERAR!','#ef4444');
     currentStop=null;
   }
   function renderItemButtons(){
     const el=document.getElementById('itemUsePanel');el.innerHTML='';
-    [['gasoline','⛽ Gasolina'],['battery','🔋 Bateria']].forEach(([k,label])=>{if(carriedItems[k]>0){const b=document.createElement('button');b.className='ctrl-btn';b.style.padding='9px';b.textContent=`${label} x${carriedItems[k]}`;b.onclick=()=>{const v=getActiveVehicle();if(k==='gasoline'&&v.category!=='boat'&&!v.electric){gasBoostUntil=performance.now()+15000;carSpeedKmh=Math.min(v.maxSpeed+45,carSpeedKmh+45);carriedItems[k]--;showEventBanner('⛽ TURBO DE GASOLINA: +45 KM/H POR 15s!','#fbbf24');}else if(k==='battery'&&v.electric){cyberEnergy=Math.min(100,cyberEnergy+45);carriedItems[k]--;}else{showEventBanner(k==='battery'?'BATERIA SÓ FUNCIONA EM VEÍCULO ELÉTRICO':'GASOLINA SÓ FUNCIONA EM CARROS A COMBUSTÃO','#f59e0b');return;}renderItemButtons();};el.appendChild(b);}});
+    [['gasoline','⛽ Gasolina'],['battery','🔋 Bateria']].forEach(([k,label])=>{if(carriedItems[k]>0){const b=document.createElement('button');b.className='ctrl-btn';b.style.padding='9px';b.textContent=`${label} x${carriedItems[k]}`;b.onclick=()=>{const v=getActiveVehicle();if(k==='gasoline'&&v.category!=='boat'&&!v.electric){gasBoostUntil=performance.now()+1000*(v.fuelSec||15);carSpeedKmh=Math.min(v.maxSpeed+45,carSpeedKmh+45);carriedItems[k]--;showEventBanner('⛽ TURBO DE GASOLINA: +45 KM/H POR 15s!','#fbbf24');}else if(k==='battery'&&v.electric){cyberEnergy=Math.min(100,cyberEnergy+45);carriedItems[k]--;}else{showEventBanner(k==='battery'?'BATERIA SÓ FUNCIONA EM VEÍCULO ELÉTRICO':'GASOLINA SÓ FUNCIONA EM CARROS A COMBUSTÃO','#f59e0b');return;}renderItemButtons();};el.appendChild(b);}});
     if(!carriedItems.gasoline&&!carriedItems.battery)el.style.display='none';
   }
   document.getElementById('leaveVehicleBtn').addEventListener('click',enterOnFoot);
@@ -3852,7 +4142,7 @@
     const surfaceDrag = (!isOffRoadOrBoat && inWater) ? 28 : 14 * (isOffRoadOrBoat ? 1.0 : mapCfg.dragFactor);
     const baseAccel = (defects.engineDamaged ? vehCfg.accel * 0.62 : vehCfg.accel) * ((!isOffRoadOrBoat && inWater) ? 0.75 : 1);
     const accelRate = Math.max(16, baseAccel - slopeGravityEffect * 0.55);
-    const brakeRate = isWaterMap ? 56 : ((!isOffRoadOrBoat && inWater) ? 58 : 88);
+    const brakeRate = (isWaterMap ? 56 : ((!isOffRoadOrBoat && inWater) ? 58 : 88)) * (vehCfg.brakePower || 1);
     const reverseAccel = 28;
 
     if(vehCfg.electric){
@@ -4003,6 +4293,8 @@
     }
 
     const distanceTraveled = Math.max(0, Math.floor(-carZ));
+    { const km = Math.floor(distanceTraveled / 1000); if (km > runKmMark) { const mb = getMasteryBucket(vehCfg.category === 'boat' ? 'boats' : 'cars', vehCfg.id); mb.escapes = (mb.escapes || 0) + (km - runKmMark); runKmMark = km; } }
+    updateCameos(distanceTraveled);
     if(!isWaterMap && distanceTraveled>=nextStopDistance && !currentStop){carZ=-nextStopDistance;carX=getRoadCenterX(carZ);carSpeedKmh=0;spawnRoadsideStop(nextStopDistance);nextStopDistance+=5000;}
     if(isWaterMap) updateSeaWaves(dt,now,vehCfg,mapCfg);
     const masteryKind=vehCfg.category==='boat'?'boats':'cars';const mastery=getMasteryBucket(masteryKind,vehCfg.id);mastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mastery.uses+=dt;
@@ -4020,14 +4312,16 @@
     // Perseguição do Monstro (rampa progressiva mais suave nos primeiros 150m)
     if (monsterAwake && !currentStop && !onFoot) {
       const earlyScale = Math.min(1, 0.65 + (distanceTraveled / 180) * 0.35);
-      const rampFactor = activeRunMonster.id === 'leviata-serra' ? 0.020 : (activeRunMonster.id === 'espreitador-lama' ? 0.019 : 0.016);
+      const rampFactor = activeRunMonster.ramp ? activeRunMonster.ramp : activeRunMonster.id === 'leviata-serra' ? 0.020 : (activeRunMonster.id === 'espreitador-lama' ? 0.019 : 0.016);
       const baseMonsterSpeed = Math.min(
         activeRunMonster.maxSpeed,
         (activeRunMonster.baseSpeed * earlyScale) + distanceTraveled * rampFactor
       );
       const gap = monsterZ - carZ;
-      const rubberBand = gap > 65 ? (gap - 65) * 0.65 : 0;
-      const targetMonsterSpeed = baseMonsterSpeed + rubberBand;
+      const chaseGap = activeRunMonster.chaseGap || 65;
+      const rubberBand = gap > chaseGap ? (gap - chaseGap) * 0.65 : 0;
+      const targetMonsterSpeed = applyMonsterBehavior(activeRunMonster, baseMonsterSpeed + rubberBand, gap, distanceTraveled, dt);
+      monsterAudioTick(activeRunMonster, gap, dt);
 
       monsterSpeedKmh += (targetMonsterSpeed - monsterSpeedKmh) * Math.min(1, dt * 1.65);
       monsterZ -= (monsterSpeedKmh / 3.6) * dt;
@@ -4074,10 +4368,10 @@
       if (gapMeters < 22) {
         const intensity = (22 - gapMeters) / 22;
         dangerVignetteEl.style.boxShadow = `inset 0 0 ${Math.round(intensity * 95)}px rgba(220, 38, 38, ${0.65 * intensity})`;
-        mirrorGlassMat.color.setRGB(0.2 + intensity * 0.8, 0.05, 0.05);
+        mirrorGlassMat.color.setRGB(1, 1 - intensity * 0.7, 1 - intensity * 0.7);
       } else {
         dangerVignetteEl.style.boxShadow = 'inset 0 0 0px rgba(220, 38, 38, 0)';
-        mirrorGlassMat.color.setHex(0x1e293b);
+        mirrorGlassMat.color.setHex(0xffffff);
       }
     }
   }
@@ -4123,6 +4417,7 @@
     );
     monsterGroup.rotation.y = monsterYaw;
     monsterGroup.rotation.x = currentStop ? Math.PI * 0.42 : 0;
+    animateNewMonster(monsterGroup, monsterBobPhase);
   }
 
   // ==========================================
@@ -4152,6 +4447,7 @@
     } else if (gameState === 'PLAYING') {
       updatePhysics(dt, now);
       updateTransforms(now);
+      renderRearMirror(dt);
       renderer.render(scene, camera);
     } else {
       updateTransforms(now);
