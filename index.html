@@ -2057,9 +2057,47 @@
     return x - Math.floor(x);
   }
 
-  function spawnSegment(segIdx) {
-    if (activeSegments.has(segIdx)) return;
+  // ================= BIFURCAÇÕES (a partir de 3000 m) =================
+  // A cada FORK_PERIOD metros a pista se divide em duas por FORK_LENGTH metros:
+  // uma pista comum (buracos/obstáculos do mapa) e uma pista limpa (refletores ciano).
+  // Os trechos nunca coincidem com as paradas de 5.000 m.
+  const FORK_FIRST_START = 3000, FORK_LENGTH = 1000, FORK_PERIOD = 2500, FORK_RAMP = 180;
+  let laneFollow = 0, lastForkHint = -1, lastLaneHint = -1;
+  const cleanPostMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
 
+  function getForkAt(dist) {
+    if (dist < FORK_FIRST_START) return null;
+    const k = Math.floor((dist - FORK_FIRST_START) / FORK_PERIOD);
+    const start = FORK_FIRST_START + k * FORK_PERIOD;
+    if (dist > start + FORK_LENGTH) return null;
+    return { k, start, end: start + FORK_LENGTH, cleanSide: seededRandom(k * 13 + 7) < 0.5 ? -1 : 1 };
+  }
+  function forkOffsetAt(dist) {
+    const f = getForkAt(dist);
+    if (!f) return 0;
+    const t = Math.max(0, Math.min(1, Math.min(dist - f.start, f.end - dist) / FORK_RAMP));
+    return t * t * (3 - 2 * t) * (getActiveRoadWidth() / 2 + 5.5);
+  }
+  // Rotação extra (yaw) de uma pista da bifurcação em relação ao tronco da estrada
+  function forkG(dist) {
+    const d = 2;
+    return -Math.atan2(forkOffsetAt(dist + d) - forkOffsetAt(dist), d);
+  }
+  function updateForkHints(dist, relX) {
+    const ahead = getForkAt(dist + 200);
+    if (ahead && ahead.k !== lastForkHint) {
+      lastForkHint = ahead.k;
+      showEventBanner('🔀 BIFURCAÇÃO À FRENTE! ESCOLHA SEU CAMINHO', '#22d3ee');
+    }
+    const cur = getForkAt(dist);
+    if (cur && cur.k !== lastLaneHint && forkOffsetAt(dist) >= getActiveRoadWidth() * 0.75) {
+      lastLaneHint = cur.k;
+      const clean = Math.sign(relX) === cur.cleanSide;
+      showEventBanner(clean ? '✅ PISTA LIMPA — SEM OBSTÁCULOS' : '⚠️ PISTA COMUM — OBSTÁCULOS NO CAMINHO', clean ? '#22d3ee' : '#f59e0b');
+    }
+  }
+
+  function buildSegmentLane(segIdx, laneSide, noHazards, off, isCleanLane) {
     const mapCfg = getActiveMap();
     const isWaterMap = mapCfg.type === 'water';
     const roadW = getActiveRoadWidth();
@@ -2067,11 +2105,11 @@
     const zPos = -segIdx * SEGMENT_LENGTH;
     const centerX = getRoadCenterX(zPos);
     const centerY = getRoadElevationY(zPos);
-    const segYaw = getRoadYaw(zPos);
+    const segYaw = getRoadYaw(zPos) + laneSide * forkG(-zPos);
     const segPitch = getRoadPitch(zPos);
 
     const group = new THREE.Group();
-    group.position.set(centerX, centerY, zPos);
+    group.position.set(centerX + laneSide * off, centerY + (isCleanLane ? 0.012 : 0), zPos);
     group.rotation.order = 'YXZ';
     group.rotation.y = segYaw;
     group.rotation.x = segPitch;
@@ -2116,7 +2154,7 @@
         treeR.position.set(roadW / 2 + 2.4 + rR * 4.5, 0, 0);
         group.add(treeR);
 
-        if (segIdx > 14) {
+        if (segIdx > 14 && !noHazards) {
           const chance = seededRandom(segIdx * 19);
           const laneOffset = (seededRandom(segIdx * 37) - 0.5) * (roadW - 4.8);
           if (chance < 0.13) {
@@ -2155,7 +2193,7 @@
         mtnR.position.set(roadW / 2 + 8.2, 0, 0);
         group.add(mtnR);
 
-        if (segIdx > 14) {
+        if (segIdx > 14 && !noHazards) {
           const chance = seededRandom(segIdx * 23);
           const laneOffset = (seededRandom(segIdx * 41) - 0.5) * (roadW - 4.8);
           if (chance < 0.16) {
@@ -2181,7 +2219,7 @@
           group.add(buoyL, buoyR);
         }
 
-        if (segIdx > 14) {
+        if (segIdx > 14 && !noHazards) {
           const chance = seededRandom(segIdx * 29);
           const laneOffset = (seededRandom(segIdx * 43) - 0.5) * (roadW - 6.0);
           if (chance < 0.12) {
@@ -2232,7 +2270,7 @@
         group.add(treeR);
       }
 
-      if (segIdx > 14) {
+      if (segIdx > 14 && !noHazards) {
         const chance = seededRandom(segIdx * 17);
         const laneOffset = (seededRandom(segIdx * 31) - 0.5) * (roadW - 4.5);
 
@@ -2273,8 +2311,42 @@
       }
     }
 
-    scene.add(group);
-    activeSegments.set(segIdx, { group, hazards, isFlooded });
+    if (laneSide !== 0) {
+      // Obstáculos usam posição lateral relativa ao tronco da estrada
+      for (const h of hazards) h.localX += laneSide * off;
+      // Cenário do lado de dentro (entre as pistas) é removido para não invadir a outra pista
+      for (const ch of group.children.slice()) {
+        if (ch.position.x * (-laneSide) > roadW / 2 + 1.5) group.remove(ch);
+      }
+    }
+    if (isCleanLane) {
+      for (const sx of [-1, 1]) {
+        const post = new THREE.Mesh(postGeo, cleanPostMat);
+        post.position.set(sx * (roadW / 2 + 0.6), 0.55, 0);
+        group.add(post);
+      }
+    }
+    return { group, hazards, isFlooded };
+  }
+
+  function spawnSegment(segIdx) {
+    if (activeSegments.has(segIdx)) return;
+    const dist = segIdx * SEGMENT_LENGTH;
+    const off = forkOffsetAt(dist);
+    if (off <= 0.001) {
+      const d = buildSegmentLane(segIdx, 0, false, 0, false);
+      scene.add(d.group);
+      activeSegments.set(segIdx, d);
+      return;
+    }
+    const f = getForkAt(dist);
+    const separated = off >= getActiveRoadWidth() * 0.5;
+    const normal = buildSegmentLane(segIdx, -f.cleanSide, !separated, off, false);
+    const clean = buildSegmentLane(segIdx, f.cleanSide, true, off, true);
+    const root = new THREE.Group();
+    root.add(normal.group, clean.group);
+    scene.add(root);
+    activeSegments.set(segIdx, { group: root, hazards: normal.hazards, isFlooded: normal.isFlooded, cleanSide: f.cleanSide });
   }
 
   function updateDynamicRoadGeneration() {
@@ -3364,6 +3436,7 @@
     steeringInput = 0;
     carAngularVel = 0;
     bumpShakeTimer = 0;
+    lastForkHint = -1; lastLaneHint = -1; laneFollow = 0;
 
     maxDurability = vehCfg.durability;
     currentDurability = maxDurability;
@@ -3592,7 +3665,7 @@
     const currentSegIdx = Math.floor(-carZ / SEGMENT_LENGTH);
     const currentSegData = activeSegments.get(currentSegIdx);
 
-    const inWater = isWaterMap || (currentSegData ? currentSegData.isFlooded : false);
+    const inWater = isWaterMap || (currentSegData ? (currentSegData.isFlooded && !(currentSegData.cleanSide && Math.sign(carX - getRoadCenterX(carZ)) === currentSegData.cleanSide)) : false);
     surfaceWarningEl.style.display = (!isWaterMap && inWater) ? 'block' : 'none';
 
     const isOffRoadOrBoat = vehCfg.allTerrain;
@@ -3689,6 +3762,7 @@
     const roadYaw = getRoadYaw(carZ);
     const totalYaw = roadYaw + carYaw;
 
+    const prevCarZ = carZ;
     carX += -Math.sin(totalYaw) * metersPerSec * dt;
     carZ += -Math.cos(totalYaw) * metersPerSec * dt;
     carY = getRoadElevationY(carZ);
@@ -3696,6 +3770,19 @@
     // Colisão com obstáculos
     const roadCenter = getRoadCenterX(carZ);
     const relX = carX - roadCenter;
+
+    // Bifurcações: o carro acompanha a curva da pista em que está e as dicas são exibidas
+    {
+      const dOld = Math.max(0, -prevCarZ), dNew = Math.max(0, -carZ);
+      const offNow = forkOffsetAt(dNew);
+      if (offNow > 0.01 || forkOffsetAt(dOld) > 0.01) {
+        laneFollow = Math.max(-1, Math.min(1, relX / Math.max(1, offNow * 0.5)));
+        carYaw += laneFollow * (forkG(dNew) - forkG(dOld));
+      } else {
+        laneFollow = 0;
+      }
+      updateForkHints(dNew, relX);
+    }
 
     if (currentSegData && currentSegData.hazards.length > 0) {
       for (let i = currentSegData.hazards.length - 1; i >= 0; i--) {
@@ -3730,8 +3817,16 @@
 
     // Barreira lateral (Em mar aberto o limite é apenas a área de navegação sem dano de rocha)
     const maxOffset = roadW / 2 - 1.15;
-    if (relX > maxOffset || relX < -maxOffset) {
-      carX = roadCenter + (relX > maxOffset ? maxOffset : -maxOffset);
+    // Em bifurcações a área permitida é a da pista mais próxima (ou a união delas enquanto se sobrepõem)
+    let laneShift = 0, halfAllowed = maxOffset;
+    const forkOffNow = forkOffsetAt(Math.max(0, -carZ));
+    if (forkOffNow > 0.01) {
+      if (forkOffNow <= maxOffset) halfAllowed = maxOffset + forkOffNow;
+      else laneShift = relX < 0 ? -forkOffNow : forkOffNow;
+    }
+    const relLane = relX - laneShift;
+    if (relLane > halfAllowed || relLane < -halfAllowed) {
+      carX = roadCenter + laneShift + (relLane > halfAllowed ? halfAllowed : -halfAllowed);
       if (mapCfg.biome !== 'open-ocean' && Math.abs(carSpeedKmh) > 40 && bumpShakeTimer <= 0 && !(vehCfg.id==='cybertruck'&&now<cyberAbilityUntil)) {
         const wallDamage = Math.round(Math.abs(carSpeedKmh) * (isWaterMap ? 0.25 : 0.22));
         let hitMsg = `💥 BATEU NA LATERAL! (-${wallDamage} DURABILIDADE)`;
@@ -3856,9 +3951,9 @@
 
     steeringWheelGroup.rotation.z = steeringInput * 0.65;
 
-    const monsterRoadX = getRoadCenterX(monsterZ);
+    const monsterRoadX = getRoadCenterX(monsterZ) + laneFollow * forkOffsetAt(Math.max(0, -monsterZ));
     const monsterRoadY = getRoadElevationY(monsterZ);
-    const monsterYaw = getRoadYaw(monsterZ);
+    const monsterYaw = getRoadYaw(monsterZ) + laneFollow * forkG(Math.max(0, -monsterZ));
     monsterGroup.position.set(
       monsterRoadX + Math.sin(monsterBobPhase * 0.5) * 1.4,
       monsterRoadY + Math.abs(Math.sin(monsterBobPhase)) * 0.45,
