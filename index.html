@@ -1695,6 +1695,19 @@
       dragFactor: 1.04
     }
   ];
+  // ===== WORLD UPDATE: 8 novos mapas (cenário, iluminação, clima e condições próprios) =====
+  LAND_MAPS_DATA.push(
+    { id:'cidade-abandonada', type:'land', name:'CIDADE ABANDONADA', price:180, desc:'Avenidas vazias entre prédios apagados e neblina baixa.', skyColor:0x0d1018, fogColor:0x1a1f2b, groundColor:0x14161c, grip:0.95, dragFactor:1.0, hillAmp:0.5, decor:'building', weather:'fog' },
+    { id:'deserto-vermelho', type:'land', name:'DESERTO VERMELHO', price:200, desc:'Dunas vermelhas, cactos e tempestades de areia. A areia reduz a aderência.', skyColor:0x3b1d12, fogColor:0x7a3b1d, groundColor:0x7c2d12, grip:0.92, dragFactor:1.06, hillAmp:0.8, decor:'cactus', weather:'sand' },
+    { id:'montanhas-geladas', type:'land', name:'MONTANHAS GELADAS', price:240, desc:'Subidas e descidas íngremes com neve caindo e pista escorregadia.', skyColor:0x0f1f33, fogColor:0x1e3a5f, groundColor:0xdbeafe, grip:0.78, dragFactor:1.0, hillAmp:1.6, decor:'peak', weather:'snow' },
+    { id:'floresta-sombria', type:'land', name:'FLORESTA SOMBRIA', price:220, desc:'Árvores secas e torcidas, pouca luz e neblina.', skyColor:0x03100a, fogColor:0x06180e, groundColor:0x05160d, grip:0.93, dragFactor:1.0, hillAmp:1.1, decor:'deadtree', weather:'fog' },
+    { id:'pantano', type:'land', name:'PÂNTANO', price:210, desc:'Terreno encharcado e baixo: a lama aumenta o arrasto.', skyColor:0x0c1a12, fogColor:0x1a2e1f, groundColor:0x1c2b16, grip:0.85, dragFactor:1.08, hillAmp:0.3, decor:'deadtree', weather:'fog' },
+    { id:'zona-industrial', type:'land', name:'ZONA INDUSTRIAL', price:230, desc:'Galpões, chaminés e estrada larga e plana.', skyColor:0x14110c, fogColor:0x241b12, groundColor:0x1c1917, grip:1.0, dragFactor:1.0, hillAmp:0.4, decor:'factory' },
+    { id:'estrada-noturna', type:'land', name:'ESTRADA NOTURNA', price:190, desc:'Noite eterna: só os postes e os faróis iluminam o caminho.', skyColor:0x020308, fogColor:0x020308, groundColor:0x08090d, grip:1.0, dragFactor:1.0, hillAmp:1.0, decor:'pole', night:true }
+  );
+  WATER_MAPS_DATA.push(
+    { id:'costa-tempestuosa', type:'water', biome:'open-ocean', name:'COSTA TEMPESTUOSA', price:260, desc:'Mar revolto ao lado de uma costa castigada por tempestades constantes.', skyColor:0x0a1620, fogColor:0x11202c, groundColor:0x050b11, waterColor:0x0b3b52, riverWidth:30, grip:0.76, dragFactor:1.06, weather:'storm' }
+  );
 
   // 3 MONSTROS DO JOGO
   const MONSTERS_DATA = [
@@ -1734,14 +1747,14 @@
   ];
   // ===== MONSTER UPDATE: 8 novas criaturas =====
   const NEW_MONSTERS = [
-    { id:'corredor', number:'#04', name:'O Corredor', baseSpeed:104, maxSpeed:215, aggroLabel:'Muito rápido, mas perde velocidade nas curvas', aggroPct:82, chaseGap:70, snd:{type:'sawtooth',f:140}, ramp:0.018, beh:'corredor', maps:['land'], habitat:'Estradas terrestres', desc:'Quadrúpede magro que corre em linha reta mais rápido que qualquer carro, mas derrapa nas curvas.' },
-    { id:'observador', number:'#05', name:'O Observador', baseSpeed:70, maxSpeed:150, aggroLabel:'Acompanha de longe; só ataca se você reduzir', aggroPct:45, chaseGap:110, snd:{type:'sine',f:90}, beh:'observador', maps:['land'], habitat:'Estradas terrestres', desc:'Figura altíssima com um único olho branco. Segue o carro à distância e ataca quem fica lento demais.' },
-    { id:'subterraneo', number:'#06', name:'O Subterrâneo', baseSpeed:86, maxSpeed:190, aggroLabel:'Surge do chão e acelera ao emergir', aggroPct:70, chaseGap:55, snd:{type:'sawtooth',f:60}, beh:'subterraneo', maps:['road-99','road-105'], habitat:'Estradas de terra e alagadas (ROAD-99 / 105)', desc:'Verme gigante que viaja sob o solo e só emerge quando está perto da presa.' },
-    { id:'naufrago', number:'#07', name:'O Náufrago', baseSpeed:80, maxSpeed:190, aggroLabel:'Avança em ondas de aceleração', aggroPct:78, chaseGap:60, snd:{type:'sine',f:75}, beh:'naufrago', maps:['water'], habitat:'Mapas aquáticos (exclusivo)', desc:'Cadáver afogado coberto de algas, que avança em surtos como as ondas.' },
-    { id:'gigante', number:'#08', name:'O Gigante', baseSpeed:55, maxSpeed:140, aggroLabel:'Muito lento, mas extremamente persistente', aggroPct:95, chaseGap:90, ramp:0.012, snd:{type:'sine',f:45}, beh:'gigante', maps:['all'], habitat:'Todos os mapas', desc:'Colosso de pedra e osso. Nunca corre, mas também nunca desiste.' },
-    { id:'imitador', number:'#09', name:'O Imitador', baseSpeed:88, maxSpeed:195, aggroLabel:'Imita buzinas e sirenes para enganar', aggroPct:68, chaseGap:65, snd:{type:'triangle',f:220}, beh:'imitador', maps:['land'], habitat:'Estradas terrestres', desc:'Massa roxa com faróis falsos. Reproduz sons parecidos com os do ambiente.' },
-    { id:'cacador', number:'#10', name:'O Caçador', baseSpeed:80, maxSpeed:200, aggroLabel:'Fica mais rápido quando você reduz a velocidade', aggroPct:85, chaseGap:60, snd:{type:'sawtooth',f:110}, beh:'cacador', maps:['all'], habitat:'Todos os mapas', desc:'Predador de costas espinhosas que sente a hesitação e dispara.' },
-    { id:'errante', number:'#11', name:'O Errante', baseSpeed:78, maxSpeed:170, aggroLabel:'Patrulha regiões específicas da estrada', aggroPct:60, chaseGap:80, snd:{type:'sine',f:65}, beh:'errante', maps:['land'], habitat:'Estradas terrestres (patrulha entre 1.000 e 2.400 m de cada 3.000 m)', desc:'Vulto encapuzado com uma lanterna. Só persegue dentro da sua região de patrulha.' }
+    { id:'corredor', pace:.8, number:'#04', name:'O Corredor', baseSpeed:104, maxSpeed:215, aggroLabel:'Muito rápido, mas perde velocidade nas curvas', aggroPct:82, chaseGap:70, snd:{type:'sawtooth',f:140}, ramp:0.018, beh:'corredor', maps:['land'], habitat:'Estradas terrestres', desc:'Quadrúpede magro que corre em linha reta mais rápido que qualquer carro, mas derrapa nas curvas.' },
+    { id:'observador', pace:.62, number:'#05', name:'O Observador', baseSpeed:70, maxSpeed:150, aggroLabel:'Acompanha de longe; só ataca se você reduzir', aggroPct:45, chaseGap:110, snd:{type:'sine',f:90}, beh:'observador', maps:['land'], habitat:'Estradas terrestres', desc:'Figura altíssima com um único olho branco. Segue o carro à distância e ataca quem fica lento demais.' },
+    { id:'subterraneo', pace:.68, number:'#06', name:'O Subterrâneo', baseSpeed:86, maxSpeed:190, aggroLabel:'Surge do chão e acelera ao emergir', aggroPct:70, chaseGap:55, snd:{type:'sawtooth',f:60}, beh:'subterraneo', maps:['road-99','road-105'], habitat:'Estradas de terra e alagadas (ROAD-99 / 105)', desc:'Verme gigante que viaja sob o solo e só emerge quando está perto da presa.' },
+    { id:'naufrago', pace:.66, number:'#07', name:'O Náufrago', baseSpeed:80, maxSpeed:190, aggroLabel:'Avança em ondas de aceleração', aggroPct:78, chaseGap:60, snd:{type:'sine',f:75}, beh:'naufrago', maps:['water'], habitat:'Mapas aquáticos (exclusivo)', desc:'Cadáver afogado coberto de algas, que avança em surtos como as ondas.' },
+    { id:'gigante', pace:.55, number:'#08', name:'O Gigante', baseSpeed:55, maxSpeed:140, aggroLabel:'Muito lento, mas extremamente persistente', aggroPct:95, chaseGap:90, ramp:0.012, snd:{type:'sine',f:45}, beh:'gigante', maps:['all'], habitat:'Todos os mapas', desc:'Colosso de pedra e osso. Nunca corre, mas também nunca desiste.' },
+    { id:'imitador', pace:.7, number:'#09', name:'O Imitador', baseSpeed:88, maxSpeed:195, aggroLabel:'Imita buzinas e sirenes para enganar', aggroPct:68, chaseGap:65, snd:{type:'triangle',f:220}, beh:'imitador', maps:['land'], habitat:'Estradas terrestres', desc:'Massa roxa com faróis falsos. Reproduz sons parecidos com os do ambiente.' },
+    { id:'cacador', pace:.72, number:'#10', name:'O Caçador', baseSpeed:80, maxSpeed:200, aggroLabel:'Fica mais rápido quando você reduz a velocidade', aggroPct:85, chaseGap:60, snd:{type:'sawtooth',f:110}, beh:'cacador', maps:['all'], habitat:'Todos os mapas', desc:'Predador de costas espinhosas que sente a hesitação e dispara.' },
+    { id:'errante', pace:.66, number:'#11', name:'O Errante', baseSpeed:78, maxSpeed:170, aggroLabel:'Patrulha regiões específicas da estrada', aggroPct:60, chaseGap:80, snd:{type:'sine',f:65}, beh:'errante', maps:['land'], habitat:'Estradas terrestres (patrulha entre 1.000 e 2.400 m de cada 3.000 m)', desc:'Vulto encapuzado com uma lanterna. Só persegue dentro da sua região de patrulha.' }
   ];
   NEW_MONSTERS.forEach(m => MONSTERS_DATA.push(m));
   const NEW_MON_IDS = new Set(NEW_MONSTERS.map(m => m.id));
@@ -2360,6 +2373,7 @@
       }
     }
 
+    if (mapCfg.decor) addMapDecor(group, mapCfg, segIdx, roadW);
     if (laneSide !== 0) {
       // Obstáculos usam posição lateral relativa ao tronco da estrada
       for (const h of hazards) h.localX += laneSide * off;
@@ -2486,9 +2500,9 @@
   const bikeMirrors = new THREE.Group();
   for (const sd of [-1, 1]) {
     const mg = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.07), mirrorGlassMat);
-    mg.scale.x = -1; mg.position.set(sd * 0.5, 0, 0.012); mg.rotation.y = -sd * 0.4;
+    mg.scale.x = -1; mg.position.set(sd * 0.45, 0, 0.012); mg.rotation.y = -sd * 0.4;
     const mf = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.02), new THREE.MeshStandardMaterial({ color: 0x090d16 }));
-    mf.position.set(sd * 0.5, 0, 0); mf.rotation.y = -sd * 0.4;
+    mf.position.set(sd * 0.45, 0, 0); mf.rotation.y = -sd * 0.4;
     bikeMirrors.add(mf, mg);
   }
   bikeMirrors.visible = false;
@@ -2500,8 +2514,8 @@
     const bike = c.bodyStyle === 'motorcycle' || c.bodyStyle === 'quad';
     const car = !bike && c.category !== 'boat' && !NO_MIRROR.has(c.bodyStyle);
     mirrorFrame.visible = car; mirrorGlass.visible = car; bikeMirrors.visible = bike;
-    if (car) { const y = cockpitCameraBaseY + 0.24, z = camera.position.z - 0.40; mirrorFrame.position.set(0, y, z); mirrorGlass.position.set(0, y, z + 0.022); }
-    if (bike) bikeMirrors.position.set(0, cockpitCameraBaseY - 0.3, camera.position.z - 0.6);
+    if (car) { const y = cockpitCameraBaseY + 0.10, z = camera.position.z - 0.45; mirrorFrame.position.set(0, y, z); mirrorGlass.position.set(0, y, z + 0.022); }
+    if (bike) bikeMirrors.position.set(0, cockpitCameraBaseY - 0.12, camera.position.z - 0.6);
   }
   function renderRearMirror(dt) {
     updateMirrorLayout();
@@ -2847,7 +2861,8 @@
     if (m.beh === 'imitador') playHorn(3);
   }
   let observerSlow = 0, erranteWasActive = false, monPulseT = 0, mimicT = 8, monCtx = null;
-  function applyMonsterBehavior(m, spd, gap, dist, dt) {
+  function applyMonsterBehavior(m, spd, gap, dist, dt, top) {
+    if (top && m.pace) spd = Math.max(spd, top * m.pace);
     switch (m.beh) {
       case 'corredor': { const curve = Math.abs(getRoadYaw(monsterZ) - getRoadYaw(monsterZ - 25)); return spd * (1 - Math.min(0.45, curve * 5)); }
       case 'observador': {
@@ -2856,7 +2871,7 @@
       }
       case 'subterraneo': return gap < 35 ? spd * 1.2 : spd;
       case 'naufrago': return Math.sin(dist / 45) > 0.7 ? spd * 1.25 : spd * 0.92;
-      case 'gigante': return spd * 0.65 + 10;
+      case 'gigante': return spd * 0.9;
       case 'cacador': return spd + Math.max(0, 120 - Math.abs(carSpeedKmh)) * 0.5;
       case 'errante': {
         const active = (dist % 3000) > 1000 && (dist % 3000) < 2400;
@@ -2957,6 +2972,118 @@
       return;
     }
     box.innerHTML = `🧠 Comportamento: ${m.aggroLabel}<br>📍 Aparece em: ${m.habitat}<br>📏 Distância de perseguição: ${m.chaseGap || 65} m<br>👁️ Encontros: <b>${monsterEncounters[m.id] || 0}</b>`;
+  }
+
+  // --- Cenário próprio (geometrias e materiais compartilhados para poupar memória) ---
+  const dGeo = { box: new THREE.BoxGeometry(1, 1, 1), cyl: new THREE.CylinderGeometry(.5, .5, 1, 8), cone: new THREE.ConeGeometry(.5, 1, 7), rock: new THREE.DodecahedronGeometry(.5), sph: new THREE.SphereGeometry(.5, 8, 6) };
+  const dMats = {};
+  const dMat = (c, basic) => dMats[c + (basic ? 'b' : '')] || (dMats[c + (basic ? 'b' : '')] = basic ? new THREE.MeshBasicMaterial({ color: c }) : new THREE.MeshStandardMaterial({ color: c, roughness: .9 }));
+  function addMapDecor(group, mapCfg, segIdx, roadW) {
+    const kind = mapCfg.decor;
+    if (kind !== 'pole' && Math.abs(segIdx) % 2) return;
+    if (kind === 'pole' && Math.abs(segIdx) % 3) return;
+    const put = (geo, mat, x, y, z, sx, sy, sz, rz = 0) => { const m = new THREE.Mesh(dGeo[geo], mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.z = rz; group.add(m); };
+    for (const sd of [-1, 1]) {
+      const r = seededRandom(segIdx * 7 + sd * 3 + 11), r2 = seededRandom(segIdx * 13 + sd + 5), x = sd * (roadW / 2 + 6 + r * 14);
+      if (kind === 'building') { const h = 5 + r2 * 14; put('box', dMat(0x2b3039), x, h / 2, 0, 4 + r * 3, h, 4 + r2 * 3); put('box', dMat(0xfacc15, true), x - sd * 2.05, h * .4, 0, .05, 1, 1.2); }
+      else if (kind === 'factory') { const h = 4 + r2 * 6; put('box', dMat(0x3f3a35), x, h / 2, 0, 8 + r * 4, h, 6); put('cyl', dMat(0x52525b), x + sd * 3, h + 3, 0, 1.4, h * 1.2 + 4, 1.4); put('box', dMat(0xef4444, true), x + sd * 3, h * 1.2 + 6, 0, .5, .3, .5); }
+      else if (kind === 'cactus') { const h = 2.5 + r2 * 2.5; if (r > .5) { put('cyl', dMat(0x3f6212), x, h / 2, 0, .55, h, .55); put('cyl', dMat(0x3f6212), x + .6, h * .6, 0, .3, 1.2, .3); } else put('rock', dMat(0x9a3412), x, 1, 0, 3 + r * 2, 2 + r2, 3); }
+      else if (kind === 'peak') { const h = 6 + r2 * 12; put('cone', dMat(0xe0f2fe), x, h / 2, 0, 4 + r * 5, h, 4 + r * 5); }
+      else if (kind === 'deadtree') { const h = 4 + r * 3; put('cyl', dMat(0x2a1f14), x, h / 2, 0, .4, h, .4); put('cyl', dMat(0x2a1f14), x + .6, h * .8, 0, .15, 2, .15, -.9); put('cyl', dMat(0x2a1f14), x - .6, h * .65, 0, .15, 1.6, .15, .9); }
+      else if (kind === 'pole') { const px = sd * (roadW / 2 + 1.4); put('cyl', dMat(0x52525b), px, 3, 0, .2, 6, .2); put('sph', dMat(0xfef08a, true), px - sd * .3, 6.1, 0, .6, .5, .6); }
+    }
+  }
+
+  // --- Clima: chuva, tempestade, neve, neblina e areia (um único objeto de partículas) ---
+  const WEATHER_FOG = { clear: 0, rain: .3, storm: .9, snow: .5, fog: 2.2, sand: 1.6 };
+  const WEATHER_GRIP = { clear: 1, rain: .86, storm: .8, snow: .78, fog: 1, sand: .92 };
+  const weather = { type: 'clear', base: 'clear', k: 0, until: 0 };
+  const baseFogDensity = 0.0085, W_COUNT = 420;
+  const envSky = new THREE.Color(), envFog = new THREE.Color(), DAY_SKY = new THREE.Color(0x6f9bd1), SAND_C = new THREE.Color(0xb7791f), WHITE_C = new THREE.Color(0xffffff);
+  let envNight = false, flash = 0, nextBolt = 6, floodUntil = 0;
+  const wPos = new Float32Array(W_COUNT * 3), wGeo = new THREE.BufferGeometry();
+  for (let i = 0; i < W_COUNT; i++) { wPos[i * 3] = (Math.random() - .5) * 24; wPos[i * 3 + 1] = Math.random() * 10; wPos[i * 3 + 2] = 4 - Math.random() * 44; }
+  wGeo.setAttribute('position', new THREE.BufferAttribute(wPos, 3));
+  const wMat = new THREE.PointsMaterial({ color: 0xaec6e8, size: .07, transparent: true, opacity: .7, depthWrite: false });
+  const weatherPoints = new THREE.Points(wGeo, wMat);
+  weatherPoints.frustumCulled = false; weatherPoints.visible = false; carCockpit.add(weatherPoints);
+  function setWeather(type, sec) { weather.type = type; weather.until = sec ? performance.now() / 1000 + sec : 0; }
+  function initEnvironment(m) {
+    envSky.setHex(m.skyColor); envFog.setHex(m.fogColor); envNight = !!m.night;
+    weather.base = m.weather || 'clear'; weather.type = weather.base; weather.k = weather.base === 'clear' ? 0 : 1; weather.until = 0;
+    flash = 0; nextBolt = 6; floodUntil = 0; scene.fog.density = baseFogDensity; ambientLight.intensity = .95; moonLight.intensity = .65; weatherPoints.visible = false;
+  }
+  function playThunder() {
+    try {
+      hornCtx = hornCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const c = hornCtx, len = Math.floor(c.sampleRate * 1.4), b = c.createBuffer(1, len, c.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = b; f.type = 'lowpass'; f.frequency.value = 260; g.gain.value = .5; src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+    } catch (e) {}
+  }
+  function updateWeather(dt, now) {
+    if (weather.until && now / 1000 > weather.until) { weather.type = weather.base; weather.until = 0; }
+    weather.k += ((weather.type === 'clear' ? 0 : 1) - weather.k) * Math.min(1, dt * .8);
+    const t = weather.type, on = (t === 'rain' || t === 'storm' || t === 'snow' || t === 'sand') && weather.k > .05;
+    weatherPoints.visible = on;
+    if (on) {
+      wMat.color.setHex(t === 'snow' ? 0xffffff : (t === 'sand' ? 0xd6a560 : 0xaec6e8)); wMat.size = t === 'snow' ? .12 : (t === 'sand' ? .1 : .06); wMat.opacity = .75 * weather.k;
+      const fall = t === 'snow' ? 2.2 : (t === 'sand' ? .4 : 16), spd = Math.abs(carSpeedKmh) / 3.6;
+      for (let i = 0; i < W_COUNT; i++) {
+        let y = wPos[i * 3 + 1] - fall * dt, z = wPos[i * 3 + 2] + spd * dt * .9;
+        if (y < 0 || z > 5) { wPos[i * 3] = (Math.random() - .5) * 24; y = y < 0 ? 10 : Math.random() * 10; z = y === 10 ? 4 - Math.random() * 44 : -40; }
+        wPos[i * 3 + 1] = y; wPos[i * 3 + 2] = z;
+      }
+      wGeo.attributes.position.needsUpdate = true;
+    }
+    if (t === 'storm' && weather.k > .5) { nextBolt -= dt; if (nextBolt <= 0) { flash = 1; nextBolt = 4 + Math.random() * 6; playThunder(); } }
+    flash = Math.max(0, flash - dt * 5);
+  }
+  // Ciclo de dia e noite (8.000 m) + efeito do clima na cor e na névoa
+  function updateEnvironment(dist) {
+    const day = envNight ? 0 : (1 - Math.cos(dist / 8000 * Math.PI * 2)) / 2, w = weather.k, wt = weather.type;
+    scene.background.copy(envSky).lerp(DAY_SKY, day * .5); scene.fog.color.copy(envFog).lerp(DAY_SKY, day * .5);
+    if (wt === 'sand') { scene.fog.color.lerp(SAND_C, w * .5); scene.background.lerp(SAND_C, w * .3); }
+    if (wt === 'storm') { scene.background.multiplyScalar(1 - .35 * w); scene.fog.color.multiplyScalar(1 - .35 * w); }
+    if (flash > 0) scene.background.lerp(WHITE_C, flash * .6);
+    scene.fog.density = baseFogDensity * (1 + (WEATHER_FOG[wt] || 0) * w);
+    ambientLight.intensity = .95 + day * .8 + flash * 1.5; moonLight.intensity = .65 + day * .5;
+  }
+
+  // --- Eventos aleatórios (probabilidades diferentes, sem repetir os últimos 3, intervalo de 1,2 a 3 km) ---
+  const EVT = { next: 1200, last: [] };
+  function forceCameo(dist) {
+    if (cameoMesh) return;
+    const id = CAMEOS[Math.floor(Math.random() * CAMEOS.length)][1], z = -(dist + 130), side = Math.random() < .5 ? -1 : 1, mon = MONSTERS_DATA.find(m => m.id === id);
+    cameoKey = dist; cameoDist = dist + 130;
+    cameoMesh = buildNewMonster(id); cameoMesh.position.set(getRoadCenterX(z) + side * 15, getRoadElevationY(z), z); cameoMesh.rotation.y = side * Math.PI / 2 + getRoadYaw(z); scene.add(cameoMesh);
+    monsterEncounters[id] = (monsterEncounters[id] || 0) + 1; try { localStorage.setItem('road37_monster_enc', JSON.stringify(monsterEncounters)); } catch (e) {}
+    showEventBanner('👁️ APARIÇÃO RARA: ' + mon.name.toUpperCase() + '!', '#a78bfa');
+  }
+  function giveCoins(n) { runCoinsEarned += n; savedCoins += n; saveProgress(); coinsRunValueEl.textContent = `🪙 +${runCoinsEarned}`; }
+  const EVENT_DEFS = [
+    { id: 'tempestade', w: 10, ok: () => true, run: () => { setWeather('storm', 45); showEventBanner('⛈️ TEMPESTADE! Visibilidade reduzida e pista escorregadia.', '#60a5fa'); } },
+    { id: 'nevoeiro', w: 14, ok: () => true, run: () => { setWeather('fog', 40); showEventBanner('🌫️ NEVOEIRO INTENSO! Você enxerga menos à frente.', '#94a3b8'); } },
+    { id: 'chuva', w: 16, ok: () => true, run: () => { setWeather('rain', 45); showEventBanner('🌧️ CHUVA FORTE! A aderência diminuiu.', '#60a5fa'); } },
+    { id: 'pane', w: 8, ok: (v) => !!v.electric, run: () => { cyberEnergy = Math.max(0, cyberEnergy - 45); showEventBanner('⚡ PANE ELÉTRICA! A energia caiu: use uma bateria.', '#f59e0b'); } },
+    { id: 'inundada', w: 9, ok: (v, w) => !w, run: () => { floodUntil = performance.now() + 25000; showEventBanner('🌊 ESTRADA INUNDADA! Veículos comuns perdem desempenho.', '#38bdf8'); } },
+    { id: 'posto', w: 9, ok: (v, w) => !w, run: (v) => {
+        if (Math.random() < .5) { if (v.electric) carriedItems.battery++; else carriedItems.gasoline++; if (typeof renderItemButtons === 'function') renderItemButtons(); showEventBanner('⛽ POSTO MISTERIOSO! Você encontrou ' + (v.electric ? 'uma bateria.' : 'combustível.'), '#fbbf24'); }
+        else { giveCoins(20); showEventBanner('⛽ POSTO MISTERIOSO! Você encontrou 20 moedas.', '#fbbf24'); } } },
+    { id: 'sinal', w: 6, ok: () => true, run: () => { giveCoins(25); try { localStorage.setItem('road37_secrets', String((+localStorage.getItem('road37_secrets') || 0) + 1)); } catch (e) {} showEventBanner('📡 SINAL MISTERIOSO captado! Descoberta registrada: +25 moedas.', '#22d3ee'); } },
+    { id: 'aparicao', w: 5, ok: (v, w) => !w, run: (v, w, dist) => forceCameo(dist) }
+  ];
+  function worldReset() { EVT.next = 1200; EVT.last = []; }
+  function updateEvents(dist, vehCfg, isWater) {
+    if (dist < EVT.next) return;
+    const pool = EVENT_DEFS.filter(e => !EVT.last.includes(e.id) && e.ok(vehCfg, isWater));
+    if (!pool.length) { EVT.next = dist + 600; return; }
+    let r = Math.random() * pool.reduce((a, e) => a + e.w, 0), pick = pool[0];
+    for (const e of pool) { r -= e.w; if (r <= 0) { pick = e; break; } }
+    pick.run(vehCfg, isWater, dist);
+    EVT.last.push(pick.id); if (EVT.last.length > 3) EVT.last.shift();
+    EVT.next = dist + 1200 + Math.random() * 1800;
   }
 
   const UPGRADE_CAPS = { 'onibus-antigo':{speed:3,accel:3}, 'caminhao':{speed:3,accel:3}, 'trator':{speed:3,accel:3}, 'gt-esportivo':{durability:3}, 'corrida-antigo':{durability:3}, 'buggy':{durability:3}, 'quadriciclo':{durability:3}, 'blindado-comboio':{accel:3} };
@@ -3746,6 +3873,7 @@
     scene.background.setHex(mapCfg.skyColor);
     scene.fog.color.setHex(mapCfg.fogColor);
     groundMat.color.setHex(mapCfg.groundColor);
+    initEnvironment(mapCfg);
 
     if (mapCfg.waterColor) {
       riverMat.color.setHex(mapCfg.waterColor);
@@ -3888,7 +4016,7 @@
     steeringInput = 0;
     carAngularVel = 0;
     bumpShakeTimer = 0;
-    lastForkHint = -1; lastLaneHint = -1; laneFollow = 0; runKmMark = 0; observerSlow = 0; erranteWasActive = false; monPulseT = 0; mimicT = 8; if (cameoMesh) { scene.remove(cameoMesh); cameoMesh = null; } cameoKey = -1;
+    lastForkHint = -1; lastLaneHint = -1; laneFollow = 0; runKmMark = 0; observerSlow = 0; erranteWasActive = false; monPulseT = 0; mimicT = 8; if (cameoMesh) { scene.remove(cameoMesh); cameoMesh = null; } cameoKey = -1; worldReset();
 
     maxDurability = vehCfg.durability;
     currentDurability = maxDurability;
@@ -4117,11 +4245,11 @@
     const currentSegIdx = Math.floor(-carZ / SEGMENT_LENGTH);
     const currentSegData = activeSegments.get(currentSegIdx);
 
-    const inWater = isWaterMap || (currentSegData ? (currentSegData.isFlooded && !(currentSegData.cleanSide && Math.sign(carX - getRoadCenterX(carZ)) === currentSegData.cleanSide)) : false);
+    const inWater = isWaterMap || (floodUntil > now && !vehCfg.allTerrain && vehCfg.category !== 'boat') || (currentSegData ? (currentSegData.isFlooded && !(currentSegData.cleanSide && Math.sign(carX - getRoadCenterX(carZ)) === currentSegData.cleanSide)) : false);
     surfaceWarningEl.style.display = (!isWaterMap && inWater) ? 'block' : 'none';
 
     const isOffRoadOrBoat = vehCfg.allTerrain;
-    const baseTerrainGrip = isOffRoadOrBoat ? 0.95 : (inWater ? 0.58 : mapCfg.grip);
+    const baseTerrainGrip = (isOffRoadOrBoat ? 0.95 : (inWater ? 0.58 : mapCfg.grip)) * (WEATHER_GRIP[weather.type] ? 1 - (1 - WEATHER_GRIP[weather.type]) * weather.k : 1);
     const effectiveGrip = Math.min(1.25, Math.max(0.45, baseTerrainGrip + vehCfg.gripBonus));
 
     // Inclinação da pista (Subida reduz um pouco a força, descida embala!)
@@ -4295,6 +4423,9 @@
     const distanceTraveled = Math.max(0, Math.floor(-carZ));
     { const km = Math.floor(distanceTraveled / 1000); if (km > runKmMark) { const mb = getMasteryBucket(vehCfg.category === 'boat' ? 'boats' : 'cars', vehCfg.id); mb.escapes = (mb.escapes || 0) + (km - runKmMark); runKmMark = km; } }
     updateCameos(distanceTraveled);
+    updateEvents(distanceTraveled, vehCfg, isWaterMap);
+    updateWeather(dt, now);
+    updateEnvironment(distanceTraveled);
     if(!isWaterMap && distanceTraveled>=nextStopDistance && !currentStop){carZ=-nextStopDistance;carX=getRoadCenterX(carZ);carSpeedKmh=0;spawnRoadsideStop(nextStopDistance);nextStopDistance+=5000;}
     if(isWaterMap) updateSeaWaves(dt,now,vehCfg,mapCfg);
     const masteryKind=vehCfg.category==='boat'?'boats':'cars';const mastery=getMasteryBucket(masteryKind,vehCfg.id);mastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mastery.uses+=dt;
@@ -4320,11 +4451,13 @@
       const gap = monsterZ - carZ;
       const chaseGap = activeRunMonster.chaseGap || 65;
       const rubberBand = gap > chaseGap ? (gap - chaseGap) * 0.65 : 0;
-      const targetMonsterSpeed = applyMonsterBehavior(activeRunMonster, baseMonsterSpeed + rubberBand, gap, distanceTraveled, dt);
+      const targetMonsterSpeed = applyMonsterBehavior(activeRunMonster, baseMonsterSpeed + rubberBand, gap, distanceTraveled, dt, vehCfg.maxSpeed);
       monsterAudioTick(activeRunMonster, gap, dt);
 
       monsterSpeedKmh += (targetMonsterSpeed - monsterSpeedKmh) * Math.min(1, dt * 1.65);
       monsterZ -= (monsterSpeedKmh / 3.6) * dt;
+      const leash = Math.max(150, chaseGap * 2);   // distância máxima: o monstro nunca fica para trás além disso
+      if (monsterZ - carZ > leash) monsterZ -= (monsterZ - carZ - leash) * Math.min(1, dt * 1.2);
       monsterBobPhase += dt * 14;
 
       if (monsterZ <= carZ + 2.4) {
