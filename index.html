@@ -1195,6 +1195,9 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 (() => {
   // ==========================================
@@ -1828,6 +1831,7 @@
   ];
 
   function getVehicleUpgradeLevels(vehId) {
+    if (onlineMatch && onl.cfg && !onl.cfg.upgrades) return FLAT_UP;
     if (!vehicleUpgrades[vehId]) {
       vehicleUpgrades[vehId] = { speed: 1, accel: 1, durability: 1, handling: 1, reliability: 1 };
     }
@@ -3115,7 +3119,7 @@
     monsterEncounters[id] = (monsterEncounters[id] || 0) + 1; try { localStorage.setItem('road37_monster_enc', JSON.stringify(monsterEncounters)); } catch (e) {}
     showEventBanner('👁️ APARIÇÃO RARA: ' + mon.name.toUpperCase() + '!', '#a78bfa');
   }
-  function giveCoins(n) { runCoinsEarned += n; savedCoins += n; saveProgress(); coinsRunValueEl.textContent = `🪙 +${runCoinsEarned}`; }
+  function giveCoins(n) { if (onlineMatch) return; runCoinsEarned += n; savedCoins += n; saveProgress(); coinsRunValueEl.textContent = `🪙 +${runCoinsEarned}`; }
   const EVENT_DEFS = [
     { id: 'tempestade', w: 10, ok: () => true, run: () => { setWeather('storm', 45); showEventBanner('⛈️ TEMPESTADE! Visibilidade reduzida e pista escorregadia.', '#60a5fa'); } },
     { id: 'nevoeiro', w: 14, ok: () => true, run: () => { setWeather('fog', 40); showEventBanner('🌫️ NEVOEIRO INTENSO! Você enxerga menos à frente.', '#94a3b8'); } },
@@ -3134,7 +3138,7 @@
   ];
   function worldReset() { EVT.next = 1200; EVT.last = []; clearObst(); clearStopProp(); }
   function updateEvents(dist, vehCfg, isWater) {
-    if (!settings.events || dist < EVT.next) return;
+    if (!settings.events || modeRules().noEvents || dist < EVT.next) return;
     const pool = EVENT_DEFS.filter(e => !EVT.last.includes(e.id) && e.ok(vehCfg, isWater));
     if (!pool.length) { EVT.next = dist + 600; return; }
     const bw = e => e.w * ((modeRules().boost || {})[e.id] || 1);
@@ -3166,6 +3170,7 @@
   function currentTitle(lv) { let t = TITLES[0][1]; for (const [l, n] of TITLES) if (lv >= l) t = n; return t; }
   let runXp = 0;
   function addXp(n, raw) {
+    if (onlineMatch) return;
     if (!raw) n *= (modeRules().xpMul || 1);
     if (!(n > 0)) return;
     const before = levelInfo().lv; prog.xp += Math.round(n); runXp += Math.round(n); const after = levelInfo().lv; saveProg();
@@ -3184,12 +3189,13 @@
     ['especialista', 'Especialista', 'Completar 100% de maestria de um veículo ou barco', () => CARS_DATA.concat(BOATS_DATA).some(v => masteryPercent(v.category === 'boat' ? 'boats' : 'cars', v.id) >= 100)]
   ];
   function checkAchievements() {
-    if (runMode !== 'survival') return;   // conquistas só contam no modo principal
+    if (onlineMatch || runMode !== 'survival') return;   // conquistas só contam no modo principal
     const m = Math.max(0, Math.floor(-carZ)), w = getActiveMap().type === 'water';
     for (const [id, name, , test] of ACHS) if (!prog.ach[id] && test(m, w)) { prog.ach[id] = Date.now(); runAch.push(name); addXp(50); showEventBanner('🏆 CONQUISTA: ' + name, '#fbbf24'); }
     saveProg();
   }
   function trackRunStart() {
+    if (onlineMatch) { modeTime = 0; modeDone = false; chLastDist = 0; chAcc = 0; runCleanDone = false; modeHud.textContent = ''; return; }
     runXp = 0; prog.runs++;
     const m = getActiveMap(), v = getActiveVehicle();
     if (!prog.mapsUsed[m.id]) { prog.mapsUsed[m.id] = 1; addXp(30); }
@@ -3326,6 +3332,7 @@
   const dayIndex = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5);
   const dailyGoal = () => 2000 + (dayIndex() % 5) * 500;
   function modeRules() {
+    if (onlineMatch) return onlineRules();
     const m = runMode === 'daily' ? DAILY_VARIANTS[dayIndex() % 4] : runMode;
     return ({ infinite: { noObst: true, noCameo: true, monsterMul: .9, xpMul: .5 }, storm: { weather: 'storm', xpMul: .5 }, night: { night: true, xpMul: .5 }, norecover: { noRecover: true, xpMul: .5 }, explore: { monsterMul: .6, evtMul: .5, boost: { sinal: 3, aparicao: 2 }, xpMul: .5 }, timeattack: { xpMul: .5 } })[m] || {};
   }
@@ -3335,6 +3342,7 @@
   document.getElementById('hud').appendChild(modeHud);
   function updateModes(dist, dt) {
     modeTime += dt;
+    if (onlineMatch) { onlineTick(dt, dist); return; }
     const dd = Math.max(0, dist - chLastDist); chLastDist = dist;
     if (dd < 200) { chAcc += dd; if (chAcc >= 50) { trackChallengeDist(chAcc); chAcc = 0; } }
     if (!runCleanDone && dist >= 3000 && currentDurability >= maxDurability * .7) { runCleanDone = true; chAdd('clean', 1); }
@@ -3529,7 +3537,7 @@
   document.body.appendChild(pauseEl);
   function resetPause() { paused = false; pauseEl.style.display = 'none'; }
   function togglePause() {
-    if (gameState !== 'PLAYING') return;
+    if (onlineMatch || gameState !== 'PLAYING') return;
     paused = !paused; pauseEl.style.display = paused ? 'flex' : 'none';
     if (paused) sfxStop(); else sfxStart();
   }
@@ -3571,6 +3579,235 @@
     mk('🚘 ABRIR GARAGEM', () => { exitToLobby(); document.getElementById('openShowcaseBtn').click(); });
     mk('📊 ESTATÍSTICAS', () => { menuEl.style.display = 'flex'; renderMenu('prog'); }); }
   applyLiveSettings();
+
+  // ===== MODO ONLINE POR SALAS (Firebase Realtime Database) =====
+  // Cole aqui a configuração do app Web do Firebase (inclua o databaseURL).
+  const FIREBASE_CONFIG = { apiKey: 'AIzaSyDSpY87FnVHnzVbP6059Uc-eOVsbQYLfD8', authDomain: 'drive-around-3c1e6.firebaseapp.com', databaseURL: 'https://drive-around-3c1e6-default-rtdb.firebaseio.com', projectId: 'drive-around-3c1e6', appId: '1:1021472727702:web:d4fe8b4954aece3bdf18b7' };
+  const onlineConfigured = () => typeof firebase !== 'undefined' && ['apiKey', 'databaseURL'].every(k => FIREBASE_CONFIG[k] && !String(FIREBASE_CONFIG[k]).startsWith('COLE'));
+  const missingCfg = () => typeof firebase === 'undefined' ? 'O Firebase não carregou: confira a internet e abra o jogo por um endereço http(s).' : 'Falta preencher em <code>FIREBASE_CONFIG</code>: <b>' + ['apiKey', 'databaseURL'].filter(k => !FIREBASE_CONFIG[k] || String(FIREBASE_CONFIG[k]).startsWith('COLE')).join(', ') + '</b>.';
+  const FLAT_UP = { speed: 1, accel: 1, durability: 1, handling: 1, reliability: 1, tires: 1, suspension: 1, brakes: 1, fuel: 1 };
+  let fbDb = null, fbUid = null, fbOffset = 0, onlineMatch = false;
+  const onl = { view: 'home', status: 'desconectado', msg: '', code: null, room: null, cfg: null, players: {}, ghosts: {}, timers: [], saved: null, started: false, finished: false, dead: false, result: null, cause: '', lastSend: 0, name: localStorage.getItem('road37_name') || '' };
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const validName = n => /^[A-Za-z0-9À-ÿ _.-]{2,16}$/.test(n);
+  const defaultCarIds = () => CARS_DATA.filter(c => c.category === 'car' && !GENERAL_STORE_ONLY_IDS.includes(c.id) && !NEW_STYLE_SET.has(c.bodyStyle)).map(c => c.id);
+  const asSet = ids => Object.fromEntries(ids.map(i => [i, true]));
+  const TS = () => firebase.database.ServerValue.TIMESTAMP;
+  function onlineRules() { const c = onl.cfg || {}; return { monsterMul: ({ slow: .7, normal: 1, fast: 1.25 })[c.monster] || 1, noObst: !c.events, noCameo: !c.events, noEvents: !c.events, xpMul: 0 }; }
+  function onlineInit() {
+    if (!onlineConfigured()) { onl.status = 'não configurado'; return; }
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG); fbDb = firebase.database(); onl.status = 'conectando…';
+      fbDb.ref('.info/serverTimeOffset').on('value', s => { fbOffset = s.val() || 0; });
+      firebase.auth().signInAnonymously().then(c => { fbUid = c.user.uid; onl.status = 'conectado'; if (onlEl.style.display === 'flex') renderOnline(); }).catch(e => { onl.status = 'erro: ' + (e.code || e.message); });
+    } catch (e) { onl.status = 'erro ao iniciar'; }
+  }
+  // --- fantasmas dos oponentes: transparentes, sem monstro ---
+  function makeGhost(uid, vId) {
+    const cfg = CARS_DATA.find(c => c.id === vId) || CARS_DATA[0], group = buildExteriorVehicle3D(cfg);
+    group.traverse(o => { if (o.isMesh) { const ms = [].concat(o.material).map(m => { const c = m.clone(); c.transparent = true; c.opacity = .35; c.depthWrite = false; return c; }); o.material = ms.length === 1 ? ms[0] : ms; } });
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64; const cx = cv.getContext('2d');
+    cx.font = 'bold 34px sans-serif'; cx.textAlign = 'center'; cx.fillStyle = '#e2e8f0'; cx.strokeStyle = '#000'; cx.lineWidth = 6;
+    const nm = (onl.players[uid] || {}).name || '?'; cx.strokeText(nm, 128, 44); cx.fillText(nm, 128, 44);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false })); sp.scale.set(4, 1, 1); sp.position.y = 3.2; group.add(sp);
+    scene.add(group); onl.ghosts[uid] = { group, d: 0, rx: 0, y: 0, td: 0, trx: 0, ty: 0, fresh: true };
+  }
+  function removeGhost(uid) { const g = onl.ghosts[uid]; if (g) { scene.remove(g.group); delete onl.ghosts[uid]; } }
+  function onPos(uid, p) {
+    if (!onlineMatch || !p || uid === fbUid) return;
+    const pl = onl.players[uid]; if (pl && (!pl.alive || pl.left)) return;
+    if (!onl.ghosts[uid]) makeGhost(uid, p.v);
+    const g = onl.ghosts[uid]; g.td = p.d; g.trx = p.rx; g.ty = p.y;
+    if (g.fresh) { g.d = p.d; g.rx = p.rx; g.y = p.y; g.fresh = false; }
+  }
+  function onlineTick(dt, dist) {   // chamado todo quadro durante a partida
+    const now = performance.now();
+    if (fbUid && now - onl.lastSend > 125) {
+      onl.lastSend = now;
+      fbDb.ref('pos/' + onl.code + '/' + fbUid).set({ d: Math.round(dist * 10) / 10, rx: Math.round((carX - getRoadCenterX(carZ)) * 100) / 100, y: Math.round(carYaw * 100) / 100, v: selectedCarId });
+    }
+    const k = Math.min(1, dt * 10);
+    for (const id in onl.ghosts) {
+      const g = onl.ghosts[id]; g.d += (g.td - g.d) * k; g.rx += (g.trx - g.rx) * k; g.y += (g.ty - g.y) * k;
+      const z = -g.d; g.group.position.set(getRoadCenterX(z) + g.rx, getRoadElevationY(z), z); g.group.rotation.y = getRoadYaw(z) + g.y;
+    }
+    const ps = Object.values(onl.players), alive = ps.filter(p => p.alive && !p.left).length;
+    const txt = `👥 Vivos: ${alive}/${ps.filter(p => !p.left || p.alive === false).length}`; if (modeHud.textContent !== txt) modeHud.textContent = txt;
+  }
+  // --- fluxo da sala ---
+  const genCode = () => Array.from({ length: 5 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+  async function onlineCreate(name) {
+    if (!fbUid) { onl.msg = 'Ainda conectando, tente de novo.'; return; }
+    for (let i = 0; i < 5; i++) {
+      const code = genCode(), tr = await fbDb.ref('rooms/' + code + '/host').transaction(cur => cur === null ? fbUid : undefined);
+      if (!tr.committed) continue;
+      const cfg = { map: LAND_MAPS_DATA[0].id, allowed: asSet(defaultCarIds()), upgrades: false, events: false, monster: 'normal' };
+      await fbDb.ref().update({ ['rooms/' + code + '/createdAt']: TS(), ['rooms/' + code + '/state']: 'lobby', ['rooms/' + code + '/cfg']: cfg, ['rooms/' + code + '/players/' + fbUid]: { name, veh: Object.keys(cfg.allowed)[0], alive: true } });
+      onlineEnter(code); return;
+    }
+    onl.msg = 'Não foi possível criar a sala.';
+  }
+  async function onlineJoin(code, name) {
+    if (!fbUid) { onl.msg = 'Ainda conectando, tente de novo.'; return; }
+    try {
+      const r = (await fbDb.ref('rooms/' + code).once('value')).val();
+      if (!r || !r.host) { onl.msg = 'Sala não encontrada.'; return; }
+      if (r.state !== 'lobby') { onl.msg = 'Essa partida já começou.'; return; }
+      if (Object.values(r.players || {}).filter(p => !p.left).length >= 8) { onl.msg = 'Sala cheia (máximo 8).'; return; }
+      await fbDb.ref('rooms/' + code + '/players/' + fbUid).set({ name, veh: Object.keys((r.cfg || {}).allowed || {})[0] || defaultCarIds()[0], alive: true });
+      onlineEnter(code);
+    } catch (e) { onl.msg = 'Erro ao entrar: ' + (e.code || e.message); }
+  }
+  function onlineEnter(code) {
+    onl.code = code; onl.msg = ''; onl.view = 'room'; onl.started = false; onl.finished = false; onl.dead = false;
+    onl.saved = { car: selectedCarId, map: selectedLandMapId, lobby: lobbyMode, mode: runMode };
+    fbDb.ref('rooms/' + code).on('value', s => onRoom(s.val()));
+    const pr = fbDb.ref('pos/' + code); pr.on('child_added', s => onPos(s.key, s.val())); pr.on('child_changed', s => onPos(s.key, s.val())); pr.on('child_removed', s => removeGhost(s.key));
+    fbDb.ref('rooms/' + code + '/players/' + fbUid).onDisconnect().update({ alive: false, left: true, deadAt: TS() });
+    fbDb.ref('pos/' + code + '/' + fbUid).onDisconnect().remove();
+    renderOnline();
+  }
+  function onRoom(r) {
+    if (!onl.code) return;
+    if (!r || r.state === 'closed') { if (!onl.finished) { onlineCleanup(); onl.msg = 'A sala foi encerrada.'; renderOnline(); } return; }
+    onl.room = r; onl.cfg = r.cfg; onl.players = r.players || {};
+    for (const id in onl.ghosts) { const p = onl.players[id]; if (!p || !p.alive || p.left) removeGhost(id); }
+    if (r.state === 'countdown' && !onl.started && onl.view !== 'count') { onl.view = 'count'; scheduleStart(r.startAt); }
+    if (onl.started && !onl.finished) checkMatchEnd();
+    if (onlEl.style.display === 'flex' && onl.view !== 'count') renderOnline();
+  }
+  function scheduleStart(startAt) {
+    onl.timers.forEach(clearInterval); onl.timers = [];
+    renderOnline();
+    const t = setInterval(() => {
+      const left = Math.ceil((startAt - (Date.now() + fbOffset)) / 1000), el = document.getElementById('onCount');
+      if (el) el.textContent = left > 0 ? left : 'JÁ!';
+      if (left <= 0) { clearInterval(t); startOnlineMatch(); }
+    }, 200);
+    onl.timers.push(t);
+  }
+  function startOnlineMatch() {
+    if (onl.started || !onl.room) return;
+    onl.started = true; onl.finished = false; onl.dead = false;
+    const cfg = onl.room.cfg, allowed = Object.keys(cfg.allowed || {}), me = onl.players[fbUid] || {};
+    const veh = allowed.includes(me.veh) ? me.veh : (allowed[0] || defaultCarIds()[0]);
+    onlineMatch = true; onl.cfg = cfg;
+    selectedCarId = veh; selectedLandMapId = cfg.map; lobbyMode = 'land'; runMode = 'survival';
+    onlEl.style.display = 'none';
+    startGame();
+    fbDb.ref('rooms/' + onl.code + '/players/' + fbUid).update({ alive: true, veh });
+    if (onl.room.host === fbUid) fbDb.ref('rooms/' + onl.code + '/state').set('playing');
+  }
+  function onlineLocalDied(reason) {
+    if (!onlineMatch || onl.dead) return;
+    onl.dead = true;
+    musicEngine.stop(); sfxStop(); gameState = 'GAMEOVER'; hud.style.display = 'none';
+    const v = getActiveVehicle(), meters = Math.max(0, Math.floor(-carZ));
+    onl.cause = reason === 'QUEDA' ? 'a moto perdeu o equilíbrio' : (reason === 'DESTRUIDO' ? `o veículo foi destruído por ${damageCause || 'dano acumulado'}` : `${activeRunMonster.name} te alcançou`);
+    fbDb.ref('rooms/' + onl.code + '/players/' + fbUid).update({ alive: false, dist: meters, deadAt: TS() });
+    fbDb.ref('pos/' + onl.code + '/' + fbUid).remove();
+    onl.view = 'dead'; onlEl.style.display = 'flex'; renderOnline();
+  }
+  function checkMatchEnd() {
+    if (onl.finished) return;
+    const ps = Object.entries(onl.players), alive = ps.filter(([, p]) => p.alive && !p.left);
+    if (ps.length >= 2 ? alive.length > 1 : alive.length > 0) return;
+    onl.finished = true;
+    const score = p => (p.alive && !p.left ? 1e15 : 0) + (p.deadAt || 0);
+    onl.result = ps.slice().sort((a, b) => score(b[1]) - score(a[1])).map(([id, p], i) => ({ id, name: p.name, dist: p.dist, alive: !!p.alive && !p.left, pos: i + 1 }));
+    if (!onl.dead && gameState === 'PLAYING') { musicEngine.stop(); sfxStop(); gameState = 'GAMEOVER'; hud.style.display = 'none'; }
+    Object.keys(onl.ghosts).forEach(removeGhost);
+    onl.view = 'result'; onlEl.style.display = 'flex'; renderOnline();
+    if (onl.room && onl.room.host === fbUid && onl.result[0]) fbDb.ref().update({ ['rooms/' + onl.code + '/state']: 'finished', ['rooms/' + onl.code + '/winner']: onl.result[0].id });
+  }
+  function onlineCleanup() {
+    onl.timers.forEach(clearInterval); onl.timers = [];
+    if (onl.code && fbDb) {
+      fbDb.ref('rooms/' + onl.code).off(); fbDb.ref('pos/' + onl.code).off();
+      try { fbDb.ref('rooms/' + onl.code + '/players/' + fbUid).onDisconnect().cancel(); fbDb.ref('pos/' + onl.code + '/' + fbUid).onDisconnect().cancel(); } catch (e) {}
+    }
+    Object.keys(onl.ghosts).forEach(removeGhost);
+    if (onl.saved) { selectedCarId = onl.saved.car; selectedLandMapId = onl.saved.map; lobbyMode = onl.saved.lobby; runMode = onl.saved.mode; onl.saved = null; }
+    onlineMatch = false; Object.assign(onl, { code: null, room: null, cfg: null, players: {}, started: false, finished: false, dead: false, view: 'home', result: null });
+  }
+  function onlineLeave() {
+    if (!onl.code) return;
+    const code = onl.code, host = onl.room && onl.room.host === fbUid, st = onl.room && onl.room.state;
+    try { fbDb.ref('rooms/' + code + '/players/' + fbUid).remove(); fbDb.ref('pos/' + code + '/' + fbUid).remove(); if (host && (st === 'lobby' || st === 'countdown')) fbDb.ref('rooms/' + code + '/state').set('closed'); } catch (e) {}
+    onlineCleanup();
+  }
+  // --- telas ---
+  const onlEl = document.createElement('div');
+  onlEl.style.cssText = 'position:fixed;inset:0;z-index:9500;background:rgba(2,6,23,.94);display:none;align-items:center;justify-content:center;padding:12px;';
+  onlEl.innerHTML = '<div style="background:#0f172a;border:1px solid #334155;border-radius:16px;max-width:560px;width:100%;max-height:94vh;overflow:auto;padding:16px;color:#e2e8f0;"></div>';
+  document.body.appendChild(onlEl);
+  const onlBtn = document.createElement('button');
+  onlBtn.textContent = '🌐 ONLINE'; onlBtn.style.cssText = 'background:#1e293b;color:#e2e8f0;border:1px solid #475569;padding:10px 14px;border-radius:999px;font-weight:900;cursor:pointer;';
+  document.querySelector('.topbar-right-actions').prepend(onlBtn);
+  onlBtn.addEventListener('click', () => { onlEl.style.display = 'flex'; renderOnline(); });
+  function renderOnline() {
+    const box = onlEl.firstChild, B = (id, t, on) => `<button id="${id}" style="${bcss(!!on)}">${t}</button>`, view = onl.view;
+    let h = '';
+    if (!onlineConfigured()) h = '<div style="line-height:1.6;">🌐 <b>Modo online não configurado.</b><br>' + missingCfg() + '</div><div style="margin-top:12px;">' + B('onClose', 'Fechar') + '</div>';
+    else if (view === 'home') h = `<div style="font-size:1.2rem;font-weight:900;margin-bottom:6px;">🌐 Modo Online</div><div style="font-size:.8rem;margin-bottom:10px;">Status: <b>${esc(onl.status)}</b> • Último sobrevivente vence • só carros e mapas terrestres</div>
+      <input id="onName" maxlength="16" placeholder="Seu nome (2-16)" value="${esc(onl.name)}" style="${bcss(false)}width:100%;margin-bottom:10px;box-sizing:border-box;">
+      ${B('onCreate', '➕ Criar sala', true)}
+      <div style="display:flex;gap:6px;margin:10px 0;"><input id="onCode" maxlength="5" placeholder="CÓDIGO" style="${bcss(false)}flex:1;text-transform:uppercase;letter-spacing:4px;text-align:center;">${B('onJoin', 'Entrar')}</div>
+      <div style="color:#fca5a5;min-height:1.2em;">${esc(onl.msg)}</div><div style="margin-top:10px;">${B('onClose', 'Fechar')}</div>`;
+    else if (view === 'room') h = roomHtml(B);
+    else if (view === 'count') h = '<div style="text-align:center;"><div style="font-size:1rem;">A partida começa em</div><div id="onCount" style="font-size:4.5rem;font-weight:900;color:#fbbf24;">5</div><div style="font-size:.8rem;">Mapa: ' + esc((LAND_MAPS_DATA.find(m => m.id === (onl.cfg || {}).map) || {}).name || '') + '</div></div>';
+    else {
+      const win = view === 'result', r = onl.result || [], won = win && r[0] && r[0].id === fbUid;
+      const rows = (win ? r : Object.entries(onl.players).map(([id, p]) => ({ id, name: p.name, dist: p.dist, alive: !!p.alive && !p.left }))).map((p, i) => `<div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:8px;${p.id === fbUid ? 'background:#1d4ed8;' : ''}"><span>${win ? (i + 1) + '. ' : (p.alive ? '🟢 ' : '☠️ ')}${esc(p.name)}</span><b>${p.alive ? 'vivo' : (p.dist != null ? p.dist + ' m' : '—')}</b></div>`).join('');
+      h = `<div style="font-size:1.5rem;font-weight:900;margin-bottom:6px;">${win ? (won ? '🏆 VOCÊ VENCEU!' : '☠️ Fim da partida') : '☠️ Você foi eliminado'}</div>
+        ${win && r[0] ? `<div style="margin-bottom:8px;">Vencedor: <b>${esc(r[0].name)}</b></div>` : `<div style="margin-bottom:8px;">Causa: ${esc(onl.cause)}. Aguardando os outros jogadores…</div>`}
+        <div style="margin-bottom:12px;">${rows}</div>${B('onLeave', '🏠 Sair da sala', true)}`;
+    }
+    box.innerHTML = h;
+    const on = (id, fn) => { const e = document.getElementById(id); if (e) e.addEventListener('click', fn); };
+    on('onClose', () => { onlEl.style.display = 'none'; });
+    on('onCreate', () => { const n = document.getElementById('onName').value.trim(); if (!validName(n)) { onl.msg = 'Nome inválido: 2 a 16 letras, números, espaço, ponto, hífen ou _.'; renderOnline(); return; } onl.name = n; try { localStorage.setItem('road37_name', n); } catch (e) {} onlineCreate(n); });
+    on('onJoin', () => { const n = document.getElementById('onName').value.trim(), c = document.getElementById('onCode').value.trim().toUpperCase(); if (!validName(n)) { onl.msg = 'Nome inválido: 2 a 16 letras, números, espaço, ponto, hífen ou _.'; renderOnline(); return; } if (c.length !== 5) { onl.msg = 'O código tem 5 caracteres.'; renderOnline(); return; } onl.name = n; try { localStorage.setItem('road37_name', n); } catch (e) {} onlineJoin(c, n).then(renderOnline); });
+    on('onLeave', () => { onlineLeave(); onlEl.style.display = 'none'; if (gameState !== 'LOBBY') exitToLobby(); });
+    if (view === 'room') bindRoom();
+  }
+  function roomHtml(B) {
+    const r = onl.room || {}, cfg = r.cfg || {}, host = r.host === fbUid, allowed = Object.keys(cfg.allowed || {}), cars = CARS_DATA.filter(c => c.category === 'car');
+    const pl = Object.entries(onl.players).filter(([, p]) => !p.left), me = onl.players[fbUid] || {};
+    const sl = `style="${bcss(false)}"`, dis = host ? '' : 'disabled';
+    const mapName = (LAND_MAPS_DATA.find(m => m.id === cfg.map) || {}).name || '';
+    return `<div style="text-align:center;font-size:.8rem;">Código da sala (passe para os amigos)</div><div style="text-align:center;font-size:2.4rem;letter-spacing:8px;font-weight:900;color:#fbbf24;">${esc(onl.code)}</div>
+      <div style="margin:8px 0;font-weight:900;">👥 Jogadores (${pl.length}/8)</div>${pl.map(([id, p]) => `<div style="padding:3px 0;">${id === r.host ? '👑 ' : '• '}${esc(p.name)}${id === fbUid ? ' (você)' : ''}</div>`).join('')}
+      <div style="margin:10px 0 4px;font-weight:900;">⚙️ Regras ${host ? '(você é o anfitrião)' : '(definidas pelo anfitrião)'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:.85rem;">
+        <label>🗺️ Mapa ${host ? `<select id="cfgMap" ${sl}>${LAND_MAPS_DATA.map(m => `<option value="${m.id}" ${m.id === cfg.map ? 'selected' : ''}>${m.name}</option>`).join('')}</select>` : '<b>' + esc(mapName) + '</b>'}</label>
+        <label>🔧 Melhorias dos veículos <input type="checkbox" id="cfgUp" ${cfg.upgrades ? 'checked' : ''} ${dis}> <small>${cfg.upgrades ? 'ligadas' : 'desligadas (todos nível 1)'}</small></label>
+        <label>🎲 Eventos aleatórios <input type="checkbox" id="cfgEv" ${cfg.events ? 'checked' : ''} ${dis}></label>
+        <label>👹 Monstro <select id="cfgMon" ${sl} ${dis}>${[['slow', 'Lento'], ['normal', 'Normal'], ['fast', 'Rápido']].map(([k, n]) => `<option value="${k}" ${k === cfg.monster ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <div>🚗 Carros permitidos ${host ? `<button id="cfgDef" ${sl}>Só carros padrão</button> <button id="cfgAll" ${sl}>Todos</button>` : ''}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;">${cars.map(c => `<label><input type="checkbox" data-car="${c.id}" ${allowed.includes(c.id) ? 'checked' : ''} ${dis}> ${esc(c.name)}</label>`).join('')}</div>
+      </div>
+      <div style="margin:10px 0;">🚘 Seu carro <select id="myVeh" ${sl}>${allowed.map(id => `<option value="${id}" ${id === me.veh ? 'selected' : ''}>${esc((CARS_DATA.find(c => c.id === id) || {}).name || id)}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">${host ? B('onStart', '▶ Iniciar partida', true) : '<span style="font-size:.8rem;">Aguardando o anfitrião iniciar…</span>'}${B('onLeave', 'Sair da sala')}</div>
+      <div style="font-size:.7rem;opacity:.7;margin-top:8px;">Oponentes aparecem como carros transparentes e não têm monstro próprio: cada jogador foge do seu. Nesta partida não valem moedas, XP nem maestria.</div>`;
+  }
+  function bindRoom() {
+    const ref = p => fbDb.ref('rooms/' + onl.code + '/' + p), cfg = (onl.room || {}).cfg || {}, host = (onl.room || {}).host === fbUid, g = id => document.getElementById(id);
+    g('myVeh').addEventListener('change', e => ref('players/' + fbUid + '/veh').set(e.target.value));
+    if (!host) return;
+    g('cfgMap').addEventListener('change', e => ref('cfg/map').set(e.target.value));
+    g('cfgUp').addEventListener('change', e => ref('cfg/upgrades').set(e.target.checked));
+    g('cfgEv').addEventListener('change', e => ref('cfg/events').set(e.target.checked));
+    g('cfgMon').addEventListener('change', e => ref('cfg/monster').set(e.target.value));
+    g('cfgDef').addEventListener('click', () => ref('cfg/allowed').set(asSet(defaultCarIds())));
+    g('cfgAll').addEventListener('click', () => ref('cfg/allowed').set(asSet(CARS_DATA.filter(c => c.category === 'car').map(c => c.id))));
+    onlEl.querySelectorAll('[data-car]').forEach(cb => cb.addEventListener('change', () => {
+      const ids = Array.from(onlEl.querySelectorAll('[data-car]')).filter(x => x.checked).map(x => x.dataset.car);
+      ref('cfg/allowed').set(asSet(ids.length ? ids : [cb.dataset.car]));
+    }));
+    g('onStart').addEventListener('click', () => fbDb.ref().update({ ['rooms/' + onl.code + '/state']: 'countdown', ['rooms/' + onl.code + '/startAt']: Date.now() + fbOffset + 5000 }));
+  }
+  onlineInit();
 
   const UPGRADE_CAPS = { 'onibus-antigo':{speed:3,accel:3}, 'caminhao':{speed:3,accel:3}, 'trator':{speed:3,accel:3}, 'gt-esportivo':{durability:3}, 'corrida-antigo':{durability:3}, 'buggy':{durability:3}, 'quadriciclo':{durability:3}, 'blindado-comboio':{accel:3} };
   function fmtUpg(key, e, cfg) {
@@ -4572,6 +4809,7 @@
   }
 
   function exitToLobby() {
+    if (onlineMatch) onlineLeave();
     clearStopProp(); resetPause();
     if(onFoot){onFoot=false;if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);}
     musicEngine.stop(); sfxStop();
@@ -4587,6 +4825,7 @@
   }
 
   function triggerGameOver(reason = 'MONSTRO') {
+    if (onlineMatch) { onlineLocalDied(reason); return; }
     if(onFoot){onFoot=false;if(footAvatar){scene.remove(footAvatar);footAvatar=null;}if(parkedVehicleMesh){scene.remove(parkedVehicleMesh);parkedVehicleMesh=null;}carCockpit.visible=true;carCockpit.attach(camera);camera.position.set(0,1.24,0);camera.rotation.set(0,0,0);}
     musicEngine.stop(); sfxStop();
     gameState = 'GAMEOVER';
@@ -4869,7 +5108,7 @@
           if(vehCfg.id==='cybertruck'&&now<cyberAbilityUntil){currentSegData.hazards.splice(i,1);continue;}
           if(vehCfg.horse&&now<horseJumpUntil){currentSegData.hazards.splice(i,1);continue;}
           currentSegData.hazards.splice(i, 1);
-          getMasteryBucket(vehCfg.category==='boat'?'boats':'cars',vehCfg.id).obstacles++;
+          if(!onlineMatch)getMasteryBucket(vehCfg.category==='boat'?'boats':'cars',vehCfg.id).obstacles++;
           if (h.type === 'pothole') {
             carSpeedKmh *= 0.76;
             showEventBanner('💥 PASSOU NO BURACO! (-22 DURABILIDADE)', '#f59e0b');
@@ -4919,7 +5158,7 @@
     }
 
     const distanceTraveled = Math.max(0, Math.floor(-carZ));
-    { const km = Math.floor(distanceTraveled / 1000); if (km > runKmMark) { const mb = getMasteryBucket(vehCfg.category === 'boat' ? 'boats' : 'cars', vehCfg.id); mb.escapes = (mb.escapes || 0) + (km - runKmMark); addXp(100 * (km - runKmMark)); runKmMark = km; checkAchievements(); } }
+    { const km = Math.floor(distanceTraveled / 1000); if (!onlineMatch && km > runKmMark) { const mb = getMasteryBucket(vehCfg.category === 'boat' ? 'boats' : 'cars', vehCfg.id); mb.escapes = (mb.escapes || 0) + (km - runKmMark); addXp(100 * (km - runKmMark)); runKmMark = km; checkAchievements(); } }
     updateCameos(distanceTraveled, dt);
     updateObstacles();
     updateModes(distanceTraveled, dt);
@@ -4927,11 +5166,11 @@
     updateEvents(distanceTraveled, vehCfg, isWaterMap);
     updateWeather(dt, now);
     updateEnvironment(distanceTraveled);
-    if(!isWaterMap && distanceTraveled>=nextStopDistance && !currentStop){carZ=-nextStopDistance;carX=getRoadCenterX(carZ);carSpeedKmh=0;spawnRoadsideStop(nextStopDistance);nextStopDistance+=5000;}
+    if(!onlineMatch && !isWaterMap && distanceTraveled>=nextStopDistance && !currentStop){carZ=-nextStopDistance;carX=getRoadCenterX(carZ);carSpeedKmh=0;spawnRoadsideStop(nextStopDistance);nextStopDistance+=5000;}
     if(isWaterMap) updateSeaWaves(dt,now,vehCfg,mapCfg);
-    const masteryKind=vehCfg.category==='boat'?'boats':'cars';const mastery=getMasteryBucket(masteryKind,vehCfg.id);mastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mastery.uses+=dt;
-    const mapMastery=getMasteryBucket('maps',mapCfg.id);mapMastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mapMastery.uses+=dt;
-    if (distanceTraveled >= nextCoinMilestone) {
+    const masteryKind=vehCfg.category==='boat'?'boats':'cars';const mastery=getMasteryBucket(masteryKind,vehCfg.id);if(!onlineMatch){mastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mastery.uses+=dt;}
+    const mapMastery=getMasteryBucket('maps',mapCfg.id);if(!onlineMatch){mapMastery.distance+=Math.max(0,Math.abs(carSpeedKmh)/3.6*dt);mapMastery.uses+=dt;}
+    if (!onlineMatch && distanceTraveled >= nextCoinMilestone) {
       saveProgress();
       runCoinsEarned += 10;
       savedCoins += 10;
